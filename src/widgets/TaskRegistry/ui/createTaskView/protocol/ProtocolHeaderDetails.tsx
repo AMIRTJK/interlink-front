@@ -95,7 +95,7 @@ export function ProtocolHeaderDetails({
   return (
     <div
       className={cn(
-        "bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-6 relative",
+        "bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-6 relative",
         chairmanSelectOpen || participantsOpen ? "z-30" : "z-10",
       )}
     >
@@ -117,7 +117,7 @@ export function ProtocolHeaderDetails({
             ПРЕДСЕДАТЕЛЬ {selectedChairmanColleagues.length > 0 && `(${selectedChairmanColleagues.length})`} {!isView && <span className="text-red-500">*</span>}
           </label>
           {isView ? (
-            <div className="min-h-12 flex flex-wrap items-center gap-2 px-4 py-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+            <div className="min-h-12 flex flex-wrap items-center gap-2 px-4 py-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
               {selectedChairmanColleagues.length > 0 ? (
                 selectedChairmanColleagues.map((c) => (
                   <span key={c.id} className="inline-flex items-center gap-2 py-0.5">
@@ -153,7 +153,7 @@ export function ProtocolHeaderDetails({
                 <button
                   type="button"
                   onClick={() => onChairmanSelectOpenChange(!chairmanSelectOpen)}
-                  className="w-full h-12 flex items-center justify-between gap-2 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)] outline-none text-left cursor-pointer"
+                  className="w-full h-12 flex items-center justify-between gap-2 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] outline-none text-left cursor-pointer"
                 >
                   {firstChairman ? (
                     <span className="inline-flex items-center gap-2.5 min-w-0 flex-1">
@@ -189,9 +189,9 @@ export function ProtocolHeaderDetails({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
+                    className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
                   >
-                    <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-800/70">
+                    <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-th-raised/70">
                       <div className="relative">
                         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -200,7 +200,7 @@ export function ProtocolHeaderDetails({
                           placeholder="Поиск председателя..."
                           value={chairmanSearch}
                           onChange={(e) => setChairmanSearch(e.target.value)}
-                          className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200/80 dark:border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100"
+                          className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-th-high border border-slate-200/80 dark:border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-th-accent-500/20 text-slate-800 dark:text-slate-100"
                         />
                       </div>
                     </div>
@@ -233,7 +233,7 @@ export function ProtocolHeaderDetails({
                                 type="button"
                                 onClick={() => handleToggleChairman(col.id)}
                                 className={cn(
-                                  "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
+                                  "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-th-high/60 transition-colors text-left cursor-pointer",
                                   isSelected && "bg-emerald-50/70 dark:bg-emerald-950/20",
                                 )}
                               >
@@ -271,14 +271,14 @@ export function ProtocolHeaderDetails({
             УЧАСТНИКИ ({batchGlobal.participants.length})
           </label>
           {isView ? (
-            <div className="min-h-12 flex flex-wrap items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+            <div className="min-h-12 flex flex-wrap items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
               {batchGlobal.participants.length > 0 ? (
                 batchGlobal.participants.map((id) => {
                   const col = colleagues.find((c) => c.id === id);
                   if (!col) return null;
                   return (
                     <Tooltip key={id} title={`${col.name} — ${col.role || "Сотрудник"}`}>
-                      <span className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100">
+                      <span className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-th-raised border border-slate-200/80 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100">
                         <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
                         <span className="truncate max-w-[140px]">{col.name}</span>
                       </span>
@@ -301,7 +301,7 @@ export function ProtocolHeaderDetails({
                   }}
                   onFocus={() => onParticipantsOpenChange(true)}
                   onClick={() => onParticipantsOpenChange(true)}
-                  className="w-full h-12 pl-4 pr-10 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+                  className="w-full h-12 pl-4 pr-10 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
                   placeholder="Добавить участника..."
                 />
                 <Search
@@ -316,7 +316,7 @@ export function ProtocolHeaderDetails({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.12 }}
-                      className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
+                      className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
                     >
                       <div className="overflow-y-auto flex-1 divide-y divide-slate-100/60 dark:divide-white/5">
                         {filteredParticipantOptions.length === 0 ? (
@@ -350,7 +350,7 @@ export function ProtocolHeaderDetails({
                                   e.preventDefault();
                                   onToggleParticipant(col.id);
                                 }}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-th-high/60 transition-colors text-left cursor-pointer"
                               >
                                 <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
                                 <div className="min-w-0 flex-1">
@@ -361,7 +361,7 @@ export function ProtocolHeaderDetails({
                                     {col.role || "Сотрудник"}
                                   </p>
                                 </div>
-                                <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
+                                <span className="text-[11px] font-extrabold text-th-accent-600 dark:text-th-accent-400 opacity-0 group-hover:opacity-100">
                                   + Добавить
                                 </span>
                               </button>
@@ -382,7 +382,7 @@ export function ProtocolHeaderDetails({
                     if (!col) return null;
                     return (
                       <Tooltip key={id} title={`${col.name} — ${col.role || "Сотрудник"}`}>
-                        <span className="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100">
+                        <span className="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-white dark:bg-th-raised border border-slate-200/80 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100">
                           <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
                           <span className="truncate max-w-[140px]">{col.name}</span>
                           <button
@@ -408,7 +408,7 @@ export function ProtocolHeaderDetails({
             ДАТА {!isView && <span className="text-red-500">*</span>}
           </label>
           {isView ? (
-            <div className="h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl flex items-center text-xs font-bold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+            <div className="h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-base/90 border border-white/90 dark:border-white/10 rounded-2xl flex items-center text-xs font-bold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
               {batchGlobal.date ? dayjs(batchGlobal.date).format("DD.MM.YYYY") : <span className="text-slate-400 font-normal italic">Не указана</span>}
             </div>
           ) : (
@@ -418,7 +418,6 @@ export function ProtocolHeaderDetails({
                   borderRadius: 16,
                   controlHeight: 48,
                   fontSize: 12,
-                  colorPrimary: "#3373e5",
                 },
               }}
             >
@@ -434,7 +433,7 @@ export function ProtocolHeaderDetails({
                 placeholder="Выберите дату"
                 allowClear
                 placement="bottomLeft"
-                className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-picker-input_input]:text-xs! [&_.ant-picker-input_input]:font-semibold!"
+                className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-base/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] [&_.ant-picker-input_input]:text-xs! [&_.ant-picker-input_input]:font-semibold!"
               />
             </ConfigProvider>
           )}
@@ -446,7 +445,7 @@ export function ProtocolHeaderDetails({
             НОМЕР
           </label>
           {isView ? (
-            <div className="h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl flex items-center text-xs font-bold text-[#1e2548] shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+            <div className="h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl flex items-center text-xs font-bold text-[#1e2548] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
               {batchGlobal.number ? `№ ${batchGlobal.number}` : <span className="text-slate-400 font-normal italic">Без номера</span>}
             </div>
           ) : (
@@ -456,7 +455,7 @@ export function ProtocolHeaderDetails({
               onChange={(e) =>
                 onBatchGlobalChange({ ...batchGlobal, number: e.target.value })
               }
-              className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
               placeholder="№ протокола"
             />
           )}

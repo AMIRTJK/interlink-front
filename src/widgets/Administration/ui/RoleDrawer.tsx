@@ -47,8 +47,14 @@ export function RoleDrawer({
 
   return (
     <div
-      className="w-[340px] min-w-[340px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full"
       style={{
+        width: 340,
+        minWidth: 340,
+        background: T.surface,
+        borderLeft: `1px solid ${T.border}`,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
         fontFamily: T.font,
         ...panelStyle,
       }}

@@ -34,9 +34,9 @@ export const OrgTreeChart = ({
     getDeptAvatar,
   } = useOrgTreeChartState(organizations, employees);
 
-  const containerBg = dark ? 'bg-gray-900/60 border-gray-700/60' : 'bg-white border-gray-100';
-  const cardBg = dark ? 'bg-gray-800 border-gray-700/60' : 'bg-white border-gray-200';
-  const deptCardBg = dark ? 'bg-gray-800/80 border-gray-700/40' : 'bg-slate-50 border-gray-100';
+  const containerBg = dark ? 'bg-th-base/60 border-th-high/60' : 'bg-white border-gray-100';
+  const cardBg = dark ? 'bg-th-raised border-th-high/60' : 'bg-white border-gray-200';
+  const deptCardBg = dark ? 'bg-th-raised/80 border-th-high/40' : 'bg-slate-50 border-gray-100';
   const lineColor = dark ? '#374151' : '#e2e8f0';
   const connectorColor = dark ? '#4b5563' : '#c7d2fe';
 

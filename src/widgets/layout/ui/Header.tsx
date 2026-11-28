@@ -36,7 +36,7 @@ export const Header = ({
 
   return (
     <header
-      className={`ui-glass sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-slate-800/80 backdrop-blur-3xl px-6 py-4 border-zinc-200 dark:border-slate-700/60 transition-all duration-300 ease-in-out ${
+      className={`ui-glass sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-th-raised/80 backdrop-blur-3xl px-6 py-4 border-zinc-200 dark:border-th-high/60 transition-all duration-300 ease-in-out ${
         isFullWidth
           ? "w-[calc(100%+48px)] -mx-6 -mt-4 rounded-none border-b"
           : "w-full rounded-[2.5rem] border"

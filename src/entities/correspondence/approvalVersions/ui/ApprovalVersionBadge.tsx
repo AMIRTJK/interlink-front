@@ -32,9 +32,9 @@ export const ApprovalVersionBadge = ({
           isMismatch
             ? isDarkMode
               ? "border-amber-800/60 bg-amber-950/40 text-amber-200"
-              : "border-amber-200 bg-amber-50 text-amber-700"
+              : "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50"
             : isDarkMode
-              ? "border-gray-700 bg-gray-800 text-gray-300"
+              ? "border-th-high bg-th-raised text-gray-300"
               : "border-gray-200 bg-gray-50 text-gray-600",
         )}
       >

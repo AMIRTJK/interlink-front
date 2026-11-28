@@ -39,7 +39,7 @@ const BoardCard = ({
         e.dataTransfer.effectAllowed = "move";
       }}
       onClick={() => onOpen(task)}
-      className="group bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-500/40 transition-all cursor-pointer flex flex-col gap-3"
+      className="group ui-glass-soft bg-white dark:bg-th-raised border border-slate-200/70 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-500/40 transition-all cursor-pointer flex flex-col gap-3"
     >
       <div className="flex items-start gap-2">
         <GripVertical
@@ -57,7 +57,7 @@ const BoardCard = ({
         <div
           className={cn(
             "flex items-center gap-1 px-2 py-0.5 rounded-full shrink-0",
-            "bg-slate-50 dark:bg-slate-700/50",
+            "bg-slate-50 dark:bg-th-high/50",
           )}
         >
           <div className={cn("w-1.5 h-1.5 rounded-full", pMeta.color)} />
@@ -72,7 +72,7 @@ const BoardCard = ({
           {task.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+              className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-th-high text-slate-500 dark:text-slate-400"
             >
               {tag}
             </span>
@@ -82,7 +82,7 @@ const BoardCard = ({
 
       {task.progress > 0 && (
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-slate-100 dark:bg-th-high rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full",
@@ -131,10 +131,10 @@ const BoardCard = ({
             >
               <div className="flex items-center -space-x-1.5 shrink-0 cursor-pointer">
                 {task.assignees.slice(0, 2).map((a, i) => (
-                  <Avatar key={a.id || i} colleague={a} className="w-6 h-6 text-[9px] ring-1.5 ring-white dark:ring-slate-800" />
+                  <Avatar key={a.id || i} colleague={a} className="w-6 h-6 text-[9px] ring-1.5 ring-white dark:ring-th-raised" />
                 ))}
                 {task.assignees.length > 2 && (
-                  <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[8px] flex items-center justify-center ring-1.5 ring-white dark:ring-slate-800">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[8px] flex items-center justify-center ring-1.5 ring-white dark:ring-th-raised">
                     +{task.assignees.length - 2}
                   </span>
                 )}
@@ -184,7 +184,7 @@ export const TaskBoardView = ({
               "flex flex-col w-[300px] shrink-0 rounded-3xl border transition-colors",
               dragOver === status
                 ? "bg-emerald-50/60 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-500/40"
-                : "bg-white/40 dark:bg-slate-900/40 border-white/30 dark:border-white/10",
+                : "ui-glass bg-white/40 dark:bg-th-base/40 border-white/30 dark:border-white/10",
             )}
           >
             <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/30 dark:border-white/10">

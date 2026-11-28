@@ -22,7 +22,7 @@ export const FilesHeaderTabs = ({
 	];
 
 	return (
-		<div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 w-full md:w-auto">
+		<div className="flex items-center gap-4 border-b border-slate-200 dark:border-th-raised w-full md:w-auto">
 			{tabsData.map((t) => {
 				const isActive = viewContext === t.key;
 				return (
@@ -37,14 +37,20 @@ export const FilesHeaderTabs = ({
 					>
 						<span>{t.label}</span>
 						<If is={t.count !== undefined}>
-							<span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
+							<span
+								className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded-full border ${
+									isActive
+										? "bg-th-accent-100 dark:bg-th-accent-900/35 text-th-accent-700 dark:text-th-accent-300 border-th-accent-200 dark:border-th-accent-800/50"
+										: "ui-glass-soft bg-slate-100 dark:bg-th-raised/90 text-slate-500 dark:text-zinc-400 border-zinc-200 dark:border-th-high/50"
+								}`}
+							>
 								{t.count}
 							</span>
 						</If>
 						<If is={isActive}>
 							<motion.div
 								layoutId="filesActiveTabBorder"
-								className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
+								className="absolute bottom-0 left-0 right-0 h-0.5 bg-th-accent-600 rounded-full"
 								transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
 							/>
 						</If>

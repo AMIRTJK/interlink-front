@@ -24,7 +24,7 @@ export const FilesHeaderSearch = ({ searchQuery, onSearchChange }: IProps) => {
 				onKeyDown={(e) => {
 					if (e.key === "Enter") onSearchChange(localSearch);
 				}}
-				className="w-full bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-zinc-200 placeholder-slate-400 pl-4 pr-14 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+				className="w-full ui-glass-soft bg-slate-50 dark:bg-th-raised/80 text-slate-700 dark:text-zinc-200 placeholder-slate-400 pl-4 pr-14 py-2 rounded-full border border-slate-200 dark:border-th-high text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all"
 			/>
 			<div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
 				<If is={!!localSearch}>
@@ -39,7 +39,7 @@ export const FilesHeaderSearch = ({ searchQuery, onSearchChange }: IProps) => {
 				</If>
 				<Search
 					size={15}
-					className="text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"
+					className="text-slate-400 hover:text-th-accent-600 transition-colors cursor-pointer"
 					onClick={() => onSearchChange(localSearch)}
 				/>
 			</div>

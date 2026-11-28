@@ -15,7 +15,7 @@ export const MediaPreview = ({ previewType, blobUrl, fileName }: IProps) => {
 	return (
 		<>
 			<If is={isImage}>
-				<div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black/5 dark:bg-black/20">
+				<div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-th-raised flex items-center justify-center bg-black/5 dark:bg-black/20">
 					<img
 						src={blobUrl || ""}
 						alt={fileName}
@@ -25,7 +25,7 @@ export const MediaPreview = ({ previewType, blobUrl, fileName }: IProps) => {
 			</If>
 
 			<If is={isPdf}>
-				<div className="w-full h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white">
+				<div className="w-full h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-th-raised bg-white">
 					<iframe
 						src={blobUrl || ""}
 						title={fileName}
@@ -35,7 +35,7 @@ export const MediaPreview = ({ previewType, blobUrl, fileName }: IProps) => {
 			</If>
 
 			<If is={isVideo}>
-				<div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black">
+				<div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-th-raised flex items-center justify-center bg-black">
 					<video
 						src={blobUrl || ""}
 						controls

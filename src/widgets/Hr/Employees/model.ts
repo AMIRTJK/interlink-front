@@ -48,13 +48,13 @@ export const STATUS_META: Record<
   string,
   { label: string; dot: string; chip: string }
 > = {
-  active: { label: "Активен", dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-600" },
-  vacation: { label: "В отпуске", dot: "bg-rose-500", chip: "bg-rose-50 text-rose-600" },
-  business_trip: { label: "В командировке", dot: "bg-amber-500", chip: "bg-amber-50 text-amber-600" },
+  active: { label: "Активен", dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/35 dark:text-emerald-400" },
+  vacation: { label: "В отпуске", dot: "bg-rose-500", chip: "bg-rose-50 text-rose-600 dark:bg-rose-900/35 dark:text-rose-400" },
+  business_trip: { label: "В командировке", dot: "bg-amber-500", chip: "bg-amber-50 text-amber-600 dark:bg-amber-900/35 dark:text-amber-400" },
 };
 
 export const statusMeta = (s: string) =>
-  STATUS_META[s] || { label: s || "—", dot: "bg-slate-400", chip: "bg-slate-100 text-slate-500" };
+  STATUS_META[s] || { label: s || "—", dot: "bg-slate-400", chip: "bg-slate-100 text-slate-500 dark:bg-th-high dark:text-slate-400" };
 
 export const initials = (name: string) =>
   name

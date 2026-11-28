@@ -45,7 +45,7 @@ export const ApprovalVersionNotice = ({
           "flex items-start gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed",
           isDarkMode
             ? "border-emerald-800/50 bg-emerald-950/30 text-emerald-200"
-            : "border-emerald-200/80 bg-emerald-50/80 text-emerald-900",
+            : "border-emerald-200/80 bg-emerald-50/80 text-emerald-900 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
         )}
       >
         <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
@@ -70,7 +70,7 @@ export const ApprovalVersionNotice = ({
         "flex items-start gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed",
         isDarkMode
           ? "border-amber-800/60 bg-amber-950/30 text-amber-100"
-          : "border-amber-300/80 bg-amber-50/90 text-amber-900",
+          : "border-amber-300/80 bg-amber-50/90 text-amber-900 dark:bg-amber-900/35 dark:text-amber-400",
       )}
     >
       <AlertTriangle size={14} className="mt-0.5 shrink-0" />

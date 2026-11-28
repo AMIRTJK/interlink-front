@@ -35,7 +35,7 @@ export const ExecutorSearchInput: React.FC<IProps> = ({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+      <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-th-accent-400 focus-within:ring-2 focus-within:ring-th-accent-100 transition-all">
         <Search size={13} className="text-slate-400 flex-shrink-0" />
         {selectedExecutor ? (
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -76,7 +76,7 @@ export const ExecutorSearchInput: React.FC<IProps> = ({
           />
         )}
         {loadingUsers && !selectedExecutor && (
-          <Loader2 size={13} className="animate-spin text-indigo-400 flex-shrink-0" />
+          <Loader2 size={13} className="animate-spin text-th-accent-400 flex-shrink-0" />
         )}
       </div>
       {showExecutorDropdown && !selectedExecutor && (

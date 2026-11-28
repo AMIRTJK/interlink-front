@@ -37,12 +37,12 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-th-base/60 backdrop-blur-sm" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-2xl bg-white dark:bg-th-raised rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
       >
-        <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-700 flex items-start justify-between gap-4">
+        <div className="px-6 py-5 border-b border-zinc-200 dark:border-th-high flex items-start justify-between gap-4">
           <div className="min-w-0">
             <span className="text-xs font-mono font-semibold text-zinc-400 dark:text-zinc-500">TSK-{task.id}</span>
             <h3 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight mt-0.5 m-0">{task.title}</h3>
@@ -55,12 +55,12 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors flex-shrink-0 border-0 bg-transparent cursor-pointer flex items-center justify-center">
+          <button onClick={onClose} className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-th-high transition-colors flex-shrink-0 border-0 bg-transparent cursor-pointer flex items-center justify-center">
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-6 max-h-[64vh] overflow-y-auto bg-white dark:bg-zinc-800">
+        <div className="p-6 max-h-[64vh] overflow-y-auto bg-white dark:bg-th-raised">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-5">
               <div>
@@ -73,7 +73,7 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
                 <div className="flex flex-wrap gap-1.5">
                   <If is={task.tags && task.tags.length > 0}>
                     {task.tags?.map((tag) => (
-                      <span key={tag} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+                      <span key={tag} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-th-high text-zinc-600 dark:text-zinc-300">
                         #{tag}
                       </span>
                     ))}
@@ -87,7 +87,7 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
               <div>
                 <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 m-0">Прогресс</h4>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-zinc-200 dark:bg-th-high overflow-hidden">
                     <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${task.progress}%` }}></div>
                   </div>
                   <span className="text-sm font-bold text-zinc-600 dark:text-zinc-300 w-10 text-right">{task.progress}%</span>
@@ -120,8 +120,8 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-700 flex justify-end gap-3 bg-white dark:bg-zinc-800">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border-0 bg-transparent cursor-pointer">
+        <div className="px-6 py-4 border-t border-zinc-200 dark:border-th-high flex justify-end gap-3 bg-white dark:bg-th-raised">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-th-high transition-colors border-0 bg-transparent cursor-pointer">
             Закрыть
           </button>
           <button onClick={onEditClick} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 transition-all shadow-md border-0 cursor-pointer`}>

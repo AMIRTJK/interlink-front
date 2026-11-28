@@ -34,7 +34,7 @@ export const CommentItem = React.memo(({ comment, isOwn }: IProps) => {
       className={cn(
         "flex gap-2.5 items-start p-3 rounded-xl border transition-colors",
         isOwn
-          ? "bg-blue-50/60 hover:bg-blue-50 border-blue-100"
+          ? "bg-th-accent-50/60 hover:bg-th-accent-50 border-th-accent-100 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
           : "bg-slate-50/70 hover:bg-slate-50 border-slate-100",
       )}
     >
@@ -53,7 +53,7 @@ export const CommentItem = React.memo(({ comment, isOwn }: IProps) => {
         <div
           className={cn(
             "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 shadow-2xs mt-0.5 text-white",
-            isOwn ? "bg-blue-600" : "bg-indigo-600",
+            isOwn ? "bg-th-accent-600" : "bg-th-accent-600",
           )}
         >
           {getCommentInitials(authorName)}

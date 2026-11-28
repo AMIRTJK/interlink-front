@@ -45,7 +45,7 @@ export function EmployeeFormStepContainer({
       </If>
 
       <If is={!isEdit && canProceed}>
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-th-raised/50 border border-gray-100 dark:border-th-raised">
           <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 mr-1">
             Паспорт:
           </span>
@@ -53,20 +53,20 @@ export function EmployeeFormStepContainer({
             <img
               src={passport.front?.previewUrl}
               alt="Лицевая"
-              className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700"
+              className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-th-high"
             />
           </If>
           <If is={!!passport.back}>
             <img
               src={passport.back?.previewUrl}
               alt="Обратная"
-              className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700"
+              className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-th-high"
             />
           </If>
           <button
             type="button"
             onClick={onShowPassportStep}
-            className="ml-auto text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+            className="ml-auto text-xs font-medium text-th-accent-600 dark:text-th-accent-400 hover:underline cursor-pointer"
           >
             Изменить
           </button>

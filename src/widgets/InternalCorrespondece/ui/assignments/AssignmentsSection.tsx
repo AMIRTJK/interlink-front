@@ -64,7 +64,7 @@ export const AssignmentsSection: React.FC<IProps> = ({
           size="small"
           icon={<PlusOutlined />}
           onClick={() => setIsCreateOpen(true)}
-          className="bg-indigo-600! hover:bg-indigo-500! text-xs!"
+          className="bg-th-accent-600! hover:bg-th-accent-500! text-xs!"
         >
           Создать поручение
         </Button>

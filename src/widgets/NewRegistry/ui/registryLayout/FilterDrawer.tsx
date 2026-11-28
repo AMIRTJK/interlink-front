@@ -197,7 +197,7 @@ export const FilterDrawer = ({
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={handleApply}
-                  className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-11 px-4 bg-white hover:bg-white/90 text-blue-600 rounded-lg font-semibold text-sm transition-all shadow-lg"
+                  className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-11 px-4 bg-white hover:bg-white/90 text-th-accent-600 rounded-lg font-semibold text-sm transition-all shadow-lg"
                 >
                   <Filter className="w-4 h-4" />
                   Применить

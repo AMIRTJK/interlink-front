@@ -21,15 +21,15 @@ export const DepartmentCard: React.FC<DepartmentCardProps> = ({
         relative w-full flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer transition-all duration-300 border min-h-[140px]
         ${
           isSelected
-            ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
+            ? "bg-[#F4F8FF] border-th-accent-100/50 shadow-inner"
+            : "bg-white border-transparent hover:border-th-accent-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
         }
       `}
     >
       <div className="mb-3 transition-transform duration-300">
         <Avatar
           size={60}
-          className={`shadow-sm bg-indigo-50 text-indigo-500 flex items-center justify-center transition-all duration-300 ${isSelected ? "ring-4 ring-white" : ""}`}
+          className={`shadow-sm bg-th-accent-50 text-th-accent-500 flex items-center justify-center transition-all duration-300 ${isSelected ? "ring-4 ring-white" : ""}`}
           icon={<ApartmentOutlined style={{ fontSize: 28 }} />}
         />
       </div>

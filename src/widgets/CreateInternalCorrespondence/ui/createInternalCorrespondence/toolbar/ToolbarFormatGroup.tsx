@@ -128,7 +128,7 @@ export const ToolbarFormatGroup = ({
                 className={cn(
                   "w-full px-3 py-1.5 text-xs font-mono text-left hover:bg-slate-50 transition-colors",
                   fontSize === s &&
-                    "bg-blue-50 text-blue-700 font-bold",
+                    "bg-th-accent-50 text-th-accent-700 font-bold dark:bg-th-accent-900/35 dark:text-th-accent-400",
                 )}
               >
                 {s}

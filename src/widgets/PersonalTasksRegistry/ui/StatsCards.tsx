@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { motion } from "framer-motion";
 import { FolderOpen, Clock, CheckCircle2, X } from "lucide-react";
 
 interface IStats {
@@ -20,7 +19,7 @@ export const StatsCards = memo(({ stats }: IProps) => {
       label: "Всего задач",
       value: stats.total,
       icon: FolderOpen,
-      color: "text-zinc-500! dark:text-zinc-400! bg-zinc-100! dark:bg-zinc-800!",
+      color: "text-zinc-500! dark:text-zinc-400! bg-zinc-100! dark:bg-th-raised!",
       textColor: "text-zinc-700! dark:text-zinc-200!",
     },
     {
@@ -54,12 +53,9 @@ export const StatsCards = memo(({ stats }: IProps) => {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <motion.div
+          <div
             key={card.key}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.15 }}
-            className="rounded-2xl! p-3.5! bg-white/60! dark:bg-zinc-900/60! backdrop-blur-xl! ui-glass ui-glass--forced border! border-zinc-200! dark:border-zinc-700/30! shadow-none! flex! items-center! gap-3!"
+            className="rounded-2xl! p-3.5! bg-white/40! dark:bg-th-raised/90! backdrop-blur-xl! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50! shadow-none! flex! items-center! gap-3!"
           >
             <div className={`p-2.5! rounded-xl! ${card.color}`}>
               <Icon size={18} />
@@ -72,7 +68,7 @@ export const StatsCards = memo(({ stats }: IProps) => {
                 {card.value}
               </span>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

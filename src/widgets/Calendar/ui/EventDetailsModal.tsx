@@ -51,7 +51,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
         onClick={onClose}
       >
         <div
-          className="bg-white! dark:bg-slate-900! rounded-3xl! shadow-2xl! w-full! max-w-md! overflow-hidden! animate-in! fade-in! zoom-in! duration-200!"
+          className="bg-white! dark:bg-th-base! rounded-3xl! shadow-2xl! w-full! max-w-md! overflow-hidden! animate-in! fade-in! zoom-in! duration-200!"
           onClick={(e) => e.stopPropagation()}
         >
           <div
@@ -72,7 +72,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400! hover:text-slate-600! dark:hover:text-zinc-300! p-1.5! rounded-full! hover:bg-slate-100! dark:hover:bg-slate-800! transition-colors! cursor-pointer! flex-shrink-0! ml-3!"
+              className="text-slate-400! hover:text-slate-600! dark:hover:text-zinc-300! p-1.5! rounded-full! hover:bg-slate-100! dark:hover:bg-th-raised! transition-colors! cursor-pointer! flex-shrink-0! ml-3!"
             >
               <X size={18} />
             </button>
@@ -112,7 +112,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
                   {(event?.participants || []).slice(0, 3).map((p) => (
                     <div
                       key={p.id}
-                      className="inline-flex! items-center! gap-1.5! pl-1! pr-2.5! py-0.5! bg-slate-100! dark:bg-slate-800! text-slate-700! dark:text-zinc-200! text-xs! font-medium! rounded-full! border! border-zinc-200! dark:border-slate-700/50!"
+                      className="inline-flex! items-center! gap-1.5! pl-1! pr-2.5! py-0.5! bg-slate-100! dark:bg-th-raised! text-slate-700! dark:text-zinc-200! text-xs! font-medium! rounded-full! border! border-zinc-200! dark:border-th-high/50!"
                     >
                       <Avatar
                         colleague={{
@@ -132,7 +132,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
                     <Tooltip
                       title={
                         <div className="flex! flex-col! gap-1.5! p-1! max-h-40! overflow-y-auto! min-w-[160px]!">
-                          <div className="text-xs! font-semibold! text-slate-400! mb-1! border-b! border-slate-700/50! pb-1!">
+                          <div className="text-xs! font-semibold! text-slate-400! mb-1! border-b! border-th-high/50! pb-1!">
                             Остальные участники ({(event?.participants?.length || 0) - 3})
                           </div>
                           {(event?.participants || []).slice(3).map((p) => (
@@ -159,7 +159,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
                     >
                       <button
                         type="button"
-                        className="inline-flex! items-center! justify-center! px-2! py-0.5! bg-slate-200/80! dark:bg-slate-700/80! hover:bg-slate-300! dark:hover:bg-slate-600! text-slate-700! dark:text-zinc-200! text-xs! font-semibold! rounded-full! border! border-slate-300/60! dark:border-slate-600/60! transition-colors! cursor-pointer!"
+                        className="inline-flex! items-center! justify-center! px-2! py-0.5! bg-slate-200/80! dark:bg-th-high/80! hover:bg-slate-300! dark:hover:bg-th-higher! text-slate-700! dark:text-zinc-200! text-xs! font-semibold! rounded-full! border! border-slate-300/60! dark:border-th-higher/60! transition-colors! cursor-pointer!"
                       >
                         +{(event?.participants?.length || 0) - 3}
                       </button>
@@ -189,7 +189,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
             </If>
           </div>
 
-          <div className="flex! items-center! justify-between! px-7! py-4! border-t! border-zinc-200! dark:border-slate-700/50!">
+          <div className="flex! items-center! justify-between! px-7! py-4! border-t! border-zinc-200! dark:border-th-high/50!">
             <button
               type="button"
               onClick={handleDelete}
@@ -206,7 +206,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
                 className={`flex! items-center! gap-1.5! px-4! py-2! rounded-full! text-sm! font-semibold! border! transition-all! cursor-pointer! ${
                   rsvpStatus === "declined"
                     ? "bg-rose-500! border-rose-500! text-white!"
-                    : "border-zinc-200! dark:border-slate-700/50! text-slate-600! dark:text-zinc-400! hover:bg-rose-50! dark:hover:bg-rose-950/20! hover:border-rose-300! hover:text-rose-500!"
+                    : "border-zinc-200! dark:border-th-high/50! text-slate-600! dark:text-zinc-400! hover:bg-rose-50! dark:hover:bg-rose-950/20! hover:border-rose-300! hover:text-rose-500!"
                 }`}
               >
                 <XCircle size={15} />
@@ -219,7 +219,7 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
                 className={`flex! items-center! gap-1.5! px-4! py-2! rounded-full! text-sm! font-semibold! border! transition-all! cursor-pointer! ${
                   rsvpStatus === "accepted"
                     ? `bg-gradient-to-r! ${theme.gradient} border-transparent! text-white!`
-                    : "border-zinc-200! dark:border-slate-700/50! text-slate-600! dark:text-zinc-400! hover:bg-emerald-50! dark:hover:bg-emerald-950/20! hover:border-emerald-300! hover:text-emerald-600!"
+                    : "border-zinc-200! dark:border-th-high/50! text-slate-600! dark:text-zinc-400! hover:bg-emerald-50! dark:hover:bg-emerald-950/20! hover:border-emerald-300! hover:text-emerald-600!"
                 }`}
               >
                 <Check size={15} />

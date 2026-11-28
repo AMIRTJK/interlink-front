@@ -18,7 +18,7 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
   return (
     <tr
       onClick={() => onClick(order)}
-      className="group border-b last:border-b-0 border-b-slate-50 border-l-2 border-transparent transition-all cursor-pointer hover:border-l-[#1E3A5F] hover:bg-slate-50"
+      className="group border-b last:border-b-0 border-b-slate-50 border-l-2 border-transparent transition-all cursor-pointer hover:border-l-[#1E3A5F] hover:bg-slate-50 dark:hover:bg-th-high"
     >
       {/* № */}
       <td className="px-4 py-3">
@@ -30,7 +30,7 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
       </td>
       {/* Номер */}
       <td className="px-4 py-3 hidden sm:table-cell">
-        <span className="font-mono text-xs rounded px-2 py-0.5 bg-slate-50 text-slate-600">
+        <span className="font-mono text-xs rounded px-2 py-0.5 bg-slate-50 text-slate-600 dark:bg-th-base dark:text-slate-300">
           {order.number}
         </span>
       </td>
@@ -47,7 +47,7 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
           >
             {execInitials}
           </div>
-          <span className="text-xs truncate max-w-[110px] text-slate-600">
+          <span className="text-xs truncate max-w-[110px] text-slate-600 dark:text-slate-300">
             {order.executorName}
           </span>
         </div>
@@ -60,14 +60,14 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
           ) : (
             <Shield size={14} className="text-slate-300 shrink-0" />
           )}
-          <span className="text-xs truncate max-w-[110px] text-slate-600">
+          <span className="text-xs truncate max-w-[110px] text-slate-600 dark:text-slate-300">
             {order.ministerName}
           </span>
         </div>
       </td>
       {/* Пунктов */}
       <td className="px-4 py-3 hidden md:table-cell text-center">
-        <span className="inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
+        <span className="inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 dark:bg-th-high dark:text-slate-300">
           {pointsCount}
         </span>
       </td>
@@ -75,7 +75,7 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
       <td className="px-4 py-3 hidden md:table-cell text-center">
         <span
           className={`inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full text-[11px] font-semibold ${
-            attachmentsCount > 0 ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+            attachmentsCount > 0 ? 'bg-th-accent-50 text-th-accent-600' : 'bg-slate-50 text-slate-400'
           }`}
         >
           {attachmentsCount}

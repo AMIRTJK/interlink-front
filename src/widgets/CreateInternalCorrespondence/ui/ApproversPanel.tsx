@@ -142,7 +142,7 @@ export const ApproversPanel = ({
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown((v) => !v)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-th-accent-600 bg-th-accent-50 border border-th-accent-100 rounded-lg hover:bg-th-accent-100 transition-colors dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
                 >
                   <UserPlus size={12} />
                   <span>Добавить</span>
@@ -162,7 +162,7 @@ export const ApproversPanel = ({
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
                           autoFocus
-                          className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+                          className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-th-accent-200 focus:border-th-accent-300"
                         />
                       </div>
                       <div className="max-h-48 overflow-y-auto py-1">
@@ -181,7 +181,7 @@ export const ApproversPanel = ({
                                 setShowDropdown(false);
                                 setSearch("");
                               }}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-th-accent-50 transition-colors text-left"
                             >
                               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-slate-100 text-slate-700">
                                 {r.initials}

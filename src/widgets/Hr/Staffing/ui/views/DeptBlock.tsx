@@ -44,21 +44,21 @@ export const DeptBlock = ({
   const pct = totalSlots > 0 ? Math.round((totalOccupied / totalSlots) * 100) : 0;
   const colors = getOccupancyColor(pct);
 
-  const headerBg = dark ? 'bg-gray-800/80 border-gray-700/50' : 'bg-gray-50/80 border-gray-100';
-  const cardBg = dark ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100';
+  const headerBg = dark ? 'bg-th-raised/80 border-th-high/50' : 'bg-gray-50/80 border-gray-100';
+  const cardBg = dark ? 'bg-th-raised/40 border-th-high/50' : 'bg-white border-gray-100';
   const deptNameText = dark ? 'text-gray-200' : 'text-gray-800';
   const subText = dark ? 'text-gray-500' : 'text-gray-400';
-  const curatorBadge = dark ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-600/80';
+  const curatorBadge = dark ? 'bg-th-accent-900/30 text-th-accent-400' : 'bg-th-accent-50 text-th-accent-600/80';
   const managerBadge = dark ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-600/80';
   const actionBtn = dark
-    ? 'text-gray-500 hover:bg-gray-700 hover:text-indigo-400'
-    : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600';
+    ? 'text-gray-500 hover:bg-th-high hover:text-th-accent-400'
+    : 'text-gray-400 hover:bg-gray-100 hover:text-th-accent-600';
   const deleteBtn = dark
-    ? 'text-gray-500 hover:bg-gray-700 hover:text-red-400'
+    ? 'text-gray-500 hover:bg-th-high hover:text-red-400'
     : 'text-gray-400 hover:bg-red-50 hover:text-red-500';
   const addBtn = dark
-    ? 'border-dashed border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
-    : 'border-dashed border-indigo-200 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50';
+    ? 'border-dashed border-th-accent-700/50 text-th-accent-400 hover:border-th-accent-500 hover:bg-th-accent-900/20'
+    : 'border-dashed border-th-accent-200 text-th-accent-600 hover:border-th-accent-400 hover:bg-th-accent-50';
 
   return (
     <div className={`rounded-2xl border overflow-hidden shadow-sm ${cardBg}`}>
@@ -160,7 +160,7 @@ export const DeptBlock = ({
                 ))}
               </AnimatePresence>
             </If>
-            <div className={`px-4 py-3 border-t ${dark ? 'border-gray-700/40' : 'border-gray-50'}`}>
+            <div className={`px-4 py-3 border-t ${dark ? 'border-th-high/40' : 'border-gray-50'}`}>
               <button
                 onClick={() => onAddPosition(org.id, dept.id)}
                 className={`flex items-center gap-2 py-2 rounded-xl border text-xs font-medium transition-all ${addBtn}`}

@@ -105,20 +105,20 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
       className="group"
     >
-      <div className="ui-glass rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600 relative overflow-hidden">
+      <div className="ui-glass rounded-xl border bg-white dark:bg-th-raised border-slate-200 dark:border-th-high shadow-sm transition-all hover:border-th-accent-200 dark:hover:border-th-higher relative overflow-hidden">
         <HighlightOverlay isHighlighted={Boolean(isHighlighted)} rounded="xl" />
         <div className="flex items-start gap-3 px-4 py-3.5">
           <span className="mt-1 w-5 h-5 flex items-center justify-center flex-shrink-0">
             <If is={isUnread}>
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="w-2 h-2 rounded-full bg-th-accent-500" />
             </If>
             <If is={!isUnread}>
-              <span className="w-2 h-2 rounded-full border-2 border-slate-200 dark:border-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="w-2 h-2 rounded-full border-2 border-slate-200 dark:border-th-higher opacity-0 group-hover:opacity-100 transition-opacity" />
             </If>
           </span>
 
           <div className="flex-shrink-0 mt-0.5">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-th-accent-400 to-th-accent-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
               {getInitials(creatorName)}
             </div>
           </div>
@@ -126,7 +126,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
           <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
             <div className="flex items-start justify-between gap-3 mb-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 border border-slate-200/80 dark:border-slate-600/80 px-2 py-0.5 rounded-md whitespace-nowrap">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-th-high/60 border border-slate-200/80 dark:border-th-higher/80 px-2 py-0.5 rounded-md whitespace-nowrap">
                   № {item.id}
                 </span>
                 <span
@@ -138,9 +138,9 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
                   {creatorName}
                 </span>
                 <If is={Boolean(item.is_pinned)}>
-                  <Pin size={11} className="text-blue-500 fill-blue-500 flex-shrink-0" />
+                  <Pin size={11} className="text-th-accent-500 fill-th-accent-500 flex-shrink-0" />
                 </If>
-                <span className="font-mono text-[11px] text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
+                <span className="font-mono text-[11px] text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-th-high/50 border border-slate-200 dark:border-th-higher px-1.5 py-0.5 rounded">
                   {item.reg_number || structureData?.document?.reg_number || "Без номера"}
                 </span>
               </div>
@@ -183,15 +183,15 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 mt-0.5 cursor-pointer select-none border",
               open
-                ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600"
+                ? "bg-slate-100 dark:bg-th-high text-slate-700 dark:text-slate-200 border-slate-200 dark:border-th-higher"
                 : isPendingLoad
-                  ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/80 shadow-xs"
-                  : "text-slate-400 dark:text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200",
+                  ? "bg-th-accent-50 dark:bg-th-accent-950/50 text-th-accent-600 dark:text-th-accent-400 border-th-accent-200 dark:border-th-accent-800/80 shadow-xs"
+                  : "text-slate-400 dark:text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-th-high hover:text-slate-600 dark:hover:text-slate-200",
             )}
             aria-label="Показать структуру письма"
           >
             <If is={isPendingLoad}>
-              <Loader2 size={12} className="animate-spin text-blue-500" />
+              <Loader2 size={12} className="animate-spin text-th-accent-500" />
             </If>
             <If is={!isPendingLoad}>
               <Activity size={12} />
@@ -232,7 +232,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
               }}
               className="overflow-hidden"
             >
-              <div className="mx-4 mb-3 border-t border-slate-100 dark:border-slate-700 pt-3">
+              <div className="mx-4 mb-3 border-t border-slate-100 dark:border-th-high pt-3">
                 <StructureTimelinePanel
                   item={item}
                   direction={direction}

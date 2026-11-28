@@ -17,7 +17,7 @@ export function RolesTabHeader({
   return (
     <div className="flex justify-between items-start">
       <div>
-        <h2 className="text-xl font-bold text-slate-800 leading-tight">
+        <h2 className="text-xl font-bold text-slate-800 leading-tight dark:text-slate-100">
           {"Роли и доступы"}
         </h2>
         <p className="text-xs text-slate-400 mt-1">
@@ -25,12 +25,12 @@ export function RolesTabHeader({
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+        <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 dark:bg-th-high dark:border-th-high">
           <button
             onClick={() => onViewModeChange("grid")}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer select-none outline-none! ${
               viewMode === "grid"
-                ? "bg-white text-slate-700 shadow-sm"
+                ? "bg-white text-slate-700 shadow-sm dark:bg-th-raised dark:text-slate-300"
                 : "text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -40,7 +40,7 @@ export function RolesTabHeader({
             onClick={() => onViewModeChange("list")}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer select-none outline-none! ${
               viewMode === "list"
-                ? "bg-white text-slate-700 shadow-sm"
+                ? "bg-white text-slate-700 shadow-sm dark:bg-th-raised dark:text-slate-300"
                 : "text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -49,14 +49,14 @@ export function RolesTabHeader({
         </div>
         <button
           onClick={onOpenCreateUiPerm}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer dark:text-slate-300 dark:bg-th-raised dark:border-th-high dark:hover:bg-th-high"
         >
           <ShieldPlus size={14} />
           <span>{"Создать UI-право"}</span>
         </button>
         <button
           onClick={onOpenCreateRole}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-th-accent-600 hover:bg-th-accent-700 transition-colors shadow-sm cursor-pointer"
         >
           <Plus size={14} />
           <span>{"Создать роль"}</span>

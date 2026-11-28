@@ -53,19 +53,19 @@ export const EditOrgModal = ({
 
   const selectedEmp = employees.find((e) => e.id === curatorId) ?? null;
 
-  const cardBg = dark ? 'bg-gray-900' : 'bg-white';
+  const cardBg = dark ? 'bg-th-base' : 'bg-white';
   const inputBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-100'
+    ? 'bg-th-raised border-th-high text-gray-100'
     : 'bg-gray-50 border-gray-200 text-gray-800';
   const labelCls = dark ? 'text-gray-400' : 'text-gray-500';
   const typeBtnActive = dark
-    ? 'bg-indigo-900/40 border-indigo-500 text-indigo-300'
-    : 'bg-indigo-50 border-indigo-300 text-indigo-700';
+    ? 'bg-th-accent-900/40 border-th-accent-500 text-th-accent-300'
+    : 'bg-th-accent-50 border-th-accent-300 text-th-accent-700';
   const typeBtnInactive = dark
-    ? 'border-gray-700 text-gray-400 hover:border-gray-600 hover:bg-gray-800'
+    ? 'border-th-high text-gray-400 hover:border-th-higher hover:bg-th-raised'
     : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50';
   const cancelCls = dark
-    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+    ? 'bg-th-raised text-gray-300 hover:bg-th-high'
     : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
 
   return (
@@ -118,7 +118,7 @@ export const EditOrgModal = ({
                   ? 'border-amber-800/40 bg-amber-900/20'
                   : 'border-amber-200 bg-amber-50'
                 : dark
-                ? 'border-gray-700 bg-gray-800'
+                ? 'border-th-high bg-th-raised'
                 : 'border-gray-100 bg-gray-50'
             }`}
           >
@@ -129,7 +129,7 @@ export const EditOrgModal = ({
               type="button"
               onClick={() => setIsMain((v) => !v)}
               className={`w-11 h-6 rounded-full transition-all relative shrink-0 ${
-                isMain ? 'bg-amber-500' : dark ? 'bg-gray-700' : 'bg-gray-200'
+                isMain ? 'bg-amber-500' : dark ? 'bg-th-high' : 'bg-gray-200'
               }`}
             >
               <motion.span
@@ -173,7 +173,7 @@ export const EditOrgModal = ({
                 setName(e.target.value);
                 setError('');
               }}
-              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg} ${
+              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg} ${
                 error ? 'border-red-400' : ''
               }`}
             />
@@ -191,7 +191,7 @@ export const EditOrgModal = ({
               type="text"
               value={shortName}
               onChange={(e) => setShortName(e.target.value)}
-              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
+              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg}`}
             />
           </div>
           <EditOrgCuratorPickerSlot
@@ -226,7 +226,7 @@ export const EditOrgModal = ({
                   curatorName
                 );
               }}
-              className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/20"
+              className="flex-1 py-3 rounded-2xl bg-th-accent-600 text-white text-sm font-semibold hover:bg-th-accent-700 transition-colors shadow-lg shadow-th-accent-900/20"
             >
               Сохранить
             </button>

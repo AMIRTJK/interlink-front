@@ -25,7 +25,7 @@ export const SelectedBadgesBar = ({
         const activeClass =
           "bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm";
         const inactiveClass = isDarkMode
-          ? "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500"
+          ? "bg-th-raised text-gray-300 border-th-high hover:border-gray-500"
           : "bg-white text-gray-500 border-gray-100 hover:border-purple-200";
 
         return (

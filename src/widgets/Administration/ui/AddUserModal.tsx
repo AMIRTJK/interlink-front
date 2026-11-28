@@ -261,7 +261,7 @@ export function AddUserModal({
                 fontWeight: 600,
                 cursor: canSubmit ? "pointer" : "not-allowed",
                 fontFamily: T.font,
-                boxShadow: canSubmit ? `0 2px 8px ${T.accent}35` : "none",
+                boxShadow: canSubmit ? `0 2px 8px rgb(var(--th-accent-rgb)/0.21)` : "none",
                 transition: "background 0.15s, box-shadow 0.15s",
               }}
             >

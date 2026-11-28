@@ -2,7 +2,6 @@ import * as React from "react";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import type { IAdminUser } from "@entities/hr";
-import { T } from "../../theme/tokens";
 import { useToasts } from "../../lib/useToasts";
 import type { ExtUser, RoleCard } from "../../model";
 import {

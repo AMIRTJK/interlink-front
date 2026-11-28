@@ -48,9 +48,9 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
   const count = hasPairs ? relatedDocuments!.length : chain.length;
 
   return (
-    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-th-high">
       <div className="flex items-center gap-1.5 mb-2">
-        <Link2 size={14} className="text-blue-500 dark:text-blue-400" />
+        <Link2 size={14} className="text-th-accent-500 dark:text-th-accent-400" />
         <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
           Связанные документы ({count})
         </span>
@@ -82,8 +82,8 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-xl border flex-shrink-0 cursor-pointer transition-all shadow-2xs select-none min-w-[260px] max-w-[340px]",
                   item.isCurrent
-                    ? "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200 dark:ring-blue-900/60 shadow-md font-semibold"
-                    : "bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-700/50",
+                    ? "bg-th-accent-600 text-white border-th-accent-600 ring-2 ring-th-accent-200 dark:ring-th-accent-900/60 shadow-md font-semibold"
+                    : "bg-slate-50 dark:bg-th-raised text-slate-800 dark:text-slate-100 border-slate-200 dark:border-th-high hover:border-th-accent-400 hover:bg-th-accent-50/50 dark:hover:bg-th-high/50",
                 )}
               >
                 <UserAvatar
@@ -98,7 +98,7 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
                     className={cn(
                       "text-[11px] truncate leading-tight mt-0.5",
                       item.isCurrent
-                        ? "text-blue-100"
+                        ? "text-th-accent-100"
                         : "text-slate-500 dark:text-slate-400",
                     )}
                   >
@@ -108,7 +108,7 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
                     className={cn(
                       "flex items-center gap-1 mt-0.5 text-[10px] font-mono",
                       item.isCurrent
-                        ? "text-blue-100"
+                        ? "text-th-accent-100"
                         : "text-slate-400 dark:text-slate-400",
                     )}
                   >
@@ -119,7 +119,7 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
                           ? "bg-white"
                           : item.kind === "incoming"
                             ? "bg-emerald-500"
-                            : "bg-blue-500",
+                            : "bg-th-accent-500",
                       )}
                     />
                     <span className="truncate">

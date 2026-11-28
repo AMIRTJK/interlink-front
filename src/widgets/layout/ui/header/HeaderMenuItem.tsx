@@ -12,7 +12,7 @@ interface IProps {
 }
 
 const ROW_CLASS =
-  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[1.25rem] text-sm font-semibold text-left transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400";
+  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[1.25rem] text-sm font-semibold text-left transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-th-accent-400";
 
 export const HeaderMenuItem = ({
   icon,
@@ -30,7 +30,7 @@ export const HeaderMenuItem = ({
       ROW_CLASS,
       isDanger
         ? "text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700",
+        : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-th-high",
     )}
   >
     <span

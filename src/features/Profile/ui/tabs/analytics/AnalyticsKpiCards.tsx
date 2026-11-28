@@ -56,7 +56,7 @@ export const AnalyticsKpiCards = memo(({ summary }: IProps) => {
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.15 }}
-					className="rounded-2xl! p-4! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! transition-all! duration-200!"
+					className="rounded-2xl! p-4! bg-white/70! dark:bg-th-raised/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50! transition-all! duration-200!"
 				>
 					<div className={`text-xs! font-semibold! mb-1! ${kpiColorMap[card.color]}`}>
 						{card.label}

@@ -105,7 +105,7 @@ export const RecipientSelectionArea: React.FC<RecipientSelectionAreaProps> = ({
           onClick={() => onOpenSelector(mode)}
           className={`
           min-w-[32px]! h-[32px]! w-[32px]! rounded-full! flex items-center justify-center p-0!
-          ${textSecondary} ${isDarkMode ? "hover:bg-gray-800!" : "hover:bg-gray-100!"}
+          ${textSecondary} ${isDarkMode ? "hover:bg-th-raised!" : "hover:bg-gray-100!"}
         `}
         />
       </If>

@@ -21,8 +21,8 @@ export const BubbleView = ({
   const [selectedOrg, setSelectedOrg] = useState<number | null>(null);
 
   const containerBg = dark
-    ? 'bg-gray-900/60 border-gray-700/60'
-    : 'bg-gradient-to-br from-slate-50 to-indigo-50/30 border-gray-100';
+    ? 'bg-th-base/60 border-th-high/60'
+    : 'bg-gradient-to-br from-slate-50 to-th-accent-50/30 border-gray-100';
 
   if (organizations.length === 0) {
     return (

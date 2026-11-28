@@ -103,7 +103,7 @@ export const EditorRuler = ({
     top: 0,
     width: 4,
     height: H,
-    background: "#3b82f6",
+    background: "var(--th-accent-500)",
     borderRadius: 2,
     boxShadow: "0 1px 2px rgba(15,23,42,0.35)",
   };

@@ -129,7 +129,7 @@ export const AssignmentResultModal: React.FC<IProps> = ({
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                       reviewDecision === "done"
                         ? "bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 shadow-sm"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
+                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-th-raised dark:border-th-high dark:text-gray-400"
                     }`}
                   >
                     ✓ Принять (Исполнено)
@@ -140,7 +140,7 @@ export const AssignmentResultModal: React.FC<IProps> = ({
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                       reviewDecision === "returned"
                         ? "bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 shadow-sm"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
+                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-th-raised dark:border-th-high dark:text-gray-400"
                     }`}
                   >
                     ↩ Вернуть на доработку

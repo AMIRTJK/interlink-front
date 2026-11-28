@@ -71,7 +71,7 @@ export const IncomingViewHeader: React.FC<IProps> = ({
         <UserActionCluster
           label="Ответили"
           users={repliedUsers}
-          accent={{ avatar: "bg-blue-500", date: "text-blue-600" }}
+          accent={{ avatar: "bg-th-accent-500", date: "text-th-accent-600" }}
         />
         <UserActionCluster
           label="Переслали"
@@ -88,7 +88,7 @@ export const IncomingViewHeader: React.FC<IProps> = ({
         <div className="relative" ref={actionMenuRef}>
           <button
             onClick={onToggleActionMenu}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-th-accent-600 hover:bg-th-accent-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm cursor-pointer"
           >
             <span>Действие</span>
             <ChevronDown

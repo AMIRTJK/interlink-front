@@ -24,7 +24,7 @@ export const ReviewBar = ({
   <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
     <div className="flex items-center gap-3 min-w-0">
       <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 shrink-0">
-        <Users size={14} className="text-blue-500" />
+        <Users size={14} className="text-th-accent-500" />
         Рецензирование — версия №{versionNumber}
         {isLatestVersion ? " (актуальная)" : ""}
       </span>

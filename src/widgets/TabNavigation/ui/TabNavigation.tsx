@@ -95,7 +95,7 @@ export const TabNavigation = () => {
             className="cursor-pointer pointer-events-auto"
             onClick={() => setIsTabsCollapsed(false)}
           >
-             <div className="subtle-glass bg-indigo-500/80! hover:bg-indigo-600/90! backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-colors border border-indigo-400/30">
+             <div className="subtle-glass bg-th-accent-500/80! hover:bg-th-accent-600/90! backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg shadow-th-accent-900/30 transition-colors border border-th-accent-400/30">
                 <AppstoreOutlined className="text-white text-lg" />
                 <span className="text-white font-medium text-sm">Вкладки ({tabs.length})</span>
              </div>

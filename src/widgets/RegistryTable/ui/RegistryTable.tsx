@@ -74,7 +74,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   return (
     <>
-      <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
+      <div className="ui-glass bg-white dark:bg-th-raised flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
         <nav>
           <If is={showTabs}>
             <StatusTabs

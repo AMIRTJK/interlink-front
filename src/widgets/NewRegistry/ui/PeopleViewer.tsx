@@ -61,7 +61,7 @@ export const PeopleViewer = ({
     <>
       <div
         onClick={handleOpen}
-        className="group flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors"
+        className="group flex items-center gap-1.5 cursor-pointer hover:text-th-accent-600 transition-colors"
       >
         <span
           className="truncate max-w-[120px] text-gray-700 dark:text-slate-200"
@@ -70,7 +70,7 @@ export const PeopleViewer = ({
           {firstName}
         </span>
         {othersCount > 0 && (
-          <span className="flex-shrink-0 text-xs font-medium bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md group-hover:bg-blue-100 transition-colors">
+          <span className="flex-shrink-0 text-xs font-medium bg-th-accent-50 text-th-accent-600 px-1.5 py-0.5 rounded-md group-hover:bg-th-accent-100 transition-colors dark:bg-th-accent-900/35 dark:text-th-accent-400">
             +{othersCount}
           </span>
         )}
@@ -79,7 +79,7 @@ export const PeopleViewer = ({
       <Modal
         title={
           <div className="flex items-center gap-2">
-            <Users size={18} className="text-blue-600!" />
+            <Users size={18} className="text-th-accent-600!" />
             <span>
               {label} ({list.length})
             </span>

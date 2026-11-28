@@ -73,7 +73,7 @@ export const EventParticipantsSelect = ({
           }}
           onFocus={() => setIsOpen(true)}
           onClick={() => setIsOpen(true)}
-          className="w-full bg-zinc-100 dark:bg-slate-800 hover:bg-zinc-200/70 dark:hover:bg-slate-700/60 focus:bg-zinc-50 dark:focus:bg-slate-800 border border-zinc-200 dark:border-white/10 focus:border-blue-500 rounded-2xl h-10 pl-4 pr-10 outline-none text-xs font-semibold text-zinc-800 dark:text-slate-100 placeholder:text-zinc-400 dark:placeholder:text-slate-500 transition-all duration-200"
+          className="w-full bg-zinc-100 dark:bg-th-raised hover:bg-zinc-200/70 dark:hover:bg-th-high/60 focus:bg-zinc-50 dark:focus:bg-th-raised border border-zinc-200 dark:border-white/10 focus:border-th-accent-500 rounded-2xl h-10 pl-4 pr-10 outline-none text-xs font-semibold text-zinc-800 dark:text-slate-100 placeholder:text-zinc-400 dark:placeholder:text-slate-500 transition-all duration-200"
           placeholder={isLoading ? "Загрузка пользователей..." : "Поиск коллеги..."}
         />
         {query ? (
@@ -97,7 +97,7 @@ export const EventParticipantsSelect = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.12 }}
-              className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+              className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
             >
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => {
@@ -108,8 +108,8 @@ export const EventParticipantsSelect = ({
                       className={cn(
                         "w-full flex items-center justify-between gap-3 px-3.5 py-2.5 transition-colors text-left cursor-pointer select-none",
                         isSelected
-                          ? "bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/50"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-700/60",
+                          ? "bg-th-accent-50/80 dark:bg-th-accent-950/40 hover:bg-th-accent-100/70 dark:hover:bg-th-accent-900/50"
+                          : "hover:bg-slate-50 dark:hover:bg-th-high/60",
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -144,7 +144,7 @@ export const EventParticipantsSelect = ({
                               className={cn(
                                 "text-xs font-bold truncate",
                                 isSelected
-                                  ? "text-blue-700 dark:text-blue-300"
+                                  ? "text-th-accent-700 dark:text-th-accent-300"
                                   : "text-slate-800 dark:text-slate-100",
                               )}
                             >
@@ -166,8 +166,8 @@ export const EventParticipantsSelect = ({
                         className={cn(
                           "w-4.5 h-4.5 rounded-md flex items-center justify-center transition-all shrink-0 border cursor-pointer",
                           isSelected
-                            ? "bg-[#3373e5] border-[#3373e5] text-white shadow-2xs"
-                            : "border-slate-300 dark:border-white/20 bg-white/80 dark:bg-slate-800 hover:border-[#3373e5]/50",
+                            ? "bg-th-accent-600 border-th-accent-600 text-white shadow-2xs"
+                            : "border-slate-300 dark:border-white/20 bg-white/80 dark:bg-th-raised hover:border-th-accent-600/50",
                         )}
                       >
                         {isSelected && <Check size={11} strokeWidth={3} />}
@@ -195,7 +195,7 @@ export const EventParticipantsSelect = ({
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {selectedUsers.map((u) => (
             <Tooltip key={u.id} title={`${u.name} — ${u.role || "Сотрудник"}`}>
-              <span className="inline-flex items-center gap-2 pl-1 pr-2.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-slate-800 dark:text-slate-100">
+              <span className="inline-flex items-center gap-2 pl-1 pr-2.5 py-0.5 bg-white dark:bg-th-raised border border-slate-200/90 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-slate-800 dark:text-slate-100">
                 <Avatar colleague={u} className="w-5 h-5 text-[8px]" />
                 <span className="truncate max-w-[130px] text-[11px]">{u.name}</span>
                 <button

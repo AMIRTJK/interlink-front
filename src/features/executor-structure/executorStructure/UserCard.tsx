@@ -25,8 +25,8 @@ export const UserCard: React.FC<UserCardProps> = ({
         relative w-full flex flex-col items-center justify-start p-4 rounded-2xl cursor-pointer transition-all duration-300 border min-h-[180px]
         ${
           isSelected
-            ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
+            ? "bg-[#F4F8FF] border-th-accent-100/50 shadow-inner"
+            : "bg-white border-transparent hover:border-th-accent-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
         }
       `}
     >

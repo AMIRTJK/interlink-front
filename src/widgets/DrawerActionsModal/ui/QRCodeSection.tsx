@@ -11,7 +11,7 @@ export const DrawerQRCodeSection: React.FC = () => {
         QR КОД
       </div>
       <div className="rounded-2xl flex flex-col items-center justify-center gap-6">
-        <div className="border border-red-50 p-3 rounded-2xl bg-red-50/30">
+        <div className="border border-red-50 p-3 rounded-2xl bg-red-50/30 dark:bg-red-900/35">
           <QRCode
             value="https://ant.design/"
             color="#F87171"

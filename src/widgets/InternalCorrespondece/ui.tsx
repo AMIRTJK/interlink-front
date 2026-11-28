@@ -78,7 +78,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   return (
     <div
       className={`relative min-h-screen transition-colors duration-300 ${
-        isDarkMode ? "bg-[#111827]!" : "bg-[#f9fafb]!"
+        isDarkMode ? "bg-th-base!" : "bg-[#f9fafb]!"
       } ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
     >
       <TopNavigation

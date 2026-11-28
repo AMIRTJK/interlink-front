@@ -86,7 +86,7 @@
 
 /* === ТЕМНАЯ ТЕМА ДЛЯ СООБЩЕНИЙ === */
 .chat-view.is-dark .chat-msg__body {
-  background: #374151; /* gray-700 - фон чужого сообщения */
+  background: var(--th-dark-high); /* gray-700 - фон чужого сообщения */
   color: #e5e7eb; /* gray-200 - текст чужого сообщения */
 }
 

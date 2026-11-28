@@ -39,16 +39,16 @@ export const AddPositionModal = ({
 
   const vacant = Math.max(0, Number(slots) - Number(occupied));
 
-  const cardBg = dark ? 'bg-gray-900' : 'bg-white';
+  const cardBg = dark ? 'bg-th-base' : 'bg-white';
   const inputBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-600'
+    ? 'bg-th-raised border-th-high text-gray-100 placeholder:text-gray-600'
     : 'bg-gray-50 border-gray-200 text-gray-800 placeholder:text-gray-400';
   const readonlyBg = dark
-    ? 'border-gray-700 bg-gray-800/60 text-gray-500'
+    ? 'border-th-high bg-th-raised/60 text-gray-500'
     : 'border-gray-100 bg-gray-50 text-gray-400';
   const labelCls = dark ? 'text-gray-400' : 'text-gray-500';
   const cancelCls = dark
-    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+    ? 'bg-th-raised text-gray-300 hover:bg-th-high'
     : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
 
   return (
@@ -65,7 +65,7 @@ export const AddPositionModal = ({
           style={{ borderColor: dark ? '#374151' : '#f3f4f6' }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-500 to-th-accent-600 flex items-center justify-center">
               <Briefcase size={16} className="text-white" />
             </div>
             <div>
@@ -100,7 +100,7 @@ export const AddPositionModal = ({
                 setError('');
               }}
               placeholder="Старший специалист"
-              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg} ${
+              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg} ${
                 error ? 'border-red-400' : ''
               }`}
             />
@@ -125,7 +125,7 @@ export const AddPositionModal = ({
                     String(Math.min(Number(prev), Number(e.target.value)))
                   );
                 }}
-                className={`w-full px-3 py-3 rounded-2xl border text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
+                className={`w-full px-3 py-3 rounded-2xl border text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg}`}
               />
             </div>
             <div>
@@ -142,7 +142,7 @@ export const AddPositionModal = ({
                 onChange={(e) =>
                   setOccupied(String(Math.min(Number(e.target.value), Number(slots))))
                 }
-                className={`w-full px-3 py-3 rounded-2xl border text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
+                className={`w-full px-3 py-3 rounded-2xl border text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg}`}
               />
             </div>
             <div>
@@ -171,7 +171,7 @@ export const AddPositionModal = ({
               value={salary}
               onChange={(e) => setSalary(e.target.value)}
               placeholder="0"
-              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
+              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg}`}
             />
           </div>
           <div className="flex gap-3 pt-1">
@@ -199,9 +199,9 @@ export const AddPositionModal = ({
               }}
               className={`flex-1 py-3 rounded-2xl text-sm font-semibold transition-all shadow-lg ${
                 posName.trim()
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  ? 'bg-th-accent-600 text-white hover:bg-th-accent-700'
                   : dark
-                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  ? 'bg-th-high text-gray-500 cursor-not-allowed'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >

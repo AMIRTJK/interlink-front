@@ -13,7 +13,7 @@ export const HeaderBgPopover = ({
   isDarkMode,
 }: IHeaderBgPopoverProps) => {
   return (
-    <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+    <div className="w-[260px] p-5 bg-white dark:bg-th-raised rounded-[2.5rem]">
       <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-4 px-1">
         Фон страницы
       </p>
@@ -26,16 +26,16 @@ export const HeaderBgPopover = ({
                 setCurrentBg(key);
               }
             }}
-            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
+            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-th-high transition-all cursor-pointer ${
               currentBg === key
-                ? "bg-zinc-100 dark:bg-zinc-700 ring-2 ring-indigo-400"
+                ? "bg-zinc-100 dark:bg-th-high ring-2 ring-th-accent-400"
                 : ""
             }`}
           >
             <div
               className={`w-10 h-10 rounded-full bg-gradient-to-br ${
                 isDarkMode ? bg.dark : bg.light
-              } border border-zinc-200 dark:border-zinc-700 flex-shrink-0 shadow-sm`}
+              } border border-zinc-200 dark:border-th-high flex-shrink-0 shadow-sm`}
             />
             <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
               {bg.name}

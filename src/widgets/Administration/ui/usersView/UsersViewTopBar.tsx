@@ -8,22 +8,61 @@ interface IProps {
 
 export function UsersViewTopBar({ onOpenAdd }: IProps) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+        gap: 16,
+      }}
+    >
       <div>
         <h1
-          className="m-0 text-xl font-bold tracking-tight text-slate-900 dark:text-white"
-          style={{ fontFamily: T.font }}
+          style={{
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 700,
+            color: T.textPrimary,
+            letterSpacing: "-0.02em",
+          }}
         >
           Пользователи
         </h1>
-        <p className="mt-0.5 mb-0 text-[13px] text-slate-500 dark:text-slate-400">
+        <p
+          style={{
+            margin: "3px 0 0",
+            fontSize: 13,
+            color: T.textSecondary,
+          }}
+        >
           Управление сотрудниками и доступами
         </p>
       </div>
       <button
         onClick={onOpenAdd}
-        className="flex items-center gap-1.5 px-4 h-9 rounded-lg border-0 bg-blue-500 hover:bg-blue-600 text-white text-[13px] font-semibold cursor-pointer whitespace-nowrap shadow-sm transition-colors"
-        style={{ fontFamily: T.font }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "0 16px",
+          height: 36,
+          borderRadius: 8,
+          border: "none",
+          background: T.accent,
+          color: "#fff",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: T.font,
+          boxShadow: `0 2px 8px rgb(var(--th-accent-rgb)/0.21)`,
+          whiteSpace: "nowrap",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background = "#2563EB";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background = T.accent;
+        }}
       >
         <Plus size={14} />
         <span>Добавить</span>

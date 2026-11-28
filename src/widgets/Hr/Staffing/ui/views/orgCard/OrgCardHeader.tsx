@@ -63,7 +63,7 @@ export const OrgCardHeader = ({
         </If>
         <span
           className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-            dark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'
+            dark ? 'bg-th-high text-gray-400' : 'bg-gray-100 text-gray-500'
           }`}
         >
           {org.type}

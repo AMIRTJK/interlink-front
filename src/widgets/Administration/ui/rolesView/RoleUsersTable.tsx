@@ -3,7 +3,6 @@ import { Search, MoreHorizontal } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType, TableRowSelection } from "antd/es/table/interface";
 import { Avatar } from "@shared/ui";
-import { useIsDarkMode } from "@shared/lib";
 import { T, getRoleColor, STATUS_CFG } from "../../theme/tokens";
 import type { TableUser } from "../../model";
 import { PER_PAGE } from "./rolesViewModel";
@@ -33,7 +32,6 @@ export function RoleUsersTable({
   onPageChange,
   onRowClick,
 }: IProps) {
-  const isDarkMode = useIsDarkMode();
   const userColumns: ColumnsType<TableUser> = React.useMemo(
     () => [
       {
@@ -41,37 +39,37 @@ export function RoleUsersTable({
         key: "employee",
         onHeaderCell: () => ({ style: { paddingLeft: 20 } }),
         onCell: () => ({ style: { paddingLeft: 20 } }),
-        render: (_, user) => (
-          <div className="flex items-center gap-2.5">
-            <Avatar
-              colleague={{
-                id: user.id,
-                name: user.fio,
-                initials: user.avatarInitials,
-                photo: user.photoUrl,
-              }}
-              className="w-8 h-8 rounded-lg shrink-0"
-              allowPreview={true}
-            />
-            <div>
-              <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
-                {user.fio}
-              </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                {user.position}
+        render: (_, user) => {
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Avatar
+                colleague={{
+                  id: user.id,
+                  name: user.fio,
+                  initials: user.avatarInitials,
+                  photo: user.photoUrl,
+                }}
+                className="w-8 h-8 rounded-lg"
+                allowPreview={true}
+              />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
+                  {user.fio}
+                </div>
+                <div style={{ fontSize: 11, color: T.textSecondary, marginTop: 1 }}>
+                  {user.position}
+                </div>
               </div>
             </div>
-          </div>
-        ),
+          );
+        },
       },
       {
         title: "Отдел",
         dataIndex: "department",
         key: "department",
         render: (val: string) => (
-          <span className="text-[13px] text-slate-900 dark:text-slate-100">
-            {val}
-          </span>
+          <span style={{ fontSize: 13, color: T.textPrimary }}>{val}</span>
         ),
       },
       {
@@ -79,7 +77,7 @@ export function RoleUsersTable({
         dataIndex: "roles",
         key: "roles",
         render: (roles: string[]) => (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {roles.slice(0, 2).map((role) => {
               const cfg = getRoleColor(role);
               return (
@@ -100,7 +98,16 @@ export function RoleUsersTable({
               );
             })}
             {roles.length > 2 && (
-              <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md px-2 py-0.5 text-[11px] font-semibold">
+              <span
+                style={{
+                  background: T.hoverBg,
+                  color: T.textSecondary,
+                  borderRadius: 6,
+                  padding: "2px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
+              >
                 +{roles.length - 2}
               </span>
             )}
@@ -114,12 +121,18 @@ export function RoleUsersTable({
         render: (status: string) => {
           const statusCfg = STATUS_CFG[status] ?? STATUS_CFG["Активен"];
           return (
-            <div className="flex items-center gap-1.5">
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span
-                className="w-[7px] h-[7px] rounded-full inline-block shrink-0"
-                style={{ background: statusCfg.dot }}
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: statusCfg.dot,
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
               />
-              <span className="text-[13px] text-slate-900 dark:text-slate-100 font-medium">
+              <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: 500 }}>
                 {status}
               </span>
             </div>
@@ -131,9 +144,7 @@ export function RoleUsersTable({
         dataIndex: "assignedDate",
         key: "assignedDate",
         render: (val: string) => (
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            {val}
-          </span>
+          <span style={{ fontSize: 12, color: T.textSecondary }}>{val}</span>
         ),
       },
       {
@@ -142,10 +153,18 @@ export function RoleUsersTable({
         width: 120,
         align: "right",
         render: () => (
-          <div className="flex justify-end">
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button
               onClick={(e) => e.stopPropagation()}
-              className="bg-transparent border-0 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 p-1 rounded-md flex"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: T.textSecondary,
+                padding: 4,
+                borderRadius: 6,
+                display: "flex",
+              }}
             >
               <MoreHorizontal size={15} />
             </button>
@@ -157,34 +176,79 @@ export function RoleUsersTable({
   );
 
   return (
-    <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs flex flex-col">
-      <div className="px-5 pt-3.5 pb-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div
+      className="ui-glass ui-glass--forced"
+      style={{
+        background: T.surface,
+        borderRadius: 10,
+        border: `1px solid ${T.border}`,
+        overflow: "hidden",
+        boxShadow: T.shadow,
+        minHeight: 700,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 20px 12px",
+          borderBottom: `1px solid ${T.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
         <div>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          <div
+            style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary }}
+          >
             {isRoleFiltered ? (
               <span>
                 <span>Пользователи с ролью: </span>
-                <span className="text-blue-500">{selectedRoleName}</span>
+                <span style={{ color: T.accent }}>{selectedRoleName}</span>
               </span>
             ) : (
               <span>Все пользователи и их роли</span>
             )}
           </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <div
+            style={{ fontSize: 12, color: T.textSecondary, marginTop: 2 }}
+          >
             {isRoleFiltered
               ? `Найдено: ${totalUsers}`
               : "Назначение ролей сотрудникам системы"}
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg px-3 h-9 min-w-[200px]">
-          <Search size={13} className="text-slate-400 shrink-0" />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: T.bg,
+            border: `1px solid ${T.border}`,
+            borderRadius: 8,
+            padding: "0 12px",
+            height: 36,
+            minWidth: 200,
+          }}
+        >
+          <Search size={13} color={T.textSecondary} />
           <input
             type="text"
-            className="admin__search-input border-0 outline-none bg-transparent text-[13px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 w-full"
+            className="admin__search-input"
             placeholder="Поиск пользователя..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            style={{ fontFamily: T.font }}
+            style={{
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: 13,
+              color: T.textPrimary,
+              fontFamily: T.font,
+              width: "100%",
+            }}
           />
         </div>
       </div>
@@ -194,7 +258,6 @@ export function RoleUsersTable({
         columns={userColumns}
         dataSource={displayedUsers}
         rowSelection={rowSelection}
-        scroll={{ x: 960 }}
         onRow={(user) => ({
           onClick: () => onRowClick(user.id),
           style: {
@@ -203,9 +266,7 @@ export function RoleUsersTable({
               isRoleFiltered &&
               !!selectedRoleName &&
               user.roles.includes(selectedRoleName)
-                ? isDarkMode
-                  ? "rgba(59, 130, 246, 0.12)"
-                  : "#EFF6FF"
+                ? "#EFF6FF"
                 : undefined,
           },
         })}
@@ -217,24 +278,16 @@ export function RoleUsersTable({
           showSizeChanger: false,
           style: {
             padding: "10px 20px",
-            borderTop: `1px solid ${isDarkMode ? "#1E293B" : T.border}`,
-            background: isDarkMode ? "rgba(15, 23, 42, 0.6)" : T.bg,
+            borderTop: `1px solid ${T.border}`,
             margin: 0,
             display: "flex",
             alignItems: "center",
             width: "100%",
           },
           showTotal: (total, range) => (
-            <span className="text-[13px] text-slate-500 dark:text-slate-400 mr-auto">
-              Показано{" "}
-              <strong className="text-slate-900 dark:text-slate-100">
-                {range[0]}-{range[1]}
-              </strong>{" "}
-              из{" "}
-              <strong className="text-slate-900 dark:text-slate-100">
-                {total}
-              </strong>{" "}
-              пользователей
+            <span style={{ fontSize: 13, color: T.textSecondary, marginRight: "auto" }}>
+              Показано <strong style={{ color: T.textPrimary }}>{range[0]}-{range[1]}</strong> из{" "}
+              <strong style={{ color: T.textPrimary }}>{total}</strong> пользователей
             </span>
           ),
         }}

@@ -45,13 +45,13 @@ export function UserProfileFooter({
           <span className={`w-1.5 h-1.5 rounded-full ${meta.dotClass}`} />
           <span
             className={
-              isActive ? "font-bold text-slate-800" : "text-slate-600 font-medium"
+              isActive ? "font-bold text-slate-800 dark:text-slate-100" : "text-slate-600 font-medium dark:text-slate-300"
             }
           >
             {labelText}
           </span>
         </div>
-        {isActive && <Check size={14} className="text-blue-500! ml-4" />}
+        {isActive && <Check size={14} className="text-th-accent-500! ml-4" />}
       </div>
     );
   };
@@ -60,7 +60,7 @@ export function UserProfileFooter({
     {
       key: "edit",
       label: (
-        <span className="font-semibold text-slate-700">
+        <span className="font-semibold text-slate-700 dark:text-slate-300">
           Редактировать сотрудника
         </span>
       ),
@@ -100,13 +100,13 @@ export function UserProfileFooter({
   ];
 
   return (
-    <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+    <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3 dark:border-th-high">
       <Dropdown
         menu={{ items: actionItems }}
         trigger={["click"]}
         placement="topRight"
       >
-        <button className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+        <button className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 dark:border-th-high dark:text-slate-300 dark:hover:bg-th-high">
           <span>Действие</span>
           <ChevronDown size={16} className="text-slate-400" />
         </button>
@@ -115,7 +115,7 @@ export function UserProfileFooter({
         <button
           onClick={onSaveRoles}
           disabled={isRolesPending}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-th-accent-600 hover:bg-th-accent-700 text-white disabled:opacity-60 transition-colors"
         >
           <Check size={16} />
           <span>Сохранить изменения</span>
@@ -125,7 +125,7 @@ export function UserProfileFooter({
         <button
           onClick={onSavePermissions}
           disabled={isDataLoading || isDirectPending || isDeniedPending}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-th-accent-600 hover:bg-th-accent-700 text-white disabled:opacity-60 transition-colors"
         >
           <Check size={16} />
           <span>Сохранить права</span>

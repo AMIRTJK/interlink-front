@@ -63,7 +63,7 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 	const chartData = typeBreakdown
 		.map((item) => {
 			const label = TYPE_LABELS[item.type.toLowerCase()] || item.type;
-			const color = TYPE_COLORS[item.type.toLowerCase()] || "#6366f1";
+			const color = TYPE_COLORS[item.type.toLowerCase()] || "var(--th-accent-500)";
 			const pct = item.percentage ?? (totalSize > 0 ? parseFloat(((item.total_size / totalSize) * 100).toFixed(1)) : 0);
 			return {
 				name: label,
@@ -82,7 +82,7 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 					<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
 					<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
 					<RechartsTooltip formatter={(v: any, _, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, "Доля"]} contentStyle={tooltipStyle} />
-					<Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+					<Line type="monotone" dataKey="value" stroke="var(--th-accent-500)" strokeWidth={2} dot={{ r: 4, fill: "var(--th-accent-500)", strokeWidth: 2, stroke: "#fff" }} />
 				</LineChart>
 			);
 		}
@@ -91,14 +91,14 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 				<AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
 					<defs>
 						<linearGradient id="filesTypeAreaGrad" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
-							<stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+							<stop offset="5%" stopColor="var(--th-accent-500)" stopOpacity={0.35} />
+							<stop offset="95%" stopColor="var(--th-accent-500)" stopOpacity={0} />
 						</linearGradient>
 					</defs>
 					<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
 					<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
 					<RechartsTooltip formatter={(v: any, _, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, "Доля"]} contentStyle={tooltipStyle} />
-					<Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#filesTypeAreaGrad)" dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "#6366f1" }} />
+					<Area type="monotone" dataKey="value" stroke="var(--th-accent-500)" strokeWidth={2} fillOpacity={1} fill="url(#filesTypeAreaGrad)" dot={{ r: 4, fill: "var(--th-accent-500)", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "var(--th-accent-500)" }} />
 				</AreaChart>
 			);
 		}
@@ -133,7 +133,7 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 min-h-[320px] flex flex-col justify-between"
+			className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 min-h-[320px] flex flex-col justify-between"
 		>
 			{chartData.length === 0 ? (
 				<div className="flex flex-col items-center justify-center h-full min-h-[260px]">

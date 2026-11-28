@@ -28,7 +28,7 @@ export const UserBlock: React.FC<IProps> = ({
       className={cn(
         "flex items-center gap-3 min-w-0 p-2.5 rounded-xl transition-all cursor-pointer group/user flex-1",
         isCurrent
-          ? "bg-blue-50/90 border border-blue-200 shadow-2xs"
+          ? "bg-th-accent-50/90 border border-th-accent-200 shadow-2xs dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
           : "bg-slate-50/80 hover:bg-slate-100/90 border border-slate-100 hover:border-slate-200",
       )}
       title={`${name} • ${position}`}
@@ -40,7 +40,7 @@ export const UserBlock: React.FC<IProps> = ({
             {name}
           </span>
           <If is={Boolean(isCurrent)}>
-            <span className="px-1.5 py-0.5 text-[8px] font-extrabold bg-blue-600 text-white rounded uppercase tracking-wider shrink-0">
+            <span className="px-1.5 py-0.5 text-[8px] font-extrabold bg-th-accent-600 text-white rounded uppercase tracking-wider shrink-0">
               Текущий
             </span>
           </If>
@@ -52,7 +52,7 @@ export const UserBlock: React.FC<IProps> = ({
           <span
             className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0",
-              kind === "incoming" ? "bg-emerald-500" : "bg-blue-500",
+              kind === "incoming" ? "bg-emerald-500" : "bg-th-accent-500",
             )}
           />
           <span className="truncate font-medium text-slate-500">

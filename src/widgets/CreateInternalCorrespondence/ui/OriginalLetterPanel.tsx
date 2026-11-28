@@ -9,24 +9,24 @@ import { cn } from "@shared/lib";
 
 const STATUS_STYLE: Record<string, string> = {
   // Russian keys
-  "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "на исполнении": "bg-amber-100 text-amber-700 border-amber-200",
-  "на согласовании": "bg-blue-50 text-blue-700 border-blue-200",
-  "на подпись": "bg-purple-50 text-purple-700 border-purple-200",
+  "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  "на исполнении": "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  "на согласовании": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  "на подпись": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
   завершено: "bg-slate-100 text-slate-600 border-slate-200",
-  sent: "bg-blue-50 text-blue-700 border-blue-200",
+  sent: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
 
   // English keys
   draft: "bg-slate-100 text-slate-600 border-slate-200",
-  to_register: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  to_execute: "bg-amber-100 text-amber-700 border-amber-200",
-  to_approve: "bg-blue-50 text-blue-700 border-blue-200",
-  to_sign: "bg-purple-50 text-purple-700 border-purple-200",
+  to_register: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  to_execute: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  to_approve: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  to_sign: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
   done: "bg-slate-100 text-slate-600 border-slate-200",
-  cancelled: "bg-rose-50 text-rose-700 border-rose-200",
-  approved: "bg-blue-50 text-blue-700 border-blue-200",
-  signed: "bg-purple-50 text-purple-700 border-purple-200",
+  cancelled: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/35 dark:text-rose-400 dark:border-rose-800/50",
+  approved: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  signed: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
 };
 
 const STATUS_TRANSLATIONS: Record<string, string> = {
@@ -46,19 +46,19 @@ const STATUS_TRANSLATIONS: Record<string, string> = {
 const PRIORITY_STYLE: Record<string, { label: string; className: string }> = {
   high: {
     label: "Высокая",
-    className: "bg-rose-50! text-rose-700! border-rose-100!",
+    className: "bg-rose-50! text-rose-700! border-rose-100! dark:bg-rose-900/35! dark:text-rose-400! dark:border-rose-800/50!",
   },
   middle: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   medium: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   normal: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   low: {
     label: "Низкая важность",
@@ -120,7 +120,7 @@ export const OriginalLetterPanel = ({
     .replace(/\s+/g, " ")
     .trim();
   const statusBadge =
-    STATUS_STYLE[status] || "bg-amber-100 text-amber-700 border-amber-200";
+    STATUS_STYLE[status] || "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50";
 
   const handleOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -134,11 +134,11 @@ export const OriginalLetterPanel = ({
   };
 
   return (
-    <div className="mb-5 rounded-2xl overflow-hidden border border-amber-200 bg-amber-50 shadow-sm">
+    <div className="mb-5 rounded-2xl overflow-hidden border border-amber-200 bg-amber-50 shadow-sm dark:bg-amber-900/35 dark:border-amber-800/50">
       {/* Свёрнутая полоса */}
       <button
         onClick={() => setIsExpanded((v) => !v)}
-        className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 transition-colors px-5 w-full text-left cursor-pointer"
+        className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 transition-colors px-5 w-full text-left cursor-pointer dark:bg-amber-900/35"
         style={{ height: 48 }}
       >
         <motion.div
@@ -151,13 +151,13 @@ export const OriginalLetterPanel = ({
           {label}
         </span>
         <div className="flex items-center gap-2 ml-2 flex-1 overflow-hidden">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold flex-shrink-0">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold flex-shrink-0 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50">
             <span className="w-4 h-4 rounded-full bg-amber-400 text-white text-[9px] font-bold flex items-center justify-center">
               {getInitials(sender)[0]}
             </span>
             <span className="truncate max-w-[140px]">{sender}</span>
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium flex-shrink-0">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium flex-shrink-0 dark:bg-amber-900/35 dark:text-amber-400">
             <Calendar size={10} />
             <span>{date}</span>
           </span>
@@ -214,7 +214,7 @@ export const OriginalLetterPanel = ({
               </div>
               <div className="flex flex-col gap-1 min-w-0">
                 <Lbl>Вх. номер</Lbl>
-                <span className="font-mono text-[10px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 inline-flex w-fit text-slate-700">
+                <span className="font-mono text-[10px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 inline-flex w-fit text-slate-700 dark:bg-amber-900/35 dark:border-amber-800/50">
                   {inboundNumber}
                 </span>
               </div>

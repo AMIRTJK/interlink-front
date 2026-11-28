@@ -18,14 +18,14 @@ const STATUS_OPTS = [
 const chipCls = (active: boolean) =>
   `px-2.5 py-1 rounded-lg text-xs border transition-colors ${
     active
-      ? "bg-blue-50 border-blue-300 text-blue-600"
-      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+      ? "bg-th-accent-50 border-th-accent-300 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400"
+      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-th-raised dark:border-th-high dark:text-slate-300 dark:hover:bg-th-high"
   }`;
 
 export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset }: IProps) => {
   return (
-    <div className="absolute z-30 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
-      <p className="text-sm font-bold text-slate-800 mb-3">Фильтры</p>
+    <div className="absolute z-30 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 dark:bg-th-raised dark:border-th-high">
+      <p className="text-sm font-bold text-slate-800 mb-3 dark:text-slate-100">Фильтры</p>
 
       <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Статус</p>
       <div className="flex flex-wrap gap-1.5 mb-3">
@@ -68,7 +68,7 @@ export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset
           onChange={(e) => setDraft({ ...draft, salaryMin: e.target.value })}
           type="number"
           placeholder="От"
-          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:border-blue-400"
+          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-th-accent-400 dark:border-th-high dark:bg-th-base dark:text-slate-100 dark:[color-scheme:dark]"
         />
         <span className="text-slate-400">—</span>
         <input
@@ -76,20 +76,20 @@ export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset
           onChange={(e) => setDraft({ ...draft, salaryMax: e.target.value })}
           type="number"
           placeholder="До"
-          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:border-blue-400"
+          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-th-accent-400 dark:border-th-high dark:bg-th-base dark:text-slate-100 dark:[color-scheme:dark]"
         />
       </div>
 
       <div className="flex items-center gap-2">
         <button
           onClick={onReset}
-          className="flex-1 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50"
+          className="flex-1 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 dark:text-slate-300 dark:bg-th-raised dark:border-th-high dark:hover:bg-th-high"
         >
           Сбросить
         </button>
         <button
           onClick={onApply}
-          className="flex-1 px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700"
+          className="flex-1 px-3 py-2 text-sm font-semibold text-white bg-th-accent-600 rounded-xl hover:bg-th-accent-700"
         >
           Применить
         </button>

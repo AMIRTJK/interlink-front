@@ -34,7 +34,7 @@ export const Card = memo(({
 	title: string;
 	children: React.ReactNode;
 }) => (
-	<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50!">
+	<div className="bg-white/40! dark:bg-th-raised/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50!">
 		<h3 className="text-xs! font-bold! text-zinc-400! dark:text-zinc-500! uppercase! tracking-wider! mb-4!">
 			{title}
 		</h3>

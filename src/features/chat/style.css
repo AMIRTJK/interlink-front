@@ -37,18 +37,18 @@
 
 /* === ТЕМНАЯ ТЕМА ДЛЯ CHAT VIEW === */
 .chat-view.is-dark {
-  background: #1f2937; /* gray-800 */
+  background: var(--th-dark-raised); /* gray-800 */
 }
 
 .chat-view.is-dark .chat-view__history {
-  background: #111827; /* gray-900 */
+  background: var(--th-dark-base); /* gray-900 */
 }
 
 /* Скроллбар в темной теме */
 .chat-view.is-dark .chat-view__history::-webkit-scrollbar-thumb {
-  background: #374151; /* gray-700 */
+  background: var(--th-dark-high); /* gray-700 */
 }
 
 .chat-view.is-dark .chat-view__history::-webkit-scrollbar-thumb:hover {
-  background: #4b5563; /* gray-600 */
+  background: var(--th-dark-higher); /* gray-600 */
 }

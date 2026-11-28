@@ -56,7 +56,7 @@ export const HeaderMenu = ({ label, icon, children }: IProps) => {
         <div
           role="menu"
           aria-label={label}
-          className="w-[264px] max-h-[min(460px,75vh)] overflow-y-auto p-2 bg-white dark:bg-zinc-800 rounded-[1.75rem] shadow-xl"
+          className="w-[264px] max-h-[min(460px,75vh)] overflow-y-auto p-2 bg-white dark:bg-th-raised rounded-[1.75rem] shadow-xl"
         >
           {panel === null && (
             <p className="px-3 pt-2 pb-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">

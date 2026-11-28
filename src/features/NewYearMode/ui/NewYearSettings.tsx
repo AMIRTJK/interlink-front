@@ -19,7 +19,7 @@ export const NewYearSettings = () => {
         isChecked={isEnabled}
         onToggle={toggleEnabled}
       />
-      <div className="mx-3 my-1 h-px bg-zinc-100 dark:bg-zinc-700" />
+      <div className="mx-3 my-1 h-px bg-zinc-100 dark:bg-th-high" />
       {NEW_YEAR_EFFECTS.map((effect) => (
         <NewYearSwitchRow
           key={effect.key}

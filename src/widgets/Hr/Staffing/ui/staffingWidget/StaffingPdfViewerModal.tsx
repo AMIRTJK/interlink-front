@@ -33,17 +33,17 @@ export function StaffingPdfViewerModal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className={`relative rounded-2xl shadow-2xl w-full max-w-4xl z-[61] flex flex-col ${
-              dark ? 'bg-gray-900' : 'bg-white'
+              dark ? 'bg-th-base' : 'bg-white'
             }`}
             style={{ maxHeight: '90vh' }}
           >
             <div
               className={`flex items-center justify-between px-5 py-4 border-b shrink-0 ${
-                dark ? 'border-gray-700/60' : 'border-gray-100'
+                dark ? 'border-th-high/60' : 'border-gray-100'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center dark:bg-red-900/35">
                   <FileText size={14} className="text-red-600" />
                 </div>
                 <p
@@ -60,7 +60,7 @@ export function StaffingPdfViewerModal({
                   download={pdfFile?.name}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-colors ${
                     dark
-                      ? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+                      ? 'border-th-high text-gray-300 hover:bg-th-raised'
                       : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -70,7 +70,7 @@ export function StaffingPdfViewerModal({
                 <button
                   onClick={onClose}
                   className={`p-2 rounded-xl transition-colors ${
-                    dark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
+                    dark ? 'hover:bg-th-raised text-gray-400' : 'hover:bg-gray-100 text-gray-400'
                   }`}
                 >
                   <X size={16} />

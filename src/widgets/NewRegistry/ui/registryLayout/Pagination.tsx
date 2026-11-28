@@ -52,8 +52,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) =>
         disabled={current === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
           current === 1
-            ? "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed"
-            : "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 cursor-pointer"
+            ? "bg-gray-100 dark:bg-th-raised text-gray-400 dark:text-slate-600 cursor-not-allowed"
+            : "bg-white dark:bg-th-raised text-gray-700 dark:text-slate-200 hover:bg-th-accent-50 dark:hover:bg-th-high hover:text-th-accent-600 dark:hover:text-th-accent-400 border border-gray-200 dark:border-th-high cursor-pointer"
         }`}
       >
         <ChevronLeft className="w-4 h-4" />
@@ -83,8 +83,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) =>
               onClick={() => onPageChange(pageNum)}
               className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                 isActive
-                  ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700"
+                  ? "bg-linear-to-r from-th-accent-600 to-th-accent-700 text-white shadow-md"
+                  : "bg-white dark:bg-th-raised text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-th-high border border-gray-200 dark:border-th-high"
               }`}
             >
               {pageNum}
@@ -100,8 +100,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) =>
         disabled={current === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
           current === totalPages
-            ? "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed"
-            : "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 cursor-pointer"
+            ? "bg-gray-100 dark:bg-th-raised text-gray-400 dark:text-slate-600 cursor-not-allowed"
+            : "bg-white dark:bg-th-raised text-gray-700 dark:text-slate-200 hover:bg-th-accent-50 dark:hover:bg-th-high hover:text-th-accent-600 dark:hover:text-th-accent-400 border border-gray-200 dark:border-th-high cursor-pointer"
         }`}
       >
         <span className="hidden sm:inline">{texts.forward}</span>

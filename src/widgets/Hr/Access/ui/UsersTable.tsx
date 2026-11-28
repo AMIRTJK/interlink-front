@@ -53,7 +53,7 @@ export const UsersTable = ({
         },
         className: "cursor-pointer",
       })}
-      className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm"
+      className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm dark:border-th-high"
     />
   );
 };

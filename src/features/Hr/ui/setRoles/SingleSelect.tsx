@@ -34,7 +34,7 @@ export const SingleSelect = ({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm flex items-center justify-between cursor-pointer hover:border-indigo-300 transition-colors"
+        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm flex items-center justify-between cursor-pointer hover:border-th-accent-300 transition-colors"
       >
         <span className={selected ? "text-slate-900" : "text-slate-400"}>
           {selected ? selected.label : placeholder}
@@ -66,11 +66,11 @@ export const SingleSelect = ({
                   setOpen(false);
                   setSearch("");
                 }}
-                className={`w-full px-3.5 py-2.5 text-sm text-left flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors ${o.value === value ? "bg-indigo-50 text-indigo-700" : "text-slate-700"}`}
+                className={`w-full px-3.5 py-2.5 text-sm text-left flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors ${o.value === value ? "bg-th-accent-50 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400" : "text-slate-700"}`}
               >
                 <span>{o.label}</span>
                 <If is={o.value === value}>
-                  <Check className="w-4 h-4 text-indigo-600" />
+                  <Check className="w-4 h-4 text-th-accent-600" />
                 </If>
               </button>
             ))}

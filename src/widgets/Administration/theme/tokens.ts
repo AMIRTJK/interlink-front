@@ -3,20 +3,24 @@
 // Верстка/стили перенесены дословно; шрифт Inter самохостится (@fontsource/inter),
 // поэтому CDN @import из ensureStyles убран — остались только keyframes.
 import type * as React from "react";
+import "./tokens.css";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
+// Нейтрали — CSS-переменные (tokens.css), чтобы модуль переключался с темой.
+// accent/danger остаются hex: к ним в разметке приклеивают альфу (`rgb(var(--th-accent-rgb)/0.21)`).
 export const T = {
-  bg: "#F8FAFC",
-  surface: "#FFFFFF",
+  bg: "var(--adm-bg)",
+  surface: "var(--adm-surface)",
   sidebar: "#0F172A",
-  accent: "#3B82F6",
+  accent: "rgb(var(--th-accent-rgb))",
   success: "#10B981",
   danger: "#EF4444",
   warning: "#F59E0B",
-  textPrimary: "#0F172A",
-  textSecondary: "#64748B",
-  border: "#E2E8F0",
-  hoverBg: "#F1F5F9",
+  textPrimary: "var(--adm-text)",
+  textSecondary: "var(--adm-text-muted)",
+  textFaint: "var(--adm-text-faint)",
+  border: "var(--adm-border)",
+  hoverBg: "var(--adm-hover)",
   shadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)",
   shadowMd: "0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
   shadowXl: "0 20px 60px rgba(0,0,0,0.15)",
@@ -35,7 +39,7 @@ export function ensureStyles() {
     @keyframes contentFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
     @keyframes contentFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes permRowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes cardPulse { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); } 60% { box-shadow: 0 0 0 6px rgba(59,130,246,0); } 100% { box-shadow: 0 4px 16px rgba(59,130,246,0.12); } }
+    @keyframes cardPulse { 0% { box-shadow: 0 0 0 0 rgb(var(--th-accent-rgb)/0.3); } 60% { box-shadow: 0 0 0 6px rgb(var(--th-accent-rgb)/0); } 100% { box-shadow: 0 4px 16px rgb(var(--th-accent-rgb)/0.12); } }
     @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     @keyframes toastSlideIn { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
@@ -43,11 +47,12 @@ export function ensureStyles() {
     .ant-select-selection-placeholder { color: #94A3B8 !important; }
     .admin__search-input::placeholder { color: #94A3B8 !important; opacity: 1 !important; }
     .admin__select {
-      border: 1px solid #E2E8F0 !important;
+      border: 1px solid var(--adm-border) !important;
       border-radius: 8px !important;
       padding: 0 12px !important;
       height: 36px !important;
-      background: #FFFFFF !important;
+      background-color: var(--adm-surface) !important;
+      color: var(--adm-text) !important;
       font-size: 13px !important;
       font-family: 'Inter', sans-serif !important;
       outline: none !important;
@@ -62,17 +67,17 @@ export function ensureStyles() {
       transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
     }
     .admin__select:hover {
-      border-color: #3B82F6 !important;
+      border-color: rgb(var(--th-accent-rgb)) !important;
     }
     .admin__select:focus {
-      border-color: #3B82F6 !important;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15) !important;
+      border-color: rgb(var(--th-accent-rgb)) !important;
+      box-shadow: 0 0 0 2px rgb(var(--th-accent-rgb)/0.15) !important;
     }
     .admin__more-btn {
       background: none !important;
       border: none !important;
       cursor: pointer !important;
-      color: #64748B !important;
+      color: var(--adm-text-muted) !important;
       padding: 6px !important;
       border-radius: 6px !important;
       display: flex !important;
@@ -81,12 +86,12 @@ export function ensureStyles() {
       transition: background 0.15s, color 0.15s !important;
     }
     .admin__more-btn:hover {
-      background: #F1F5F9 !important;
-      color: #0F172A !important;
+      background: var(--adm-hover) !important;
+      color: var(--adm-text) !important;
     }
     .admin__more-btn--active {
-      background: #F1F5F9 !important;
-      color: #0F172A !important;
+      background: var(--adm-hover) !important;
+      color: var(--adm-text) !important;
     }
     /* Правый край последней колонки, поиска в шапке и пагинации — на одной вертикали */
     .admin__users-table .ant-table-thead > tr > th:last-child,

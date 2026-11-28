@@ -62,7 +62,7 @@ export const EventRow: React.FC<IEventRowProps> = ({
     >
       <div
         className={cn(
-          "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 -ml-8 ring-2 ring-white dark:ring-slate-800 relative z-10",
+          "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 -ml-8 ring-2 ring-white dark:ring-th-raised relative z-10",
           meta.ring,
         )}
       >
@@ -75,7 +75,7 @@ export const EventRow: React.FC<IEventRowProps> = ({
               "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0",
               !hasKnownActor
                 ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
-                : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300",
+                : "bg-th-accent-100 dark:bg-th-accent-900/40 text-th-accent-700 dark:text-th-accent-300",
             )}
           >
             {initials}
@@ -104,7 +104,7 @@ export const EventRow: React.FC<IEventRowProps> = ({
               e.stopPropagation();
               onVersionClick?.(event.document_id, targetVersionId, targetVersionNum);
             }}
-            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer inline-flex items-center gap-1 mt-0.5 text-left group/vlink"
+            className="text-xs font-semibold text-th-accent-600 dark:text-th-accent-400 hover:text-th-accent-800 dark:hover:text-th-accent-300 hover:underline cursor-pointer inline-flex items-center gap-1 mt-0.5 text-left group/vlink"
             title="Открыть эту версию письма"
           >
             <span>{meta.title}</span>

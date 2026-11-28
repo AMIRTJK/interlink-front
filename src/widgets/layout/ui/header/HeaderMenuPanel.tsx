@@ -15,7 +15,7 @@ export const HeaderMenuPanel = ({ title, onBack, children }: IProps) => (
         type="button"
         onClick={onBack}
         aria-label="Назад"
-        className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+        className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-th-high transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-th-accent-400"
       >
         <ArrowLeft size={16} strokeWidth={2.2} />
       </button>

@@ -45,15 +45,15 @@ export function EmployeeProfileInfoTab({
   return (
     <>
       <If is={!!r.bio}>
-        <div className="mb-4 pb-4 border-b border-gray-100">
-          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">
+        <div className="mb-4 pb-4 border-b border-gray-100 dark:border-th-high">
+          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-slate-400">
             Биография
           </p>
-          <div className="flex gap-3 p-4 rounded-xl bg-gray-50">
-            <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
-              <FileText size={15} className="text-indigo-400" />
+          <div className="flex gap-3 p-4 rounded-xl bg-gray-50 dark:bg-th-base">
+            <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0 dark:bg-th-raised">
+              <FileText size={15} className="text-th-accent-400" />
             </div>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words dark:text-slate-300">
               {r.bio}
             </p>
           </div>
@@ -140,7 +140,7 @@ export function EmployeeProfileInfoTab({
               <button
                 type="button"
                 onClick={(ev) => copyLogin(r.phone, ev)}
-                className="p-1 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-100/60 transition-colors cursor-pointer shrink-0"
+                className="p-1 rounded-md text-gray-400 hover:text-th-accent-600 hover:bg-th-accent-100/60 transition-colors cursor-pointer shrink-0"
                 title="Копировать логин"
                 aria-label="Копировать логин"
               >

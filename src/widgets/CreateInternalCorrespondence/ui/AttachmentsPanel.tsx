@@ -49,7 +49,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
             )}
             aria-label="Вложения"
           >
-            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-th-accent-500" />
             <span
               style={{
                 writingMode: "vertical-rl",
@@ -63,7 +63,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
               Вложения
             </span>
             <If is={attachments.length > 0}>
-              <span className="bg-indigo-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+              <span className="bg-th-accent-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
                 {attachments.length}
               </span>
             </If>
@@ -121,7 +121,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
                 <button
                   type="button"
                   onClick={onUpload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 rounded-xl transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-th-accent-600 bg-th-accent-50 hover:bg-th-accent-100 border border-th-accent-200/80 rounded-xl transition-all cursor-pointer active:scale-95 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
                 >
                   <Paperclip size={13} />
                   <span>Загрузить файл</span>
@@ -130,7 +130,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
             </div>
 
             <If is={!isReadOnly}>
-              <div className="mx-4 mt-3 p-2.5 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-start gap-2 text-[11px] text-amber-900 leading-snug">
+              <div className="mx-4 mt-3 p-2.5 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-start gap-2 text-[11px] text-amber-900 leading-snug dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50">
                 <AlertCircle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
                 <span>
                   <strong>Внимание:</strong> Не забудьте нажать кнопку <strong>«Сохранить»</strong> в верхней панели документа, чтобы вложения сохранились!
@@ -156,19 +156,19 @@ export const AttachmentsPanel: React.FC<IProps> = ({
                       <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
                         {idx + 1}
                       </span>
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-indigo-100 text-indigo-600 group-hover:scale-105 transition-transform">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-th-accent-100 text-th-accent-600 group-hover:scale-105 transition-transform dark:bg-th-accent-900/35 dark:text-th-accent-400">
                         <FileText size={14} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p
-                            className="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors"
+                            className="text-xs font-semibold text-slate-900 truncate group-hover:text-th-accent-600 transition-colors"
                             title={file.name}
                           >
                             {file.name}
                           </p>
                           <If is={!!file.file}>
-                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-md flex-shrink-0">
+                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-md flex-shrink-0 dark:bg-amber-900/35 dark:text-amber-400">
                               Новое
                             </span>
                           </If>
@@ -184,7 +184,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
                           onPreview(file);
                         }}
                         title="Просмотр"
-                        className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                        className="text-slate-400 hover:text-th-accent-600 transition-colors flex-shrink-0 cursor-pointer"
                       >
                         <Eye size={13} />
                       </button>
@@ -196,7 +196,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
                             onDownload(file);
                           }}
                           title="Скачать"
-                          className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
+                          className="text-slate-400 hover:text-th-accent-600 transition-colors flex-shrink-0 cursor-pointer"
                         >
                           <Download size={13} />
                         </button>

@@ -44,7 +44,7 @@ export const ExecutionModal: React.FC<ExecutionModalProps> = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-1000 flex items-center justify-center bg-gray-700/60 backdrop-blur-sm overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 z-1000 flex items-center justify-center bg-th-high/60 backdrop-blur-sm overflow-hidden animate-fade-in">
       <div
         className={`
           bg-white shadow-2xl flex flex-col overflow-hidden md:p-6 relative transition-all duration-300 ease-in-out

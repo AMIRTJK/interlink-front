@@ -13,6 +13,8 @@ import type { IPersonalTask, TFilterTab, TSortField, ISortConfig } from "../mode
 import { getUserName, calculateStats, getFilteredTasks } from "./lib";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { PersonalAnalytics } from "./PersonalAnalytics";
+import { SubTabSwitcher, type TSubTab } from "./SubTabSwitcher";
+import { SectionEnter } from "./SectionEnter";
 import "./style.css";
 
 const cacheOptions = {
@@ -21,7 +23,7 @@ const cacheOptions = {
 };
 
 export const PersonalTasksRegistry = memo(() => {
-  const [subTab, setSubTab] = useState<"registry" | "analytics">("registry");
+  const [subTab, setSubTab] = useState<TSubTab>("registry");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState<TFilterTab>("all");
   const [sortConfig, setSortConfig] = useState<ISortConfig>({ field: "dueDate", order: "desc" });
@@ -125,38 +127,15 @@ export const PersonalTasksRegistry = memo(() => {
   }, []);
 
   return (
-    <div className="w-full! flex! flex-col! gap-4! selection:bg-emerald-100! selection:text-emerald-900!">
+    <div className="w-full! flex! flex-col! gap-4! selection:bg-th-accent-100! selection:text-th-accent-900!">
       <div className="flex! items-center! gap-3!">
-        <div className="flex! items-center! gap-1! p-1! rounded-2xl! bg-zinc-100! dark:bg-zinc-800!">
-          <button
-            type="button"
-            onClick={() => setSubTab("registry")}
-            className={`px-4! py-1.5! rounded-xl! text-sm! font-semibold! transition-all! duration-200! border-0! cursor-pointer! ${
-              subTab === "registry"
-                ? "bg-white! dark:bg-zinc-700! shadow! text-zinc-900! dark:text-white!"
-                : "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-200!"
-            }`}
-          >
-            Реестр
-          </button>
-          <button
-            type="button"
-            onClick={() => setSubTab("analytics")}
-            className={`px-4! py-1.5! rounded-xl! text-sm! font-semibold! transition-all! duration-200! border-0! cursor-pointer! ${
-              subTab === "analytics"
-                ? "bg-white! dark:bg-zinc-700! shadow! text-zinc-900! dark:text-white!"
-                : "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-200!"
-            }`}
-          >
-            Аналитика
-          </button>
-        </div>
+        <SubTabSwitcher value={subTab} onChange={setSubTab} />
       </div>
 
       <If is={subTab === "registry"}>
-        <div className="flex! flex-col! gap-4!">
+        <SectionEnter className="flex! flex-col! gap-4!">
           <StatsCards stats={stats} />
-          <div className="rounded-3xl! bg-white/60! dark:bg-zinc-900/60! backdrop-blur-xl! ui-glass ui-glass--forced border! border-zinc-200! dark:border-zinc-700/30! shadow-none! flex! flex-col! overflow-hidden!">
+          <div className="rounded-3xl! bg-white/40! dark:bg-th-raised/90! backdrop-blur-xl! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50! shadow-none! flex! flex-col! overflow-hidden!">
             <RegistryHeader
               taskCount={filteredTasks.length}
               searchQuery={searchQuery}
@@ -175,11 +154,13 @@ export const PersonalTasksRegistry = memo(() => {
               userName={userName}
             />
           </div>
-        </div>
+        </SectionEnter>
       </If>
 
       <If is={subTab === "analytics"}>
-        <PersonalAnalytics tasks={tasks} activeTheme={activeTheme} />
+        <SectionEnter>
+          <PersonalAnalytics tasks={tasks} activeTheme={activeTheme} />
+        </SectionEnter>
       </If>
 
       <AnimatePresence>

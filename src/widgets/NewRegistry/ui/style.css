@@ -105,13 +105,13 @@
   font-weight: 600 !important;
   font-size: 14px !important;
   letter-spacing: -0.01em !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 4px 12px rgb(var(--th-accent-rgb)/0.25) !important;
   transition: all 0.3s ease !important;
 }
 
 .premium-modal .premium-ok-button:not(:disabled):hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
+  box-shadow: 0 6px 20px rgb(var(--th-accent-rgb)/0.35) !important;
 }
 
 .premium-modal .premium-cancel-button {
@@ -178,12 +178,12 @@
 /* Состояние при выборе и ховере */
 .folder-tree-premium .ant-tree-node-selected {
   background-color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12) !important;
-  color: #2563eb !important;
+  box-shadow: 0 4px 12px rgb(var(--th-accent-rgb)/0.12) !important;
+  color: var(--th-accent-600) !important;
 }
 
 .folder-tree-premium .ant-tree-node-content-wrapper:hover {
-  background-color: rgba(79, 70, 229, 0.05) !important;
+  background-color: rgb(var(--th-accent-rgb)/0.05) !important;
 }
 
 .folder-tree-premium .ant-tree-indent-unit {
@@ -236,10 +236,10 @@
 }
 
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
-  background: #2563eb !important;
+  background: var(--th-accent-600) !important;
   opacity: 1 !important;
   width: 2px !important;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 10px rgb(var(--th-accent-rgb)/0.4);
 }
 
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item + .ant-dropdown-menu-item::before {
@@ -258,7 +258,7 @@
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover {
   background: rgba(255, 255, 255, 0.9) !important;
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
+  box-shadow: 0 4px 12px rgb(var(--th-accent-rgb)/0.08) !important;
 }
 
 /* Разделитель групп */

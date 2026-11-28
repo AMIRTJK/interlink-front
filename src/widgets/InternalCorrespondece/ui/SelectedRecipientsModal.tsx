@@ -48,11 +48,11 @@ export const SelectedRecipientsModal: React.FC<
             className={`
               relative flex flex-col w-full max-w-md max-h-[70vh]
               rounded-3xl shadow-2xl backdrop-blur-2xl border
-              ${isDarkMode ? "bg-gray-800/95 border-gray-700/50" : "bg-white/95 border-gray-200/50"}
+              ${isDarkMode ? "bg-th-raised/95 border-th-high/50" : "bg-white/95 border-gray-200/50"}
             `}
           >
             <div
-              className={`px-6 py-4 flex items-center justify-between border-b ${isDarkMode ? "border-gray-700/50" : "border-gray-200/50"}`}
+              className={`px-6 py-4 flex items-center justify-between border-b ${isDarkMode ? "border-th-high/50" : "border-gray-200/50"}`}
             >
               <h3
                 className={`text-lg font-bold flex items-center gap-2 ${textPrimary}`}
@@ -79,7 +79,7 @@ export const SelectedRecipientsModal: React.FC<
                     key={recipient.id}
                     className={`
                       w-full p-3 rounded-2xl flex items-center gap-3 border transition-all
-                      ${isDarkMode ? "bg-gray-900/30 border-gray-700/30" : "bg-gray-50/50 border-gray-100"}
+                      ${isDarkMode ? "bg-th-base/30 border-th-high/30" : "bg-gray-50/50 border-gray-100"}
                     `}
                   >
                     <Avatar
@@ -113,11 +113,11 @@ export const SelectedRecipientsModal: React.FC<
             </div>
 
             <div
-              className={`px-6 py-4 border-t ${isDarkMode ? "border-gray-700/50" : "border-gray-200/50"}`}
+              className={`px-6 py-4 border-t ${isDarkMode ? "border-th-high/50" : "border-gray-200/50"}`}
             >
               <button
                 onClick={onClose}
-                className={`w-full cursor-pointer py-2.5 rounded-xl font-medium text-sm transition-all ${isDarkMode ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-gray-100 text-gray-900 hover:bg-gray-200"}`}
+                className={`w-full cursor-pointer py-2.5 rounded-xl font-medium text-sm transition-all ${isDarkMode ? "bg-th-high text-white hover:bg-th-higher" : "bg-gray-100 text-gray-900 hover:bg-gray-200"}`}
               >
                 Закрыть
               </button>

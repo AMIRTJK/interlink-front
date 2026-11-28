@@ -71,20 +71,20 @@ export const CalendarSidebar = memo(({
       <button
         type="button"
         onClick={onCreateEvent}
-        className="w-full! py-3! px-4.5! rounded-2xl! bg-[#0d9488]! hover:bg-[#0f766e]! text-white! font-semibold! text-sm! flex! items-center! justify-center! gap-2! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
+        className="w-full! py-3! px-4.5! rounded-2xl! bg-[rgb(var(--th-accent-rgb))]! hover:brightness-90! text-[var(--th-on-accent)]! font-semibold! text-sm! flex! items-center! justify-center! gap-2! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
       >
         <Plus size={16} strokeWidth={3} />
         <span>Создать событие</span>
       </button>
 
       {/* Mini Month Picker Widget */}
-      <div className="bg-white/85! dark:bg-slate-900/85! backdrop-blur-xl! rounded-2xl! p-3.5! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50!">
+      <div className="bg-white/85! dark:bg-th-base/85! backdrop-blur-xl! rounded-2xl! p-3.5! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50!">
         {/* Month Navigation Header */}
         <div className="flex! items-center! justify-between! mb-2.5! px-0.5!">
           <button
             type="button"
             onClick={() => onDateChange(currentDate.subtract(1, "month"))}
-            className="w-6! h-6! flex! items-center! justify-center! rounded-full! hover:bg-slate-100! dark:hover:bg-slate-800! text-slate-500! dark:text-slate-400! transition-colors! border-0! cursor-pointer!"
+            className="w-6! h-6! flex! items-center! justify-center! rounded-full! hover:bg-slate-100! dark:hover:bg-th-raised! text-slate-500! dark:text-slate-400! transition-colors! border-0! cursor-pointer!"
           >
             <ChevronLeft size={14} />
           </button>
@@ -94,7 +94,7 @@ export const CalendarSidebar = memo(({
           <button
             type="button"
             onClick={() => onDateChange(currentDate.add(1, "month"))}
-            className="w-6! h-6! flex! items-center! justify-center! rounded-full! hover:bg-slate-100! dark:hover:bg-slate-800! text-slate-500! dark:text-slate-400! transition-colors! border-0! cursor-pointer!"
+            className="w-6! h-6! flex! items-center! justify-center! rounded-full! hover:bg-slate-100! dark:hover:bg-th-raised! text-slate-500! dark:text-slate-400! transition-colors! border-0! cursor-pointer!"
           >
             <ChevronRight size={14} />
           </button>
@@ -127,9 +127,9 @@ export const CalendarSidebar = memo(({
                 onClick={() => onDateChange(day)}
                 className={`w-7! h-7! mx-auto! flex! items-center! justify-center! rounded-full! text-xs! font-medium! transition-all! cursor-pointer! border-0! ${
                   isSelected
-                    ? "bg-[#0d9488]! text-white! font-semibold!"
+                    ? "bg-[rgb(var(--th-accent-rgb))]! text-[var(--th-on-accent)]! font-semibold!"
                     : isCurrentMonth
-                    ? "text-slate-700! dark:text-slate-200! hover:bg-slate-100! dark:hover:bg-slate-800!"
+                    ? "text-slate-700! dark:text-slate-200! hover:bg-slate-100! dark:hover:bg-th-raised!"
                     : "text-slate-300! dark:text-slate-600!"
                 }`}
               >
@@ -180,7 +180,7 @@ export const CalendarSidebar = memo(({
             </div>
           ))
         ) : (
-          <div className="p-4! rounded-2xl! bg-slate-50! dark:bg-slate-900/40! border! border-zinc-200! dark:border-slate-700/50! text-center! text-sm! font-medium! text-slate-400!">
+          <div className="p-4! rounded-2xl! bg-slate-50! dark:bg-th-base/40! border! border-zinc-200! dark:border-th-high/50! text-center! text-sm! font-medium! text-slate-400!">
             Нет запланированных событий
           </div>
         )}

@@ -96,24 +96,43 @@
     var(--sky-fill);
 }
 
-/* Тёмная тема: то же небо, приглушённое вечерней дымкой поверх картинки. */
-.dark .sky-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: rgb(2 6 23 / 0.4);
-  pointer-events: none;
+/* Тёмная тема: ночные версии тех же картинок (та же композиция, другой свет). */
+.dark .sky-card {
+  text-shadow: 0 1px 3px rgb(2 6 23 / 0.6);
+}
+
+.dark .sky-card--none {
+  --sky-image: url("../../assets/capsules/sky-unknown-dark.webp");
+  --sky-fill: #211f39;
+}
+
+.dark .sky-card--sun {
+  --sky-image: url("../../assets/capsules/sky-sun-dark.webp");
+  --sky-fill: #1b2350;
+}
+
+.dark .sky-card--sun-cloud {
+  --sky-image: url("../../assets/capsules/sky-sun-cloud-dark.webp");
+  --sky-fill: #1b2143;
+}
+
+.dark .sky-card--cloud {
+  --sky-image: url("../../assets/capsules/sky-cloud-dark.webp");
+  --sky-fill: #0d1020;
+}
+
+.dark .sky-card--rain {
+  --sky-image: url("../../assets/capsules/sky-rain-dark.webp");
+  --sky-fill: #181f35;
+}
+
+.dark .sky-card--snow {
+  --sky-image: url("../../assets/capsules/sky-snow-dark.webp");
+  --sky-fill: #12152d;
 }
 
 .dark .sky-card--sun-cloud,
 .dark .sky-card--snow {
   --cap-weekend: #fcd34d;
   color: #fff;
-  text-shadow: 0 1px 3px rgb(30 64 120 / 0.5);
-}
-
-.dark .sky-card--sun-cloud::before,
-.dark .sky-card--snow::before {
-  background: rgb(2 6 23 / 0.5);
 }

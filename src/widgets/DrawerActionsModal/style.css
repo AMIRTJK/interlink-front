@@ -42,11 +42,11 @@
 }
 
 .is-dark-modal .ant-modal-content {
-  background-color: #111827 !important; /* gray-900 */
+  background-color: var(--th-dark-base) !important; /* gray-900 */
 }
 .is-dark-modal .ant-modal-header {
-  background-color: #111827 !important;
-  border-bottom-color: #374151 !important; /* gray-700 */
+  background-color: var(--th-dark-base) !important;
+  border-bottom-color: var(--th-dark-high) !important; /* gray-700 */
 }
 .is-dark-modal .ant-modal-title {
   color: #f3f4f6 !important; /* gray-100 */

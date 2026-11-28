@@ -27,7 +27,16 @@ export function AdminTabsLayout() {
     >
       {/* Tab bar */}
       <div
-        className="bg-white dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 h-12 flex items-center pl-6 shrink-0"
+        className="ui-glass ui-glass--forced"
+        style={{
+          background: T.surface,
+          borderBottom: `1px solid ${T.border}`,
+          height: 48,
+          display: "flex",
+          alignItems: "center",
+          paddingLeft: 24,
+          flexShrink: 0,
+        }}
       >
         {TABS.map((tab) => {
           const isActive =
@@ -36,12 +45,21 @@ export function AdminTabsLayout() {
             <button
               key={tab.key}
               onClick={() => navigate(tab.key)}
-              className={`px-4 h-full border-0 bg-transparent cursor-pointer text-sm transition-colors border-b-2 ${
-                isActive
-                  ? "font-semibold text-slate-900 dark:text-white border-blue-500"
-                  : "font-medium text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200"
-              }`}
-              style={{ fontFamily: T.font }}
+              style={{
+                padding: "0 16px",
+                height: "100%",
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: isActive ? 600 : 500,
+                color: isActive ? T.textPrimary : T.textSecondary,
+                fontFamily: T.font,
+                borderBottom: isActive
+                  ? `2px solid ${T.accent}`
+                  : "2px solid transparent",
+                transition: "color 0.15s, border-color 0.15s",
+              }}
             >
               {tab.label}
             </button>

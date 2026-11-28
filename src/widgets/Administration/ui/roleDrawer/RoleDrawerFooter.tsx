@@ -14,20 +14,72 @@ export function RoleDrawerFooter({
   onDeleteRequest,
 }: IProps) {
   return (
-    <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex gap-2 shrink-0 bg-white dark:bg-slate-900">
+    <div
+      style={{
+        padding: "12px 20px",
+        borderTop: `1px solid ${T.border}`,
+        display: "flex",
+        gap: 8,
+        flexShrink: 0,
+        background: T.surface,
+      }}
+    >
       <button
         onClick={onSave}
         disabled={isPending}
-        className="flex-1 px-3.5 h-9 rounded-lg border-0 bg-blue-500 hover:bg-blue-600 text-white text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors disabled:opacity-70"
-        style={{ fontFamily: T.font }}
+        style={{
+          flex: 1,
+          padding: "0 14px",
+          height: 36,
+          borderRadius: 8,
+          border: "none",
+          background: T.accent,
+          color: "#fff",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: T.font,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          opacity: isPending ? 0.7 : 1,
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background = "#2563EB";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background = T.accent;
+        }}
       >
         <Check size={13} />
         <span>Сохранить</span>
       </button>
       <button
         onClick={onDeleteRequest}
-        className="px-3 h-9 rounded-lg border-[1.5px] border-red-500 bg-transparent hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 text-[13px] font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-colors"
-        style={{ fontFamily: T.font }}
+        style={{
+          padding: "0 12px",
+          height: 36,
+          borderRadius: 8,
+          border: `1.5px solid ${T.danger}`,
+          background: "transparent",
+          color: T.danger,
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: T.font,
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          whiteSpace: "nowrap",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background = "#FEF2F2";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "transparent";
+        }}
       >
         <LogOut size={13} />
         <span>Удалить</span>

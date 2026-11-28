@@ -33,22 +33,22 @@
 
 .custom-pagination .ant-pagination-item:hover {
   opacity: 0.8;
-  background-color: #f5f5f5 !important; /* Легкий фон при наведении */
+  background-color: var(--th-hover-bg) !important;
   border-radius: 8px;
 }
 
 .custom-pagination .ant-pagination-item-active {
-  background-color: #f0f5ff !important; /* Светло-голубой фон для активной цифры */
+  background-color: var(--th-accent-600) !important; /* Активная страница — цвет темы */
   border-radius: 8px;
 }
 
 
 
 .custom-pagination .ant-pagination-item-active:hover {
-  background-color: #f0f5ff !important;
+  background-color: var(--th-accent-600) !important;
   opacity: 1;
 }
 
 .custom-pagination .ant-pagination-item-active a {
-  color: #0037af !important;
+  color: #fff !important;
 }

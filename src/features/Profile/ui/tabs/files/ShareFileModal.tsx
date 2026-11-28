@@ -60,14 +60,14 @@ export const ShareFileModal = ({
 
 	return (
 		<div
-			className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+			className="fixed inset-0 bg-th-base/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
 			onClick={onClose}
 		>
 			<div
-				className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-[92vw]! md:max-w-[85vw]! xl:max-w-[1152px]! overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
+				className="bg-white dark:bg-th-base rounded-[2rem] border border-slate-100 dark:border-th-raised shadow-2xl w-full max-w-[92vw]! md:max-w-[85vw]! xl:max-w-[1152px]! overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+				<div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-th-raised shrink-0">
 					<div className="flex items-center gap-3">
 						<div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 to-purple-500! flex items-center justify-center text-white!">
 							<Share2 size={16} />
@@ -83,13 +83,13 @@ export const ShareFileModal = ({
 					</div>
 					<button
 						onClick={onClose}
-						className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors cursor-pointer"
+						className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-th-raised transition-colors cursor-pointer"
 					>
 						<X size={18} />
 					</button>
 				</div>
 
-				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[300px] md:min-h-[500px]">
+				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-th-raised overflow-hidden flex-1 min-h-[300px] md:min-h-[500px]">
 					{/* Слева — доступ и права */}
 					<div className="flex-1 p-6 space-y-5 overflow-y-auto">
 						<ShareActiveList
@@ -97,7 +97,7 @@ export const ShareFileModal = ({
 							onRemove={handleRemove}
 						/>
 
-						<div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-zinc-400">
+						<div className="p-3 bg-slate-50 dark:bg-th-deep rounded-2xl border border-slate-200 dark:border-th-raised text-xs text-slate-500 dark:text-zinc-400">
 							<span className="font-bold text-slate-700 dark:text-zinc-300 block mb-1">
 								Доступ
 							</span>
@@ -121,11 +121,11 @@ export const ShareFileModal = ({
 					</div>
 				</div>
 
-				<div className="flex justify-end gap-3 p-6 border-t border-slate-100 dark:border-slate-800 shrink-0">
+				<div className="flex justify-end gap-3 p-6 border-t border-slate-100 dark:border-th-raised shrink-0">
 					<button
 						type="button"
 						onClick={onClose}
-						className="px-6 py-2.5 rounded-full text-xs font-bold text-slate-600 dark:text-zinc-400 border border-slate-250 dark:border-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer bg-white dark:bg-slate-900"
+						className="px-6 py-2.5 rounded-full text-xs font-bold text-slate-600 dark:text-zinc-400 border border-slate-250 dark:border-th-raised hover:bg-slate-100 dark:hover:bg-th-raised transition-colors cursor-pointer bg-white dark:bg-th-base"
 					>
 						Отмена
 					</button>
@@ -136,7 +136,7 @@ export const ShareFileModal = ({
 						className={`px-6 py-2.5 rounded-full text-xs font-bold text-white! transition-opacity shadow-lg shadow-purple-500/10 ${
 							selectedUsers.length > 0
 								? "upload-btn-gradient cursor-pointer hover:opacity-90"
-								: "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+								: "bg-slate-300 dark:bg-th-high cursor-not-allowed"
 						}`}
 					>
 						Предоставить доступ

@@ -202,7 +202,7 @@ export const FullHistoryModal = ({
             <div>
               {filteredSigners.length > 0 && (
                 <Divider
-                  className={`my-4! ${isDarkMode ? "border-gray-700!" : "border-gray-200!"}`}
+                  className={`my-4! ${isDarkMode ? "border-th-high!" : "border-gray-200!"}`}
                 />
               )}
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
@@ -222,7 +222,7 @@ export const FullHistoryModal = ({
 
           {sourceData.acknowledged_users &&
             sourceData.acknowledged_users.length > 0 && (
-              <div className="mt-4 border-t pt-3 border-gray-100 dark:border-gray-800">
+              <div className="mt-4 border-t pt-3 border-gray-100 dark:border-th-raised">
                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 pl-1">
                   Ознакомились ({sourceData.acknowledged_users.length})
                 </div>

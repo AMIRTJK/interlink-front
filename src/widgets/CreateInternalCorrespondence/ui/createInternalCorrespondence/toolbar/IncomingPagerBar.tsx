@@ -30,7 +30,7 @@ export const IncomingPagerBar = ({
                 "noopener,noreferrer",
               )
             }
-            className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-semibold text-th-accent-600 hover:text-th-accent-800 transition-colors cursor-pointer"
           >
             <ExternalLink size={12} />
             <span>Оригинал</span>

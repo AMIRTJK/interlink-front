@@ -43,16 +43,16 @@ export const HeaderOptionGrid = ({
           aria-checked={isSelected}
           onClick={() => onSelect(option.key)}
           className={cn(
-            "flex flex-col items-center gap-1.5 px-1 py-2 rounded-[1.25rem] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400",
+            "flex flex-col items-center gap-1.5 px-1 py-2 rounded-[1.25rem] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-th-accent-400",
             isSelected
-              ? "bg-zinc-100 dark:bg-zinc-700"
-              : "hover:bg-zinc-100 dark:hover:bg-zinc-700",
+              ? "bg-zinc-100 dark:bg-th-high"
+              : "hover:bg-zinc-100 dark:hover:bg-th-high",
           )}
         >
           <span className="relative">
             {option.preview}
             {isSelected && (
-              <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white ring-2 ring-white dark:ring-zinc-800">
+              <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white ring-2 ring-white dark:ring-th-raised">
                 <Check size={10} strokeWidth={3} />
               </span>
             )}

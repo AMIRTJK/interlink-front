@@ -20,7 +20,7 @@ const PRIORITY_OPTIONS: { value: TPriority; label: string; color: string }[] = [
 ];
 
 const STATUS_OPTIONS: { value: TTaskStatus; label: string; color: string }[] = [
-  { value: "new", label: "Новая", color: "bg-blue-500" }, { value: "in_progress", label: "В работе", color: "bg-indigo-500" },
+  { value: "new", label: "Новая", color: "bg-th-accent-500" }, { value: "in_progress", label: "В работе", color: "bg-th-accent-500" },
   { value: "review", label: "На ревью", color: "bg-purple-500" }, { value: "completed", label: "Завершена", color: "bg-emerald-500" },
   { value: "overdue", label: "Просрочена", color: "bg-rose-500" }
 ];
@@ -76,10 +76,10 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-th-base/60 backdrop-blur-sm" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-lg bg-white dark:bg-th-raised rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
       >
         <form onSubmit={handleSubmit} className="w-full flex flex-col">
           <div className={`px-6 py-5 bg-gradient-to-r ${activeTheme.gradient} text-white flex items-center justify-between`}>
@@ -92,21 +92,21 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
             </button>
           </div>
 
-          <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto bg-white dark:bg-zinc-800">
+          <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto bg-white dark:bg-th-raised">
             <div>
               <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Название задачи</label>
-              <input type="text" required placeholder="Например: Разработка нового модуля" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all border-zinc-200 dark:border-zinc-700 text-slate-800 dark:text-slate-200" />
+              <input type="text" required placeholder="Например: Разработка нового модуля" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-zinc-100 dark:bg-th-base border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all border-zinc-200 dark:border-th-high text-slate-800 dark:text-slate-200" />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Описание</label>
-              <textarea rows={3} placeholder="Детали задачи…" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none text-slate-800 dark:text-slate-200" />
+              <textarea rows={3} placeholder="Детали задачи…" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-zinc-100 dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all resize-none text-slate-800 dark:text-slate-200" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="relative">
                 <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Приоритет</label>
-                <button type="button" onClick={() => setPriorityOpen(!priorityOpen)} onBlur={() => setTimeout(() => setPriorityOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-zinc-900 border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all border-zinc-200 dark:border-zinc-700 text-slate-855 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
+                <button type="button" onClick={() => setPriorityOpen(!priorityOpen)} onBlur={() => setTimeout(() => setPriorityOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-th-base border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all border-zinc-200 dark:border-th-high text-slate-855 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
                   <span className="flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${selectedPriority.color}`} />
                     {selectedPriority.label}
@@ -114,9 +114,9 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
                   <ChevronDown size={14} className="text-zinc-400" />
                 </button>
                 <If is={priorityOpen}>
-                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl overflow-hidden py-1">
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl shadow-xl overflow-hidden py-1">
                     {PRIORITY_OPTIONS.map((o) => (
-                      <button key={o.value} type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setPriority(o.value); setPriorityOpen(false); }} className="w-full px-4 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer text-slate-800 dark:text-slate-200 flex items-center gap-2 border-0 bg-transparent">
+                      <button key={o.value} type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setPriority(o.value); setPriorityOpen(false); }} className="w-full px-4 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-th-raised transition-colors cursor-pointer text-slate-800 dark:text-slate-200 flex items-center gap-2 border-0 bg-transparent">
                         <span className={`w-1.5 h-1.5 rounded-full ${o.color}`} />
                         {o.label}
                       </button>
@@ -127,7 +127,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
 
               <div className="relative">
                 <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Статус</label>
-                <button type="button" onClick={() => setStatusOpen(!statusOpen)} onBlur={() => setTimeout(() => setStatusOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-zinc-900 border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all border-zinc-200 dark:border-zinc-700 text-slate-855 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
+                <button type="button" onClick={() => setStatusOpen(!statusOpen)} onBlur={() => setTimeout(() => setStatusOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-th-base border rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all border-zinc-200 dark:border-th-high text-slate-855 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
                   <span className="flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${selectedStatus.color}`} />
                     {selectedStatus.label}
@@ -135,9 +135,9 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
                   <ChevronDown size={14} className="text-zinc-400" />
                 </button>
                 <If is={statusOpen}>
-                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl overflow-hidden py-1">
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl shadow-xl overflow-hidden py-1">
                     {STATUS_OPTIONS.map((o) => (
-                      <button key={o.value} type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setStatus(o.value); setStatusOpen(false); }} className="w-full px-4 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer text-slate-800 dark:text-slate-200 flex items-center gap-2 border-0 bg-transparent">
+                      <button key={o.value} type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setStatus(o.value); setStatusOpen(false); }} className="w-full px-4 py-2 text-sm text-left hover:bg-zinc-100 dark:hover:bg-th-raised transition-colors cursor-pointer text-slate-800 dark:text-slate-200 flex items-center gap-2 border-0 bg-transparent">
                         <span className={`w-1.5 h-1.5 rounded-full ${o.color}`} />
                         {o.label}
                       </button>
@@ -149,7 +149,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
 
             <div className="relative">
               <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Срок</label>
-              <button type="button" onClick={() => setDateOpen(!dateOpen)} onBlur={() => setTimeout(() => setDateOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
+              <button type="button" onClick={() => setDateOpen(!dateOpen)} onBlur={() => setTimeout(() => setDateOpen(false), 200)} className="w-full bg-zinc-100 dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all text-slate-800 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer bg-transparent">
                 <span className="flex items-center gap-2">
                   <Calendar size={16} className="text-zinc-400" />
                   {dueDate ? new Date(dueDate).toLocaleDateString("ru-RU") : "Выберите дату"}
@@ -157,13 +157,13 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
                 <ChevronDown size={14} className="text-zinc-400" />
               </button>
               <If is={dateOpen}>
-                <div className="absolute z-20 right-0 bottom-full mb-1 w-[280px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl p-3 flex flex-col gap-2">
+                <div className="absolute z-20 right-0 bottom-full mb-1 w-[280px] bg-white dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl shadow-xl p-3 flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <button type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); }} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-slate-705 dark:text-slate-200 border-0 bg-transparent cursor-pointer flex items-center justify-center">
+                    <button type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); }} className="p-1 hover:bg-zinc-100 dark:hover:bg-th-raised rounded-lg text-slate-705 dark:text-slate-200 border-0 bg-transparent cursor-pointer flex items-center justify-center">
                       <ChevronLeft size={16} />
                     </button>
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">{currentDate.toLocaleString("ru-RU", { month: "long", year: "numeric" })}</span>
-                    <button type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); }} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-slate-705 dark:text-slate-200 border-0 bg-transparent cursor-pointer flex items-center justify-center">
+                    <button type="button" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); }} className="p-1 hover:bg-zinc-100 dark:hover:bg-th-raised rounded-lg text-slate-705 dark:text-slate-200 border-0 bg-transparent cursor-pointer flex items-center justify-center">
                       <ChevronRight size={16} />
                     </button>
                   </div>
@@ -180,7 +180,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
                           key={dateStr}
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setDueDate(dateStr); setDateOpen(false); }}
-                          className={`h-8 w-8 text-xs font-bold rounded-xl flex items-center justify-center border-0 cursor-pointer transition-all ${isSelected ? `bg-gradient-to-r ${activeTheme.gradient} text-white shadow-md` : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 bg-transparent"}`}
+                          className={`h-8 w-8 text-xs font-bold rounded-xl flex items-center justify-center border-0 cursor-pointer transition-all ${isSelected ? `bg-gradient-to-r ${activeTheme.gradient} text-white shadow-md` : "hover:bg-zinc-100 dark:hover:bg-th-raised text-slate-700 dark:text-slate-200 bg-transparent"}`}
                         >
                           {d.getDate()}
                         </button>
@@ -193,12 +193,12 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
 
             <div>
               <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Теги (через запятую)</label>
-              <input type="text" placeholder="backend, security" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800 dark:text-slate-200" />
+              <input type="text" placeholder="backend, security" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="w-full bg-zinc-100 dark:bg-th-base border border-zinc-200 dark:border-th-high rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all text-slate-800 dark:text-slate-200" />
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-700 flex justify-end gap-3 bg-white dark:bg-zinc-800">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border-0 bg-transparent cursor-pointer">Отмена</button>
+          <div className="px-6 py-4 border-t border-zinc-200 dark:border-th-high flex justify-end gap-3 bg-white dark:bg-th-raised">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-th-high transition-colors border-0 bg-transparent cursor-pointer">Отмена</button>
             <button type="submit" disabled={isSaving} className={`px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 transition-all shadow-md border-0 cursor-pointer disabled:opacity-50`}>
               <If is={isSaving}>
                 <If is={!!task}>Сохранение...</If>

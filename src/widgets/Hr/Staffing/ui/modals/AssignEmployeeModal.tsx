@@ -71,7 +71,7 @@ export const AssignEmployeeModal = ({
               <p className={`text-xs mt-0.5 ${theme.subText}`}>{positionName}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className={`text-xs ${theme.subText}`}>
-                  <span className="font-bold text-indigo-500">{assignedIds.length}</span>/
+                  <span className="font-bold text-th-accent-500">{assignedIds.length}</span>/
                   {slots} ставок
                 </span>
                 <If is={isFull}>
@@ -90,7 +90,7 @@ export const AssignEmployeeModal = ({
             <button
               onClick={onClose}
               className={`p-1.5 rounded-xl transition-colors ${
-                dark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
+                dark ? 'hover:bg-th-raised text-gray-400' : 'hover:bg-gray-100 text-gray-400'
               }`}
             >
               <X size={16} />
@@ -114,7 +114,7 @@ export const AssignEmployeeModal = ({
               placeholder="Поиск..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full pl-9 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${theme.inputBg}`}
+              className={`w-full pl-9 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${theme.inputBg}`}
             />
           </div>
         </div>
@@ -131,13 +131,13 @@ export const AssignEmployeeModal = ({
           className={`px-4 py-3 border-t ${theme.headerBorder} shrink-0 flex items-center justify-between`}
         >
           <span className={`text-xs ${theme.subText}`}>
-            <span className="font-bold text-indigo-500">{assignedIds.length}</span>{' '}
+            <span className="font-bold text-th-accent-500">{assignedIds.length}</span>{' '}
             назначено
           </span>
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={onClose}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-th-accent-600 text-white text-sm font-semibold hover:bg-th-accent-700 transition-colors shadow-lg shadow-th-accent-900/20"
           >
             <Check size={14} />
             <span>Готово</span>

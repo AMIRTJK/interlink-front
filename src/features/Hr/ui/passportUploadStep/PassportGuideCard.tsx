@@ -7,9 +7,9 @@ export const PassportGuideCard = () => {
   const [guideOpen, setGuideOpen] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-blue-100 bg-blue-50/60 dark:border-slate-700 dark:bg-slate-800/50">
+    <div className="overflow-hidden rounded-2xl border border-th-accent-100 bg-th-accent-50/60 dark:border-th-high dark:bg-th-raised/50">
       <div className="flex items-center gap-2.5 p-3.5">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-th-accent-600 text-white">
           <ScanLine size={16} />
         </div>
         <p className="flex-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -25,7 +25,7 @@ export const PassportGuideCard = () => {
         <button
           type="button"
           onClick={() => setGuideOpen(true)}
-          className="group relative block w-full cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 transition-shadow hover:shadow-md dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50"
+          className="group relative block w-full cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-th-accent-50 to-th-accent-50 p-4 transition-shadow hover:shadow-md dark:border-th-high dark:from-th-raised dark:to-th-raised/50"
         >
           <svg viewBox="0 0 320 150" className="h-[150px] w-full" role="img" aria-label="Пример фотографии паспорта">
             {/* Рамка выравнивания (уголки) */}
@@ -35,16 +35,16 @@ export const PassportGuideCard = () => {
               "M306 120 V136 H290",
               "M30 136 H14 V120",
             ].map((d) => (
-              <path key={d} d={d} className="fill-none stroke-blue-300 dark:stroke-blue-500/60" strokeWidth={2.5} strokeLinecap="round" />
+              <path key={d} d={d} className="fill-none stroke-th-accent-300 dark:stroke-th-accent-500/60" strokeWidth={2.5} strokeLinecap="round" />
             ))}
 
             {/* Документ */}
             <rect x="34" y="34" width="252" height="82" rx="8" className="fill-white stroke-slate-200 dark:fill-slate-900 dark:stroke-slate-700" strokeWidth={1.5} />
 
             {/* Фото владельца */}
-            <rect x="44" y="44" width="46" height="52" rx="5" className="fill-blue-100 dark:fill-blue-950/50" />
-            <circle cx="67" cy="63" r="9" className="fill-blue-300 dark:fill-blue-500/70" />
-            <path d="M52 92 c0-9 7-15 15-15 s15 6 15 15 z" className="fill-blue-300 dark:fill-blue-500/70" />
+            <rect x="44" y="44" width="46" height="52" rx="5" className="fill-th-accent-100 dark:fill-th-accent-950/50" />
+            <circle cx="67" cy="63" r="9" className="fill-th-accent-300 dark:fill-th-accent-500/70" />
+            <path d="M52 92 c0-9 7-15 15-15 s15 6 15 15 z" className="fill-th-accent-300 dark:fill-th-accent-500/70" />
 
             {/* Строки полей */}
             {[52, 62, 72].map((y, i) => (
@@ -65,7 +65,7 @@ export const PassportGuideCard = () => {
             <line x1="34" y1="75" x2="286" y2="75" className="stroke-emerald-400/70" strokeWidth={2} strokeDasharray="4 4" />
           </svg>
 
-          <span className="pointer-events-none absolute bottom-2.5 right-2.5 flex items-center gap-1.5 rounded-full bg-slate-900/75 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm backdrop-blur-sm transition-transform group-hover:scale-105">
+          <span className="pointer-events-none absolute bottom-2.5 right-2.5 flex items-center gap-1.5 rounded-full bg-th-base/75 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm backdrop-blur-sm transition-transform group-hover:scale-105">
             <Maximize2 size={13} /> Открыть и увеличить
           </span>
         </button>

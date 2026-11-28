@@ -170,7 +170,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             type="checkbox"
             checked={panelsInToolbar}
             onChange={(e) => onTogglePanelsInToolbar(e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
           />
           <span>Панель разделов сверху</span>
         </label>
@@ -197,7 +197,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
                   : "cursor-pointer",
                 section.isOpen
-                  ? "bg-slate-800 border-slate-800 text-white shadow-sm"
+                  ? "bg-th-raised border-th-raised text-white shadow-sm"
                   : !section.disabled &&
                       "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
               )}
@@ -216,7 +216,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                     "text-[10px] font-bold rounded-full px-1.5 py-0.5 flex items-center justify-center flex-shrink-0 min-w-4 h-4",
                     section.isOpen
                       ? "bg-white text-slate-800"
-                      : "bg-indigo-100 text-indigo-700",
+                      : "bg-th-accent-100 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400",
                   )}
                 >
                   {section.badge}

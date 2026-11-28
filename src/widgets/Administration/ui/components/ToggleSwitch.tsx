@@ -18,7 +18,7 @@ export function ToggleSwitch({
         width: 32,
         height: 18,
         borderRadius: 9,
-        backgroundColor: checked ? T.accent : "#E2E8F0",
+        backgroundColor: checked ? T.accent : T.border,
         position: "relative",
         border: "none",
         cursor: "pointer",

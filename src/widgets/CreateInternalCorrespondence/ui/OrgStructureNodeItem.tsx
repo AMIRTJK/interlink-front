@@ -29,7 +29,7 @@ export const OrgStructureNodeItem = ({
         className={cn(
           "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left",
           isLeaf
-            ? "hover:bg-blue-50 cursor-pointer border border-slate-200"
+            ? "hover:bg-th-accent-50 cursor-pointer border border-slate-200"
             : "hover:bg-slate-50",
         )}
         style={{ marginLeft: `${depth * 16}px` }}

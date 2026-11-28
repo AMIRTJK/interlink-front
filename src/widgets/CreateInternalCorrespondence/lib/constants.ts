@@ -30,28 +30,28 @@ export const ORG_STRUCTURE: OrgStructureNode = {
   name: "Министерство Финансов",
   position: "Руководство",
   initials: "МФ",
-  color: "bg-blue-100 text-blue-700",
+  color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
   children: [
     {
       id: "dep-1",
       name: "Отдел бюджетного планирования",
       position: "Заместитель министра",
       initials: "ОБП",
-      color: "bg-blue-100 text-blue-700",
+      color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
       children: [
         {
           id: "person-1",
           name: "Беҳруз Насрдинов",
           position: "Начальник отдела",
           initials: "БН",
-          color: "bg-amber-100 text-amber-700",
+          color: "bg-amber-100 text-amber-700 dark:bg-amber-900/35 dark:text-amber-400",
         },
         {
           id: "person-2",
           name: "Шамсӣ Аҳмадбеков",
           position: "Главный специалист",
           initials: "ША",
-          color: "bg-rose-100 text-rose-700",
+          color: "bg-rose-100 text-rose-700 dark:bg-rose-900/35 dark:text-rose-400",
         },
       ],
     },
@@ -60,14 +60,14 @@ export const ORG_STRUCTURE: OrgStructureNode = {
       name: "Отдел контроля и аудита",
       position: "Заместитель министра",
       initials: "ОКА",
-      color: "bg-purple-100 text-purple-700",
+      color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
       children: [
         {
           id: "person-3",
           name: "Ҷаҳонгир Додохонов",
           position: "Начальник отдела",
           initials: "ДД",
-          color: "bg-purple-100 text-purple-700",
+          color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
         },
       ],
     },
@@ -76,14 +76,14 @@ export const ORG_STRUCTURE: OrgStructureNode = {
       name: "Агентии инноватсия",
       position: "Генеральный директор",
       initials: "АИ",
-      color: "bg-emerald-100 text-emerald-700",
+      color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400",
       children: [
         {
           id: "person-4",
           name: "Александр В.",
           position: "Директор цифровизации",
           initials: "АВ",
-          color: "bg-blue-100 text-blue-700",
+          color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
         },
       ],
     },
@@ -127,7 +127,7 @@ export const IMPORTANCE_OPTIONS: {
     label: "Высокая важность",
     desc: "Срочно, требует немедленного внимания",
     flagFill: "fill-rose-500 text-rose-500",
-    badgeBg: "bg-rose-50",
+    badgeBg: "bg-rose-50 dark:bg-rose-900/35",
     badgeBorder: "border-rose-200",
     badgeText: "text-rose-700",
   },
@@ -136,7 +136,7 @@ export const IMPORTANCE_OPTIONS: {
     label: "Средняя важность",
     desc: "Обычный приоритет",
     flagFill: "fill-amber-400 text-amber-400",
-    badgeBg: "bg-amber-50",
+    badgeBg: "bg-amber-50 dark:bg-amber-900/35",
     badgeBorder: "border-amber-200",
     badgeText: "text-amber-700",
   },
@@ -163,35 +163,35 @@ export const RECIPIENT_OPTIONS: RecipientOption[] = [
     name: "Министерство Финансов",
     org: "Отдел бюджетного планирования",
     initials: "МФ",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
   },
   {
     id: "r2",
     name: "Агентии инноватсия",
     org: "Отдел цифровизации",
     initials: "АИ",
-    color: "bg-purple-100 text-purple-700",
+    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
   },
   {
     id: "r3",
     name: "Дастгоҳи иҷроияи ПТ",
     org: "Канцелярия",
     initials: "ДИ",
-    color: "bg-emerald-100 text-emerald-700",
+    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400",
   },
   {
     id: "r4",
     name: "Беҳруз Насрдинов",
     org: "Министерство Финансов",
     initials: "БН",
-    color: "bg-amber-100 text-amber-700",
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/35 dark:text-amber-400",
   },
   {
     id: "r5",
     name: "Шамсӣ Аҳмадбеков",
     org: "Агентии инноватсия",
     initials: "ША",
-    color: "bg-rose-100 text-rose-700",
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/35 dark:text-rose-400",
   },
 ];
 
@@ -200,7 +200,7 @@ export const INITIAL_FINAL_SIGNER: FinalSigner = {
   name: "Александр В.",
   role: "Инициатор / Автор",
   initials: "АВ",
-  color: "bg-blue-100 text-blue-700",
+  color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
   dsApplied: false,
   dsLoading: false,
 };
@@ -231,11 +231,11 @@ export const INBOX_DOC_TYPES: Record<string, string> = {
 };
 
 export const INBOX_DOC_TYPE_STYLE: Record<string, string> = {
-  Маълумотнома: "bg-indigo-50 text-indigo-700 border-indigo-100",
-  Дархост: "bg-purple-50 text-purple-700 border-purple-100",
-  Гузориш: "bg-teal-50 text-teal-700 border-teal-100",
-  Ариза: "bg-amber-50 text-amber-700 border-amber-100",
-  Мактуб: "bg-blue-50 text-blue-700 border-blue-100",
+  Маълумотнома: "bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/35 dark:text-indigo-400 dark:border-indigo-800/50",
+  Дархост: "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
+  Гузориш: "bg-teal-50 text-teal-700 border-teal-100 dark:bg-teal-900/35 dark:text-teal-400 dark:border-teal-800/50",
+  Ариза: "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  Мактуб: "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
 };
 
 export const MOCK_CONTENT_LINES = [
@@ -263,11 +263,11 @@ export const OUTBOX_STATUS_LABEL: Record<Status, string> = {
 };
 
 export const OUTBOX_STATUS_STYLE: Record<Status, string> = {
-  "на резолюции": "bg-amber-50 text-amber-600 border-amber-100",
-  "на исполнении": "bg-amber-50 text-amber-600 border-amber-100",
-  "на согласовании": "bg-blue-50 text-blue-600 border-blue-100",
-  "на подпись": "bg-purple-50 text-purple-600 border-purple-100",
-  завершено: "bg-emerald-50 text-emerald-600 border-emerald-100",
+  "на резолюции": "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  "на исполнении": "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  "на согласовании": "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  "на подпись": "bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
+  завершено: "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
 };
 
 // ===== Служебные атрибуты разметки редактора =====

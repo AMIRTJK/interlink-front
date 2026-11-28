@@ -68,7 +68,7 @@ export const MfaModal = ({
 
               {qrDataUrl && (
                 <div className="flex justify-center">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-2 dark:border-slate-700">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2 dark:border-th-high">
                     <img
                       src={qrDataUrl}
                       alt="QR-код для настройки MFA"
@@ -84,7 +84,7 @@ export const MfaModal = ({
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Или введите ключ вручную:
                 </p>
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-th-high dark:bg-th-raised">
                   <code className="flex-1 break-all font-mono text-sm text-slate-700 dark:text-slate-200">
                     {setupData.secret}
                   </code>
@@ -92,7 +92,7 @@ export const MfaModal = ({
                     type="button"
                     title="Скопировать"
                     onClick={handleCopySecret}
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-th-high dark:hover:text-slate-200"
                   >
                     <Copy className="h-4 w-4" />
                   </button>

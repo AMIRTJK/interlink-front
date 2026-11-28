@@ -2,14 +2,14 @@ import type { TPriority, TTaskStatus } from "../model/types";
 
 export const PRIORITY_OPTIONS = [
   { value: "low", label: "Низкий", color: "bg-slate-400", textColor: "text-slate-600", rank: 1 },
-  { value: "medium", label: "Средний", color: "bg-blue-400", textColor: "text-blue-600", rank: 2 },
+  { value: "medium", label: "Средний", color: "bg-th-accent-400", textColor: "text-th-accent-600", rank: 2 },
   { value: "high", label: "Высокий", color: "bg-orange-400", textColor: "text-orange-600", rank: 3 },
   { value: "critical", label: "Критический", color: "bg-red-500", textColor: "text-red-600", rank: 4 },
 ] as const;
 
 export const STATUS_OPTIONS = [
   { value: "new", label: "Новая", color: "bg-sky-400", rank: 1 },
-  { value: "in_progress", label: "В работе", color: "bg-blue-500", rank: 2 },
+  { value: "in_progress", label: "В работе", color: "bg-th-accent-500", rank: 2 },
   { value: "review", label: "На проверке", color: "bg-purple-400", rank: 3 },
   { value: "completed", label: "Завершена", color: "bg-emerald-500", rank: 4 },
   { value: "overdue", label: "Просрочена", color: "bg-red-500", rank: 0 },

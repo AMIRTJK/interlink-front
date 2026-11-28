@@ -19,7 +19,7 @@ export function UsersTabFilterBar({
   departments,
 }: IProps) {
   return (
-    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3 flex-wrap">
+    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3 flex-wrap dark:bg-th-raised dark:border-th-high">
       <div className="relative flex-1 min-w-[240px]">
         <Search
           size={18}
@@ -30,7 +30,7 @@ export function UsersTabFilterBar({
           value={filters.search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Поиск сотрудника..."
-          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-th-accent-500 transition-colors dark:border-th-high"
         />
       </div>
       <Select

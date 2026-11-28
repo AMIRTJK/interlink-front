@@ -36,7 +36,7 @@ export const AttachmentsField = ({
           Вложения
         </label>
         <If is={attachments.length > 0}>
-          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold bg-th-accent-100 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400">
             {attachments.length}
           </span>
         </If>
@@ -48,11 +48,11 @@ export const AttachmentsField = ({
             <div
               key={file.id}
               onClick={() => onPreview(file)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-amber-50/60 hover:bg-amber-100/80 border border-amber-200 rounded-xl text-xs cursor-pointer transition-all group"
+              className="flex items-center gap-2 px-3 py-1.5 bg-amber-50/60 hover:bg-amber-100/80 border border-amber-200 rounded-xl text-xs cursor-pointer transition-all group dark:bg-amber-900/35 dark:border-amber-800/50"
             >
               <FileTextIcon className="w-4 h-4 text-amber-500 flex-shrink-0 group-hover:scale-105 transition-transform" />
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-blue-600 transition-colors">
+                <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-th-accent-600 transition-colors">
                   {file.name}
                 </p>
                 <p className="text-[10px] text-slate-400">
@@ -66,7 +66,7 @@ export const AttachmentsField = ({
                   onPreview(file);
                 }}
                 title="Просмотр вложения"
-                className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                className="text-slate-400 hover:text-th-accent-600 transition-colors flex-shrink-0 cursor-pointer"
               >
                 <Eye size={13} />
               </button>
@@ -88,12 +88,12 @@ export const AttachmentsField = ({
           onClick={() => fileInputRef.current?.click()}
           disabled={isReadOnly || attachments.length >= MAX_ATTACHMENTS}
           title={`${ATTACHMENT_EXTENSIONS.join(", ")} · до ${MAX_ATTACHMENTS} файлов · до ${MAX_ATTACHMENT_SIZE_MB} МБ каждый`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-th-accent-600 bg-th-accent-50 border border-th-accent-100 rounded-lg hover:bg-th-accent-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-th-accent-50 cursor-pointer dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
         >
           <Paperclip size={12} />
           <span>Прикрепить файл</span>
           {attachments.some((a) => a.file) && (
-            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-th-accent-600 text-white">
               {attachments.filter((a) => a.file).length}
             </span>
           )}

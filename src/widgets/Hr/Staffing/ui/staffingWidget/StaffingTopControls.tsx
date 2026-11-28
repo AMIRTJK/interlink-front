@@ -24,17 +24,17 @@ export function StaffingTopControls({
   onAddOrg,
 }: IProps) {
   const searchBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-600'
+    ? 'bg-th-raised border-th-high text-gray-200 placeholder:text-gray-600'
     : 'bg-white border-gray-200 text-gray-700 placeholder:text-gray-400';
   const searchIcon = dark ? 'text-gray-500' : 'text-gray-400';
-  const viewToggleBg = dark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white';
+  const viewToggleBg = dark ? 'border-th-high bg-th-raised' : 'border-gray-200 bg-white';
   const countText = dark ? 'text-gray-500' : 'text-gray-400';
 
   const viewToggleActive = (mode: TStaffingViewMode) =>
     viewMode === mode
-      ? 'bg-indigo-600 text-white shadow-sm'
+      ? 'bg-th-accent-600 text-white shadow-sm'
       : dark
-      ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
+      ? 'text-gray-500 hover:text-gray-300 hover:bg-th-high'
       : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50';
 
   const viewModes = [
@@ -56,7 +56,7 @@ export function StaffingTopControls({
           placeholder="Поиск организаций, отделов..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${searchBg}`}
+          className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${searchBg}`}
         />
       </div>
       <div className={`flex items-center rounded-xl border p-1 gap-0.5 ${viewToggleBg}`}>
@@ -77,8 +77,8 @@ export function StaffingTopControls({
         </span>
         <button
           onClick={onAddOrg}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-md ${
-            dark ? 'shadow-indigo-900/30' : 'shadow-indigo-200'
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-th-accent-600 text-white text-sm font-semibold hover:bg-th-accent-700 transition-colors shadow-md ${
+            dark ? 'shadow-th-accent-900/30' : 'shadow-th-accent-200'
           }`}
         >
           <Plus size={15} />

@@ -27,31 +27,31 @@ export const ACCESS_STATUS_META: Record<
     label: "Активен",
     dotClass: "bg-emerald-500!",
     textClass: "text-emerald-600!",
-    chipClass: "bg-emerald-50! text-emerald-600!",
+    chipClass: "bg-emerald-50! text-emerald-600! dark:bg-emerald-900/35! dark:text-emerald-400!",
   },
   inactive: {
     label: "Неактивен",
     dotClass: "bg-slate-400!",
-    textClass: "text-slate-500!",
-    chipClass: "bg-slate-50! text-slate-500!",
+    textClass: "text-slate-500! dark:text-slate-400!",
+    chipClass: "bg-slate-50! text-slate-500! dark:bg-th-base! dark:text-slate-400!",
   },
   blocked: {
     label: "Заблокирован",
     dotClass: "bg-rose-500!",
     textClass: "text-rose-600!",
-    chipClass: "bg-rose-50! text-rose-600!",
+    chipClass: "bg-rose-50! text-rose-600! dark:bg-rose-900/35! dark:text-rose-400!",
   },
   vacation: {
     label: "В отпуске",
     dotClass: "bg-amber-500!",
     textClass: "text-amber-600!",
-    chipClass: "bg-amber-50! text-amber-600!",
+    chipClass: "bg-amber-50! text-amber-600! dark:bg-amber-900/35! dark:text-amber-400!",
   },
   business_trip: {
     label: "В командировке",
     dotClass: "bg-sky-500!",
     textClass: "text-sky-600!",
-    chipClass: "bg-sky-50! text-sky-600!",
+    chipClass: "bg-sky-50! text-sky-600! dark:bg-sky-900/35! dark:text-sky-400!",
   },
 };
 

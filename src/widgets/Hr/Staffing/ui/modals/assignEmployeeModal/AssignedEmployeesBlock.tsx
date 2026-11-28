@@ -28,7 +28,7 @@ export const AssignedEmployeesBlock = ({
       >
         <p
           className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${
-            dark ? 'text-indigo-400' : 'text-indigo-500'
+            dark ? 'text-th-accent-400' : 'text-th-accent-500'
           }`}
         >
           Назначены

@@ -28,7 +28,7 @@ export const PageSizeSelect = ({ value, options, onChange }: IProps) => {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-1.5 rounded-lg border bg-white px-2.5 py-1 font-medium text-slate-600 transition-colors cursor-pointer ${
-          open ? "border-blue-400 ring-2 ring-blue-100" : "border-slate-200 hover:bg-slate-50"
+          open ? "border-th-accent-400 ring-2 ring-th-accent-100" : "border-slate-200 hover:bg-slate-50 dark:border-th-high dark:hover:bg-th-high"
         }`}
       >
         <span>{value}</span>
@@ -45,7 +45,7 @@ export const PageSizeSelect = ({ value, options, onChange }: IProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.96 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute bottom-full right-0 z-20 mb-2 min-w-[100px] overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-xl shadow-slate-900/5"
+            className="absolute bottom-full right-0 z-20 mb-2 min-w-[100px] overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-xl shadow-slate-900/5 dark:border-th-high dark:bg-th-raised"
           >
             {options.map((size) => {
               const active = size === value;
@@ -58,11 +58,11 @@ export const PageSizeSelect = ({ value, options, onChange }: IProps) => {
                       setOpen(false);
                     }}
                     className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-1.5 text-left font-medium transition-colors cursor-pointer ${
-                      active ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
+                      active ? "bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400" : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-th-high"
                     }`}
                   >
                     <span>{size}</span>
-                    {active && <Check size={14} className="text-blue-500" />}
+                    {active && <Check size={14} className="text-th-accent-500" />}
                   </button>
                 </li>
               );

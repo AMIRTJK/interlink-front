@@ -44,7 +44,7 @@ export const HISTORY_COLUMNS = [
     title: "Состояние",
     dataIndex: "status",
     key: "status",
-    className: "text-blue-600 font-medium",
+    className: "text-th-accent-600 font-medium",
   },
   {
     title: "Начало",

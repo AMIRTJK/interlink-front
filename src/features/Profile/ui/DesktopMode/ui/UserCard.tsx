@@ -67,7 +67,7 @@ export const UserCard = ({ userData, isDark, variant = "regular", cornerAction, 
       initial={CARD_FADE.initial}
       animate={CARD_FADE.animate}
       exit={CARD_FADE.exit}
-      className={`relative rounded-[2rem] backdrop-blur-2xl backdrop-saturate-150 border flex flex-col w-full ${classes.root} ${isDark ? "bg-slate-950/35 border-white/12 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]" : "bg-white/65 border-white/80 shadow-[0_24px_64px_-16px_rgba(49,46,129,0.35),inset_0_1px_0_rgba(255,255,255,0.9)]"} ${className}`}
+      className={`relative rounded-[2rem] backdrop-blur-2xl backdrop-saturate-150 border flex flex-col w-full ${classes.root} ${isDark ? "bg-th-deep/35 border-white/12 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]" : "bg-white/65 border-white/80 shadow-[0_24px_64px_-16px_rgba(49,46,129,0.35),inset_0_1px_0_rgba(255,255,255,0.9)]"} ${className}`}
     >
       <div className={`flex flex-col w-full ${classes.content}`}>
         <div className={classes.identity}>
@@ -78,7 +78,7 @@ export const UserCard = ({ userData, isDark, variant = "regular", cornerAction, 
               width={AVATAR_SIZE[variant]}
               height={AVATAR_SIZE[variant]}
               onError={() => setAvatarError(true)}
-              className={`${classes.avatar} rounded-full object-cover border-2 ${isDark ? "border-slate-900" : "border-white"}`}
+              className={`${classes.avatar} rounded-full object-cover border-2 ${isDark ? "border-th-base" : "border-white"}`}
             />
           </div>
           <div className="min-w-0">

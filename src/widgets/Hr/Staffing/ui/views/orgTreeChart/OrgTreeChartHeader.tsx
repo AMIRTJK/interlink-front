@@ -16,7 +16,7 @@ export function OrgTreeChartHeader({ organizations, dark = false, lineColor, onA
       style={{ borderColor: lineColor }}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-th-accent-500 to-th-accent-700 flex items-center justify-center">
           <GitBranch size={15} className="text-white" />
         </div>
         <div>
@@ -31,7 +31,7 @@ export function OrgTreeChartHeader({ organizations, dark = false, lineColor, onA
       </div>
       <button
         onClick={onAddOrg}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-all shadow-md"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-th-accent-600 text-white text-xs font-semibold hover:bg-th-accent-700 transition-all shadow-md"
       >
         <Plus size={13} />
         <span>Организация</span>

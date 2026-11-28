@@ -30,7 +30,7 @@ export const AnimatedStatChip = ({
   };
 
   const darkStyles: Record<string, string> = {
-    default: 'bg-gray-800 text-gray-300 border-gray-700',
+    default: 'bg-th-raised text-gray-300 border-th-high',
     emerald: 'bg-emerald-900/30 text-emerald-400 border-emerald-800/40',
     amber: 'bg-amber-900/30 text-amber-400 border-amber-800/40',
     indigo: 'bg-indigo-900/30 text-indigo-400 border-indigo-800/40',

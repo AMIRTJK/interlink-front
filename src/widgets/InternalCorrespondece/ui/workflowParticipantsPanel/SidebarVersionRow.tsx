@@ -38,11 +38,11 @@ export const SidebarVersionRow = ({
       className={`flex items-start gap-3 p-2 rounded-lg border transition-all cursor-pointer group ${
         v.id === activeVersionId
           ? isDarkMode
-            ? "bg-[#1f2937] border-blue-500 shadow-sm"
-            : "bg-blue-50/40 border-blue-500 shadow-sm"
+            ? "bg-th-raised border-th-accent-500 shadow-sm"
+            : "bg-th-accent-50/40 border-th-accent-500 shadow-sm dark:bg-th-accent-900/35"
           : isDarkMode
-            ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
-            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+            ? "bg-th-raised border-th-high hover:bg-th-raised hover:border-th-accent-500"
+            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-th-accent-300"
       }`}
     >
       <Avatar
@@ -50,15 +50,15 @@ export const SidebarVersionRow = ({
         icon={<UserOutlined />}
         size="small"
         className={`mt-0.5 shrink-0 ${
-          isDarkMode ? "bg-gray-600!" : "bg-gray-200!"
+          isDarkMode ? "bg-th-higher!" : "bg-gray-200!"
         }`}
       />
       <div className="flex-1 min-w-0">
         <div
           className={`text-xs font-semibold flex gap-1 transition-colors ${
             isDarkMode
-              ? "text-gray-200 group-hover:text-blue-400"
-              : "text-gray-700 group-hover:text-blue-600"
+              ? "text-gray-200 group-hover:text-th-accent-400"
+              : "text-gray-700 group-hover:text-th-accent-600"
           }`}
         >
           <p>Версия {v.displayVersion}</p>
@@ -68,7 +68,7 @@ export const SidebarVersionRow = ({
                 className={`px-1 rounded text-[9px] font-semibold self-center ${
                   isDarkMode
                     ? "bg-emerald-900/40 text-emerald-300"
-                    : "bg-emerald-50 text-emerald-700"
+                    : "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400"
                 }`}
               >
                 ✓ {v.approvedCount}
@@ -87,7 +87,7 @@ export const SidebarVersionRow = ({
           ) : (
             v.is_current_signed && (
               <Tooltip title="Подписанная версия">
-                <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
+                <SafetyCertificateOutlined className="text-th-accent-500! text-[13px]!" />
               </Tooltip>
             )
           )}
@@ -128,8 +128,8 @@ export const SidebarVersionRow = ({
         <div
           className={`${
             isDarkMode
-              ? "text-gray-500 hover:text-blue-400"
-              : "text-gray-400 hover:text-blue-500"
+              ? "text-gray-500 hover:text-th-accent-400"
+              : "text-gray-400 hover:text-th-accent-500"
           }`}
         >
           <Tooltip title="Восстановить в редакторе">

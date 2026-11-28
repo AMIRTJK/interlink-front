@@ -39,7 +39,7 @@ export const UnlockForm = ({ isDark, onUnlock }: IProps) => {
   const toggleLabel = isPasswordVisible ? LOCK_TEXTS.hidePassword : LOCK_TEXTS.showPassword;
   const fieldTone = isDark
     ? "bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-within:border-white/50"
-    : "bg-white/70 border-black/10 text-slate-800 placeholder:text-slate-400 focus-within:border-indigo-400";
+    : "bg-white/70 border-black/10 text-slate-800 placeholder:text-slate-400 focus-within:border-th-accent-400";
   const errorTone = error ? "border-rose-400!" : "";
 
   return (
@@ -68,7 +68,7 @@ export const UnlockForm = ({ isDark, onUnlock }: IProps) => {
             onClick={() => setIsPasswordVisible((prev) => !prev)}
             aria-label={toggleLabel}
             aria-pressed={isPasswordVisible}
-            className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-indigo-400 ${isDark ? "text-white/60 hover:bg-white/10" : "text-slate-500 hover:bg-black/5"}`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-th-accent-400 ${isDark ? "text-white/60 hover:bg-white/10" : "text-slate-500 hover:bg-black/5"}`}
           >
             {isPasswordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -78,7 +78,7 @@ export const UnlockForm = ({ isDark, onUnlock }: IProps) => {
             type="submit"
             disabled={!password || isSubmitting}
             aria-label={LOCK_TEXTS.submit}
-            className="w-9 h-9 rounded-full flex items-center justify-center bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-indigo-400"
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-gradient-to-r from-violet-600 to-th-accent-600 text-white shadow-md cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-th-accent-400"
           >
             {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <LockKeyholeOpen size={16} />}
           </button>

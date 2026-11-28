@@ -24,13 +24,13 @@ export const ProfileAvatarCard = ({ userData, onEdit, gradient }: IProps) => {
 	});
 
 	return (
-		<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! flex! flex-col! items-center!">
+		<div className="bg-white/40! dark:bg-th-raised/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50! flex! flex-col! items-center!">
 			<div className="relative! mb-4!">
 				<button
 					type="button"
 					onClick={handleAvatarClick}
 					aria-label="Изменить фото профиля"
-					className={`group! relative! block! rounded-[2.5rem]! overflow-hidden! focus:outline-none! focus:ring-2! focus:ring-indigo-400/40! ${
+					className={`group! relative! block! rounded-[2.5rem]! overflow-hidden! focus:outline-none! focus:ring-2! focus:ring-th-accent-400/40! ${
 						isUploading
 							? "opacity-60! pointer-events-none!"
 							: "cursor-pointer!"
@@ -45,7 +45,7 @@ export const ProfileAvatarCard = ({ userData, onEdit, gradient }: IProps) => {
 								  userAvatar
 						}
 						alt="Аватар"
-						className="w-64! h-64! rounded-[2.5rem]! border-2! border-white/60! dark:border-zinc-900/60! object-cover! shadow-lg!"
+						className="w-64! h-64! rounded-[2.5rem]! border-2! border-white/60! dark:border-th-base/60! object-cover! shadow-lg!"
 						onError={handleAvatarError}
 					/>
 					<span className="absolute! inset-0! bg-black/40! flex! flex-col! items-center! justify-center! gap-1! text-white! opacity-0! group-hover:opacity-100! transition-opacity!">

@@ -34,7 +34,7 @@ const ACCENTS = {
   amber: { iconClass: "text-amber-500", circleClass: "bg-amber-50 dark:bg-amber-500/15" },
   emerald: { iconClass: "text-emerald-500", circleClass: "bg-emerald-50 dark:bg-emerald-500/15" },
   sky: { iconClass: "text-sky-500", circleClass: "bg-sky-50 dark:bg-sky-500/15" },
-  zinc: { iconClass: "text-zinc-500 dark:text-zinc-400", circleClass: "bg-zinc-100 dark:bg-zinc-700/50" },
+  zinc: { iconClass: "text-zinc-500 dark:text-zinc-400", circleClass: "bg-zinc-100 dark:bg-th-high/50" },
 } as const;
 
 type Accent = keyof typeof ACCENTS;

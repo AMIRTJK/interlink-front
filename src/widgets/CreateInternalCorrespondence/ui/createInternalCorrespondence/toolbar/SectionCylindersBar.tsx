@@ -117,7 +117,7 @@ export const SectionCylindersBar = ({
         className={cn(
           "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
           p.isOpen
-            ? "bg-slate-800 border-slate-800 text-white shadow-sm"
+            ? "bg-th-raised border-th-raised text-white shadow-sm"
             : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
         )}
       >

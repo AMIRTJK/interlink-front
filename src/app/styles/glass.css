@@ -21,13 +21,18 @@
      страницей, и у списка, карточек и панели «Всего» пропадают края. Плотность
      чуть выше исходного gray-200, чтобы край читался и сквозь размытие. */
   --ui-glass-border: rgba(15, 23, 42, 0.15);
-  --ui-glass-blur: 20px;
+  /* Эталон — карточки профиля: сильное размытие без усиления насыщенности.
+     С saturate(180%) фон за панелью «вспыхивал» (аналитика выглядела ярче
+     профиля), а профиль её не получал — его backdrop-blur-3xl! перебивал фильтр. */
+  --ui-glass-blur: 64px;
+  --ui-glass-blur-soft: 8px;
 }
 
 .glass-ui.dark {
-  /* slate-900 / slate-800 — базовые цвета тёмных поверхностей в разметке. */
-  --ui-glass-bg: rgba(15, 23, 42, 0.35);
-  --ui-glass-bg-soft: rgba(30, 41, 59, 0.45);
+  /* Те же уровни, что у тёмных поверхностей в разметке (theme.css): стекло
+     тонируется выбранной темой, для синей совпадает с прежними slate-900/800. */
+  --ui-glass-bg: color-mix(in srgb, var(--th-dark-base) 35%, transparent);
+  --ui-glass-bg-soft: color-mix(in srgb, var(--th-dark-raised) 45%, transparent);
   /* Тонкая и приглушённая: на тёмном фоне даже малая доля белого читается как
      яркая обводка, а нужен только край блока. */
   --ui-glass-border: rgba(255, 255, 255, 0.08);
@@ -39,12 +44,19 @@
    заливка живёт в слое `ui-glass`, объявленном в `global.css` до импорта
    Tailwind: для важных объявлений выигрывает слой, объявленный раньше. */
 @layer ui-glass {
+  /* Фильтр тоже в слое и важный: иначе важные утилиты компонентов
+     (`backdrop-blur-3xl!`, `backdrop-blur-sm`) дают каждой панели своё размытие,
+     и одно и то же стекло на разных экранах выглядит по-разному. */
   .glass-ui .ui-glass {
     background-color: var(--ui-glass-bg) !important;
+    backdrop-filter: blur(var(--ui-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--ui-glass-blur)) !important;
   }
 
   .glass-ui .ui-glass-soft {
     background-color: var(--ui-glass-bg-soft) !important;
+    backdrop-filter: blur(var(--ui-glass-blur-soft)) !important;
+    -webkit-backdrop-filter: blur(var(--ui-glass-blur-soft)) !important;
   }
 
   /* Модификатор для поверхностей, которые задают границу и тень важными
@@ -54,6 +66,27 @@
   .glass-ui .ui-glass--forced {
     border-color: var(--ui-glass-border) !important;
     box-shadow: none !important;
+  }
+
+  /* Для поверхностей с градиентной заливкой (`bg-gradient-to-br from-white/95…`):
+     эффект подменяет только background-color, а градиент рисуется поверх и
+     оставил бы панель глухой. */
+  .glass-ui .ui-glass--flat {
+    background-image: none !important;
+  }
+
+  /* Таблица antd внутри стеклянной панели: свой фон (colorBgContainer) у неё
+     и у ячеек, и он закрыл бы стекло. Закреплённые колонки не трогаем — под ними
+     при горизонтальной прокрутке просвечивал бы текст соседних ячеек. */
+  .glass-ui .ui-glass .ant-table,
+  .glass-ui .ui-glass .ant-table-container,
+  .glass-ui .ui-glass .ant-table-tbody > tr > td:not(.ant-table-cell-fix-left):not(.ant-table-cell-fix-right) {
+    background: transparent !important;
+  }
+
+  .glass-ui .ui-glass .ant-table-thead > tr > th:not(.ant-table-cell-fix-left):not(.ant-table-cell-fix-right),
+  .glass-ui .ui-glass .ant-table-tbody > tr:hover > td:not(.ant-table-cell-fix-left):not(.ant-table-cell-fix-right) {
+    background: var(--ui-glass-bg-soft) !important;
   }
 }
 
@@ -67,12 +100,8 @@
 .glass-ui .ui-glass {
   background-color: var(--ui-glass-bg);
   border-color: var(--ui-glass-border);
-  backdrop-filter: blur(var(--ui-glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--ui-glass-blur)) saturate(180%);
 }
 
 .glass-ui .ui-glass-soft {
   background-color: var(--ui-glass-bg-soft);
-  backdrop-filter: blur(8px) saturate(160%);
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
 }

@@ -26,9 +26,9 @@ export const IncomingActionsSection: React.FC<IncomingActionsSectionProps> = ({
         size="large"
         className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
           isAcknowledged
-            ? "bg-emerald-50! border-emerald-200! text-emerald-700!"
+            ? "bg-emerald-50! border-emerald-200! text-emerald-700! dark:bg-emerald-900/35! dark:text-emerald-400! dark:border-emerald-800/50!"
             : isDarkMode
-            ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+            ? "bg-th-raised! border-th-high! text-gray-200! hover:bg-th-high! hover:border-[#8B5CF6]!"
             : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
         }`}
         icon={
@@ -50,7 +50,7 @@ export const IncomingActionsSection: React.FC<IncomingActionsSectionProps> = ({
         size="large"
         className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
           isDarkMode
-            ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+            ? "bg-th-raised! border-th-high! text-gray-200! hover:bg-th-high! hover:border-[#8B5CF6]!"
             : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
         }`}
         icon={
@@ -70,7 +70,7 @@ export const IncomingActionsSection: React.FC<IncomingActionsSectionProps> = ({
         size="large"
         className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
           isDarkMode
-            ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+            ? "bg-th-raised! border-th-high! text-gray-200! hover:bg-th-high! hover:border-[#8B5CF6]!"
             : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
         }`}
         icon={
@@ -90,7 +90,7 @@ export const IncomingActionsSection: React.FC<IncomingActionsSectionProps> = ({
         size="large"
         className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
           isDarkMode
-            ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+            ? "bg-th-raised! border-th-high! text-gray-200! hover:bg-th-high! hover:border-[#8B5CF6]!"
             : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
         }`}
         icon={

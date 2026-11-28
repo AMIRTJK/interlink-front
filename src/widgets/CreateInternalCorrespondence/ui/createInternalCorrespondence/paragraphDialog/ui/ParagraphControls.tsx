@@ -74,8 +74,8 @@ export const NumberSpin = ({
       className={cn(
         "flex items-stretch rounded-lg border transition-colors",
         disabled
-          ? "border-slate-100 bg-slate-50 dark:border-zinc-800 dark:bg-zinc-800/60"
-          : "border-slate-200 bg-white focus-within:border-blue-400 dark:border-zinc-700 dark:bg-zinc-800",
+          ? "border-slate-100 bg-slate-50 dark:border-th-raised dark:bg-th-raised/60"
+          : "border-slate-200 bg-white focus-within:border-th-accent-400 dark:border-th-high dark:bg-th-raised",
       )}
     >
       <input
@@ -105,7 +105,7 @@ export const NumberSpin = ({
             : "text-slate-700 dark:text-zinc-100",
         )}
       />
-      <div className="flex flex-col border-l border-slate-200 dark:border-zinc-700">
+      <div className="flex flex-col border-l border-slate-200 dark:border-th-high">
         {([1, -1] as const).map((direction) => (
           <button
             key={direction}
@@ -116,10 +116,10 @@ export const NumberSpin = ({
             aria-label={direction === 1 ? "Увеличить" : "Уменьшить"}
             className={cn(
               "flex h-1/2 w-6 items-center justify-center transition-colors",
-              direction === 1 && "border-b border-slate-200 dark:border-zinc-700",
+              direction === 1 && "border-b border-slate-200 dark:border-th-high",
               disabled
                 ? "cursor-not-allowed text-slate-300 dark:text-zinc-600"
-                : "cursor-pointer text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-100",
+                : "cursor-pointer text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-th-high dark:hover:text-zinc-100",
             )}
           >
             {direction === 1 ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
@@ -137,7 +137,7 @@ interface IGroupProps {
 
 /** Рамка группы настроек («Общие», «Отступ», «Интервал», «Образец»). */
 export const Group = ({ title, children }: IGroupProps) => (
-  <fieldset className="rounded-xl border border-slate-200 px-4 pb-4 pt-2 dark:border-zinc-700">
+  <fieldset className="rounded-xl border border-slate-200 px-4 pb-4 pt-2 dark:border-th-high">
     <legend className="px-1.5 text-xs font-semibold text-slate-500 dark:text-zinc-400">
       {title}
     </legend>

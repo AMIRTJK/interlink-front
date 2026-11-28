@@ -7,12 +7,12 @@ export interface ExecutorUser {
 }
 
 export const AVATAR_COLORS = [
-  "bg-blue-50 text-blue-600 border-blue-100",
-  "bg-emerald-50 text-emerald-600 border-emerald-100",
-  "bg-purple-50 text-purple-600 border-purple-100",
-  "bg-amber-50 text-amber-600 border-amber-100",
-  "bg-rose-50 text-rose-600 border-rose-100",
-  "bg-indigo-50 text-indigo-600 border-indigo-100",
+  "bg-th-accent-50 text-th-accent-600 border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50",
+  "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  "bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
+  "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/35 dark:text-rose-400 dark:border-rose-800/50",
+  "bg-th-accent-50 text-th-accent-600 border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50",
 ];
 
 export const getInitials = (fullName: string) => {

@@ -15,7 +15,7 @@ export const OrderRequisitesCard = ({ state, orgs, users }: IProps) => {
     : users;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 dark:bg-th-raised dark:border-th-high">
       <SectionTitle num={1} title="РЕКВИЗИТЫ ПРИКАЗА" />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <div>

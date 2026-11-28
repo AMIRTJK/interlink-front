@@ -97,7 +97,7 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
             placeholder="Поиск по имени, должности или названию отдела..."
             prefix={
               <SearchOutlined
-                className={`text-lg mr-2 transition-colors duration-300 ${isSearchFocused ? "text-blue-600" : "text-gray-400"}`}
+                className={`text-lg mr-2 transition-colors duration-300 ${isSearchFocused ? "text-th-accent-600" : "text-gray-400"}`}
               />
             }
             onFocus={() => setIsSearchFocused(true)}
@@ -106,8 +106,8 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
               w-full h-12 rounded-2xl border bg-gray-50/50 text-base shadow-sm transition-all duration-300
               ${
                 isSearchFocused
-                  ? "border-blue-500 shadow-lg shadow-blue-500/15"
-                  : "border-gray-200 hover:border-blue-300"
+                  ? "border-th-accent-500 shadow-lg shadow-th-accent-500/15"
+                  : "border-gray-200 hover:border-th-accent-300"
               }
             `}
             value={searchTerm}
@@ -180,7 +180,7 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
       <div className="pt-6 flex items-center justify-end gap-3 bg-white shrink-0 z-10 border-t border-gray-50 mt-auto">
         <button
           onClick={onCancel}
-          className="w-[216px] h-[48px] cursor-pointer  rounded-xl border border-[#0037AF] text-[#0037AF] font-medium hover:bg-blue-50 transition-colors flex items-center justify-center"
+          className="w-[216px] h-[48px] cursor-pointer  rounded-xl border border-[#0037AF] text-[#0037AF] font-medium hover:bg-th-accent-50 transition-colors flex items-center justify-center"
         >
           Закрыть
         </button>

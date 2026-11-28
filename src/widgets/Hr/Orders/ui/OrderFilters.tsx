@@ -44,7 +44,7 @@ export const OrderFilters = ({
   onReset,
 }: IOrderFiltersProps) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mt-2">
+    <div className="ui-glass bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mt-2 dark:bg-th-raised dark:border-th-high">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Тип приказа */}
         <div>
@@ -106,7 +106,7 @@ export const OrderFilters = ({
       </div>
 
       {/* Reset */}
-      <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
+      <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100 dark:border-th-high">
         <button
           onClick={onReset}
           className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors cursor-pointer"

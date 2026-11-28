@@ -17,12 +17,12 @@ export const ROLE_BADGE: Record<
   { bg: string; text: string; border: string }
 > = {
   Согласующий: {
-    bg: "bg-blue-50",
+    bg: "bg-blue-50 dark:bg-blue-900/35",
     text: "text-blue-700",
     border: "border-blue-200",
   },
   Утверждающий: {
-    bg: "bg-emerald-50",
+    bg: "bg-emerald-50 dark:bg-emerald-900/35",
     text: "text-emerald-700",
     border: "border-emerald-200",
   },

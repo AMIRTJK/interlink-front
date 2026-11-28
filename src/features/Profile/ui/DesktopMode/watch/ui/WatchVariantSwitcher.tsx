@@ -17,7 +17,7 @@ const CHIP_TONES = {
     idle: "text-white/55 hover:text-white/90 hover:bg-white/8",
   },
   light: {
-    active: "bg-slate-900/8 text-slate-900",
+    active: "bg-th-base/8 text-slate-900",
     idle: "text-slate-600 hover:text-slate-900 hover:bg-black/5",
   },
 } as const;
@@ -49,7 +49,7 @@ export const WatchVariantSwitcher = ({ value, isDark, isVisible, onChange }: IPr
             onClick={() => onChange(option.key)}
             aria-label={`${option.label}: ${option.hint}`}
             aria-pressed={isActive}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-colors duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-400 ${tone}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-colors duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-th-accent-400 ${tone}`}
           >
             <span
               aria-hidden="true"

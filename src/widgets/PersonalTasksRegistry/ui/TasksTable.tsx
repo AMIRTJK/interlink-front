@@ -31,7 +31,7 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
     <div className="flex-1 flex flex-col min-h-[500px]">
       <div className="flex-1 overflow-x-auto">
         <table className="w-full min-w-[1020px] text-left border-collapse">
-          <thead className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-800/80 backdrop-blur-sm">
+          <thead className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-th-raised/80 backdrop-blur-sm ui-glass-soft">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 w-24">#</th>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 min-w-[240px]">Название</th>
@@ -59,7 +59,7 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
               <tr>
                 <td colSpan={7} className="py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-350 dark:text-slate-600">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-th-raised rounded-full flex items-center justify-center text-slate-350 dark:text-slate-600">
                       <Search size={32} />
                     </div>
                     <span className="text-slate-500 dark:text-slate-400 font-bold block">Ничего не найдено</span>
@@ -72,7 +72,7 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
         </table>
       </div>
 
-      <div className="p-6 bg-slate-800/5 dark:bg-white/5 flex items-center justify-between text-xs font-bold text-slate-400 border-t border-white/20 dark:border-white/10 mt-auto">
+      <div className="p-6 bg-th-raised/5 dark:bg-white/5 flex items-center justify-between text-xs font-bold text-slate-400 border-t border-white/20 dark:border-white/10 mt-auto">
         <div className="flex items-center gap-6">
           <span>Показано {rangeStart}–{rangeEnd} из {tasks.length} задач</span>
         </div>
@@ -81,7 +81,7 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage === 1}
-            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-th-high rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
           >
             <ChevronUp className="-rotate-90" size={16} />
           </button>
@@ -92,8 +92,8 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
                 onClick={() => setPage(p)}
                 className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors border-0 cursor-pointer ${
                   p === safePage
-                    ? "bg-zinc-800 dark:bg-zinc-200 text-white! dark:text-zinc-900! font-bold"
-                    : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                    ? "bg-th-raised dark:bg-zinc-200 text-white! dark:text-zinc-900! font-bold"
+                    : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-th-high"
                 }`}
               >
                 {p}
@@ -103,7 +103,7 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}
-            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-th-high rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
           >
             <ChevronUp className="rotate-90" size={16} />
           </button>

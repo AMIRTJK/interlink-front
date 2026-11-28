@@ -123,38 +123,6 @@
   background: linear-gradient(to bottom, rgb(var(--th-accent-rgb) / 0.8), transparent);
 }
 
-.ui-scroll-rail__readout {
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  padding: 2px 6px;
-  border: 1px solid rgb(var(--th-accent-rgb) / 0.3);
-  border-radius: 6px;
-  background: rgb(255 255 255 / 0.85);
-  backdrop-filter: blur(6px);
-  color: rgb(var(--th-accent-rgb));
-  font: 600 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translate(4px, -50%);
-  pointer-events: none;
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-
-.dark .ui-scroll-rail__readout {
-  background: rgb(15 23 42 / 0.85);
-}
-
-.ui-scroll-rail[data-active="true"] .ui-scroll-rail__readout,
-.ui-scroll-rail:hover .ui-scroll-rail__readout {
-  opacity: 1;
-  transform: translate(0, -50%);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .ui-scroll-rail,
   .ui-scroll-rail * {

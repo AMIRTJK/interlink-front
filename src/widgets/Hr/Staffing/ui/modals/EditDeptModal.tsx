@@ -62,18 +62,18 @@ export const EditDeptModal = ({
   const selectedManagerEmp = employees.find((e) => e.id === managerId) ?? null;
   const otherDepts = existingDepts.filter((d) => d.id !== dept.id);
 
-  const cardBg = dark ? 'bg-gray-900' : 'bg-white';
+  const cardBg = dark ? 'bg-th-base' : 'bg-white';
   const inputBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-100'
+    ? 'bg-th-raised border-th-high text-gray-100'
     : 'bg-gray-50 border-gray-200 text-gray-800';
   const selectBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
+    ? 'bg-th-raised border-th-high text-gray-200'
     : 'bg-gray-50 border-gray-200 text-gray-700';
   const labelCls = dark ? 'text-gray-400' : 'text-gray-500';
   const cancelCls = dark
-    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+    ? 'bg-th-raised text-gray-300 hover:bg-th-high'
     : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
-  const sectionDivider = dark ? 'border-gray-700/60' : 'border-gray-100';
+  const sectionDivider = dark ? 'border-th-high/60' : 'border-gray-100';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -115,7 +115,7 @@ export const EditDeptModal = ({
                 setName(e.target.value);
                 setError('');
               }}
-              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg} ${
+              className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg} ${
                 error ? 'border-red-400' : ''
               }`}
             />
@@ -135,7 +135,7 @@ export const EditDeptModal = ({
                 onChange={(e) =>
                   setParentDeptId(e.target.value ? Number(e.target.value) : null)
                 }
-                className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${selectBg}`}
+                className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${selectBg}`}
               >
                 <option value="">— Корневой отдел —</option>
                 {otherDepts.map((d) => (
@@ -194,7 +194,7 @@ export const EditDeptModal = ({
                   parentDeptId
                 );
               }}
-              className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/20"
+              className="flex-1 py-3 rounded-2xl bg-th-accent-600 text-white text-sm font-semibold hover:bg-th-accent-700 transition-colors shadow-lg shadow-th-accent-900/20"
             >
               Сохранить
             </motion.button>

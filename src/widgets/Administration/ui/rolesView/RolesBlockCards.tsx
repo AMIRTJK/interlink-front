@@ -21,7 +21,13 @@ export function RolesBlockCards({
   onDeleteRole,
 }: IProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 12,
+      }}
+    >
       {roleCards.map((card) => {
         const isSelected = selectedRoleId === card.id && drawerOpen;
         const isPulsing = pulsingCardId === card.id;
@@ -31,50 +37,136 @@ export function RolesBlockCards({
           <div
             key={card.id}
             onClick={() => onCardClick(card.id)}
-            className={`rounded-[10px] px-4 py-3.5 cursor-pointer transition-all border border-slate-200 dark:border-slate-800 ${
-              isSelected
-                ? "shadow-md"
-                : "bg-white dark:bg-slate-900/80 shadow-xs hover:shadow-md"
-            }`}
             style={{
-              background: isSelected ? `${borderColor}14` : undefined,
-              borderTopColor: isSelected ? `${borderColor}55` : undefined,
-              borderRightColor: isSelected ? `${borderColor}55` : undefined,
-              borderBottomColor: isSelected ? `${borderColor}55` : undefined,
+              background: isSelected ? `${borderColor}0D` : T.surface,
+              borderRadius: 10,
+              padding: "14px 16px",
+              borderTop: isSelected
+                ? `1px solid ${borderColor}40`
+                : `1px solid ${T.border}`,
+              borderRight: isSelected
+                ? `1px solid ${borderColor}40`
+                : `1px solid ${T.border}`,
+              borderBottom: isSelected
+                ? `1px solid ${borderColor}40`
+                : `1px solid ${T.border}`,
               borderLeft: `4px solid ${borderColor}`,
+              cursor: "pointer",
+              transition:
+                "border-color 0.15s, box-shadow 0.15s, background 0.15s",
+              boxShadow: isPulsing
+                ? `0 0 0 0 ${borderColor}33`
+                : isSelected
+                  ? `0 4px 12px ${borderColor}15`
+                  : T.shadow,
               animation: isPulsing
                 ? "cardPulse 0.6s ease-out forwards"
                 : "none",
             }}
+            onMouseEnter={(e) => {
+              if (!isSelected) {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = T.shadowMd;
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.borderTopColor = `${borderColor}40`;
+                el.style.borderRightColor = `${borderColor}40`;
+                el.style.borderBottomColor = `${borderColor}40`;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSelected) {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = T.shadow;
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.borderTopColor = T.border;
+                el.style.borderRightColor = T.border;
+                el.style.borderBottomColor = T.border;
+              }
+            }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 min-w-0">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  minWidth: 0,
+                }}
+              >
                 <span
-                  className="w-3 h-3 rounded-full inline-block shrink-0"
-                  style={{ background: borderColor }}
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    background: borderColor,
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
                 />
-                <span className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 truncate">
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: T.textPrimary,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
                   {card.name}
                 </span>
               </div>
-              <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap shrink-0 ml-1.5">
+              <span
+                style={{
+                  background: T.hoverBg,
+                  color: T.textSecondary,
+                  borderRadius: 20,
+                  padding: "2px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  marginLeft: 6,
+                }}
+              >
                 {card.userCount}
               </span>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 mb-2.5 truncate">
+            <div
+              style={{
+                fontSize: 12,
+                color: T.textSecondary,
+                marginBottom: 10,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {card.description}
             </div>
-            <div className="flex flex-wrap gap-1 mb-2.5">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 4,
+                marginBottom: 10,
+              }}
+            >
               {permCount > 0 && (
                 <span
                   style={{
-                    background: `${borderColor}14`,
+                    background: `${borderColor}10`,
                     color: borderColor,
                     borderRadius: 5,
                     padding: "1px 5px",
                     fontSize: 10,
                     fontWeight: 600,
-                    border: `1px solid ${borderColor}30`,
+                    border: `1px solid ${borderColor}25`,
                     height: 18,
                     display: "inline-flex",
                     alignItems: "center",
@@ -84,14 +176,30 @@ export function RolesBlockCards({
                 </span>
               )}
             </div>
-            <div className="border-t border-slate-200 dark:border-slate-800 pt-2 flex items-center gap-2.5">
+            <div
+              style={{
+                borderTop: `1px solid ${T.border}`,
+                paddingTop: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onCardClick(card.id);
                 }}
-                className="text-[11px] text-blue-500 hover:text-blue-400 bg-transparent border-0 cursor-pointer font-medium p-0"
-                style={{ fontFamily: T.font }}
+                style={{
+                  fontSize: 11,
+                  color: T.accent,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: T.font,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
               >
                 Ред.
               </button>
@@ -100,8 +208,16 @@ export function RolesBlockCards({
                   e.stopPropagation();
                   onDeleteRole(card.id);
                 }}
-                className="text-[11px] text-red-500 hover:text-red-400 bg-transparent border-0 cursor-pointer font-medium p-0"
-                style={{ fontFamily: T.font }}
+                style={{
+                  fontSize: 11,
+                  color: T.danger,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: T.font,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
               >
                 Уд.
               </button>

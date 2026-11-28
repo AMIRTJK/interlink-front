@@ -17,19 +17,19 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
         <div
           key={e.id}
           onClick={() => onCardClick(e)}
-          className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col cursor-pointer hover:border-slate-300 transition-colors"
+          className="ui-glass bg-white border border-slate-200 rounded-2xl p-4 flex flex-col cursor-pointer hover:border-slate-300 transition-colors dark:bg-th-raised dark:border-th-high"
         >
           <div className="flex items-start gap-3">
             <Avatar e={e} size={44} />
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-slate-800 truncate">{e.fullName}</p>
-              <p className="text-xs text-blue-500 truncate">{e.position}</p>
+              <p className="font-semibold text-slate-800 truncate dark:text-slate-100">{e.fullName}</p>
+              <p className="text-xs text-th-accent-500 truncate">{e.position}</p>
               <div className="mt-1.5">
                 <StatusChip status={e.status} />
               </div>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5 text-sm text-slate-600">
+          <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5 text-sm text-slate-600 dark:border-th-high dark:text-slate-300">
             <p className="flex items-center gap-2">
               <Building2 size={14} className="text-slate-400" /> {e.department}
             </p>
@@ -44,7 +44,7 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
                 <button
                   type="button"
                   onClick={(ev) => copyLogin(e.phone, ev)}
-                  className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors shrink-0"
+                  className="p-1 text-slate-400 hover:text-th-accent-600 hover:bg-th-accent-50 rounded transition-colors shrink-0"
                   title="Копировать логин"
                   aria-label="Копировать логин"
                 >
@@ -54,12 +54,12 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
             </div>
           </div>
           <div
-            className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3"
+            className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3 dark:border-th-high"
             onClick={(ev) => ev.stopPropagation()}
           >
             <button
               onClick={() => onEdit(e)}
-              className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"
+              className="flex items-center gap-1 text-sm text-th-accent-500 hover:text-th-accent-600"
             >
               <Pencil size={14} /> Изменить
             </button>

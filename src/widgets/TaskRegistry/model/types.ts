@@ -16,7 +16,7 @@ export interface Colleague {
 	name: string;
 	role: string;
 	initials: string;
-	/** Tailwind-класс фона аватара, напр. "bg-blue-500". */
+	/** Tailwind-класс фона аватара, напр. "bg-th-accent-500". */
 	color: string;
 	photo?: string | null;
 }

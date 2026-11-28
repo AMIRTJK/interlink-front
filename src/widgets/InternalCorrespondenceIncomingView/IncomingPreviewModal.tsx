@@ -228,7 +228,7 @@ export const IncomingPreviewModal: React.FC<IncomingPreviewModalProps> = (props)
                           )}
                           aria-label="Поручение"
                         >
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-th-accent-500" />
                           <span
                             style={{
                               writingMode: "vertical-rl",

@@ -22,7 +22,7 @@ export const SelectedCard: React.FC<ISelectedCardProps> = ({
     <div
       className={`group relative flex items-start gap-3 p-3 rounded-lg transition-all ${
         isDarkMode
-          ? "bg-gray-800 hover:bg-gray-700"
+          ? "bg-th-raised hover:bg-th-high"
           : "bg-gray-50 hover:bg-gray-100"
       }`}
     >

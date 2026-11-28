@@ -26,7 +26,7 @@ export const NewYearCountdown = ({ isBottomNav }: IProps) => {
       role="status"
       aria-live="off"
       className={cn(
-        "pointer-events-none fixed left-1/2 -translate-x-1/2 z-[85] flex items-center gap-2.5 rounded-[2.5rem] border border-white/30 bg-white/60 px-4 py-2 shadow-lg backdrop-blur-xl dark:border-zinc-700/40 dark:bg-zinc-900/60",
+        "pointer-events-none fixed left-1/2 -translate-x-1/2 z-[85] flex items-center gap-2.5 rounded-[2.5rem] border border-white/30 bg-white/60 px-4 py-2 shadow-lg backdrop-blur-xl dark:border-th-high/40 dark:bg-th-base/60",
         isBottomNav ? "bottom-24" : "bottom-4",
       )}
     >

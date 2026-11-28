@@ -22,9 +22,9 @@ export const ExcelPreview = ({
 	};
 
 	return (
-		<div className="w-full max-h-[70vh] flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white text-left">
+		<div className="w-full max-h-[70vh] flex flex-col rounded-2xl border border-slate-200 dark:border-th-raised overflow-hidden bg-white text-left">
 			<If is={excelSheets.length > 1}>
-				<div className="flex items-center gap-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+				<div className="flex items-center gap-1 px-4 py-2 bg-slate-100 dark:bg-th-raised border-b border-slate-200 dark:border-th-high overflow-x-auto">
 					{excelSheets.map((sheet, idx) => (
 						<button
 							key={idx}
@@ -32,8 +32,8 @@ export const ExcelPreview = ({
 							onClick={() => handleSheetSelect(idx, sheet.html)}
 							className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
 								activeSheetIndex === idx
-									? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm"
-									: "text-slate-600 dark:text-zinc-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/50"
+									? "bg-white dark:bg-th-high text-emerald-700 dark:text-emerald-400 shadow-sm"
+									: "text-slate-600 dark:text-zinc-400 hover:bg-slate-200/60 dark:hover:bg-th-high/50"
 							}`}
 						>
 							{sheet.name}

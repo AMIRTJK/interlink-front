@@ -28,8 +28,8 @@ export const NotificationsPopover: FC<IProps> = ({ open }) => {
   const showLoader = isLoading || (isFetching && notifications.length === 0);
 
   return (
-    <div className="w-80 bg-white dark:bg-zinc-800 rounded-[2.5rem] overflow-hidden">
-      <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-100 dark:border-zinc-700/60">
+    <div className="w-80 bg-white dark:bg-th-raised rounded-[2.5rem] overflow-hidden">
+      <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-100 dark:border-th-high/60">
         <span className="font-semibold text-gray-800 dark:text-zinc-100">
           Уведомления
         </span>
@@ -37,7 +37,7 @@ export const NotificationsPopover: FC<IProps> = ({ open }) => {
           <button
             onClick={() => markAll.mutate()}
             disabled={markAll.isLoading}
-            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="text-xs text-th-accent-500 hover:text-th-accent-700 dark:text-th-accent-400 dark:hover:text-th-accent-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
           >
             Прочитать все
           </button>
@@ -60,8 +60,8 @@ export const NotificationsPopover: FC<IProps> = ({ open }) => {
                 }
                 className={`group relative p-3 pr-4 rounded-2xl flex gap-3 transition-colors cursor-pointer ${
                   note.is_read
-                    ? "hover:bg-gray-50 dark:hover:bg-zinc-700/40"
-                    : "bg-blue-50/60 hover:bg-blue-50 dark:bg-blue-500/10 dark:hover:bg-blue-500/15"
+                    ? "hover:bg-gray-50 dark:hover:bg-th-high/40"
+                    : "bg-th-accent-50/60 hover:bg-th-accent-50 dark:bg-th-accent-500/10 dark:hover:bg-th-accent-500/15"
                 }`}
               >
                 <div className="mt-0.5 shrink-0">
@@ -93,7 +93,7 @@ export const NotificationsPopover: FC<IProps> = ({ open }) => {
                 </div>
 
                 {!note.is_read && (
-                  <span className="absolute top-3.5 right-3.5 w-2 h-2 bg-blue-500 rounded-full transition-opacity group-hover:opacity-0" />
+                  <span className="absolute top-3.5 right-3.5 w-2 h-2 bg-th-accent-500 rounded-full transition-opacity group-hover:opacity-0" />
                 )}
                 <button
                   onClick={(e) => {

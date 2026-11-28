@@ -154,7 +154,7 @@ export const VersionsPanel = ({
                     className={cn(
                       "w-30 flex items-center justify-between gap-2 px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer text-left",
                       selectedAuthorId
-                        ? "bg-amber-50 border-amber-200 text-amber-800"
+                        ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50"
                         : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300",
                     )}
                   >
@@ -199,13 +199,13 @@ export const VersionsPanel = ({
                           className={cn(
                             "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 font-medium cursor-pointer",
                             !selectedAuthorId
-                              ? "bg-slate-50 text-blue-600 font-bold"
+                              ? "bg-slate-50 text-th-accent-600 font-bold"
                               : "text-slate-700",
                           )}
                         >
                           <span>Все авторы</span>
                           <If is={!selectedAuthorId}>
-                            <Check size={12} className="text-blue-500" />
+                            <Check size={12} className="text-th-accent-500" />
                           </If>
                         </button>
 
@@ -223,7 +223,7 @@ export const VersionsPanel = ({
                               className={cn(
                                 "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 cursor-pointer",
                                 isSelected
-                                  ? "bg-slate-50 text-blue-600 font-bold"
+                                  ? "bg-slate-50 text-th-accent-600 font-bold"
                                   : "text-slate-600",
                               )}
                             >
@@ -233,7 +233,7 @@ export const VersionsPanel = ({
                                   {auth.count}
                                 </span>
                                 <If is={isSelected}>
-                                  <Check size={12} className="text-blue-500" />
+                                  <Check size={12} className="text-th-accent-500" />
                                 </If>
                               </div>
                             </button>

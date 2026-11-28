@@ -35,10 +35,10 @@ export const CompactStructureControls: React.FC<ICompactStructureControlsProps> 
         />
         <span
           className={cn(
-            "w-4 h-4 rounded-[5px] border flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400/60",
+            "w-4 h-4 rounded-[5px] border flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-th-accent-400/60",
             isCompact
-              ? "bg-blue-600 border-blue-600 text-white"
-              : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 group-hover/compact:border-blue-400",
+              ? "bg-th-accent-600 border-th-accent-600 text-white"
+              : "bg-white dark:bg-th-raised border-slate-300 dark:border-th-higher group-hover/compact:border-blue-400",
           )}
         >
           <If is={isCompact}>
@@ -60,7 +60,7 @@ export const CompactStructureControls: React.FC<ICompactStructureControlsProps> 
         <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
           Карточек:
         </span>
-        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600">
+        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-th-high/60 border border-slate-200 dark:border-th-higher">
           {COMPACT_CARDS_OPTIONS.map((option) => (
             <button
               key={option}
@@ -71,7 +71,7 @@ export const CompactStructureControls: React.FC<ICompactStructureControlsProps> 
               className={cn(
                 "min-w-[26px] h-[22px] px-1.5 rounded-md text-[11px] font-bold transition-all cursor-pointer",
                 option === cardsCount
-                  ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs"
+                  ? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
               )}
             >

@@ -24,8 +24,8 @@ export const ConfirmationModal = ({
   confirmText,
   cancelText = "Отмена",
   icon,
-  iconBg = "bg-blue-50 dark:bg-blue-500/10 text-blue-500",
-  confirmBtnBg = "bg-blue-600 hover:bg-blue-700 shadow-blue-500/25",
+  iconBg = "bg-th-accent-50 dark:bg-th-accent-500/10 text-th-accent-500",
+  confirmBtnBg = "bg-th-accent-600 hover:bg-th-accent-700 shadow-th-accent-500/25",
   onConfirm,
   onCancel,
 }: IProps) => {
@@ -72,7 +72,7 @@ export const ConfirmationModal = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.94, opacity: 0, y: 16 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-zinc-900 border border-white/50 dark:border-zinc-700/60 shadow-2xl overflow-hidden"
+            className="w-full max-w-sm rounded-3xl bg-white dark:bg-th-base border border-white/50 dark:border-th-high/60 shadow-2xl overflow-hidden"
           >
             <div className="p-6 flex flex-col items-center text-center">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${iconBg}`}>
@@ -89,7 +89,7 @@ export const ConfirmationModal = ({
                   type="button"
                   onClick={onCancel}
                   disabled={loading}
-                  className="flex-1 py-2.5 rounded-2xl font-semibold text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer focus:outline-none"
+                  className="flex-1 py-2.5 rounded-2xl font-semibold text-sm bg-zinc-100 dark:bg-th-raised text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-th-high transition-colors disabled:opacity-50 cursor-pointer focus:outline-none"
                 >
                   {cancelText}
                 </button>

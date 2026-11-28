@@ -30,47 +30,97 @@ export function RoleDrawerPermsList({
   const roleCfg = getRoleColor(roleName);
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-4">
-      <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+    <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: T.textSecondary,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          marginBottom: 12,
+        }}
+      >
         Права доступа
       </div>
-      <div className="flex flex-col gap-2 mb-6">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          marginBottom: 24,
+        }}
+      >
         {perms.map((mod, mIdx) => (
           <div
             key={`${mod.module}-${staggerGen}`}
-            className="bg-slate-50 dark:bg-slate-800/70 rounded-lg px-3.5 py-2.5 border border-slate-200 dark:border-slate-700/80"
             style={{
+              background: T.bg,
+              borderRadius: 8,
+              padding: "11px 14px",
+              border: `1px solid ${T.border}`,
               animation: `permRowIn 200ms ease-out ${mIdx * 40}ms both`,
             }}
           >
-            <div className="text-[11px] font-bold text-slate-900 dark:text-slate-100 mb-2.5 uppercase tracking-wide">
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: T.textPrimary,
+                marginBottom: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
               {mod.module}
             </div>
             {mod.perms.map((perm, pIdx) => (
               <div
                 key={`${perm.label}-${pIdx}-${staggerGen}`}
-                className={`bg-white dark:bg-slate-900/80 rounded-md px-3 py-2.5 border border-slate-200 dark:border-slate-700/80 ${
-                  pIdx < mod.perms.length - 1 ? "mb-1.5" : ""
-                }`}
+                style={{
+                  background: T.surface,
+                  borderRadius: 6,
+                  padding: "10px 12px",
+                  border: `1px solid ${T.border}`,
+                  marginBottom: pIdx < mod.perms.length - 1 ? 6 : 0,
+                }}
               >
                 {perm.label && (
-                  <div className="text-[11px] font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: T.textPrimary,
+                      marginBottom: 8,
+                    }}
+                  >
                     {perm.label}
                   </div>
                 )}
-                <div className="flex flex-col gap-1.5">
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 7,
+                  }}
+                >
                   {perm.subperms &&
                     perm.subperms.map((sp, spIdx) => (
                       <div
                         key={`${sp.label}-${staggerGen}`}
-                        className="flex items-center justify-between gap-2"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 8,
+                        }}
                       >
                         <span
-                          className={`text-xs ${
-                            sp.value
-                              ? "text-slate-900 dark:text-slate-100 font-medium"
-                              : "text-slate-400 dark:text-slate-500 font-normal"
-                          }`}
+                          style={{
+                            fontSize: 12,
+                            color: sp.value ? T.textPrimary : "#94A3B8",
+                            fontWeight: sp.value ? 500 : 400,
+                          }}
                         >
                           {sp.label}
                         </span>
@@ -85,24 +135,49 @@ export function RoleDrawerPermsList({
                   perm.children.map((child, cIdx) => (
                     <div
                       key={`${child.label}-${staggerGen}`}
-                      className="mt-2.5 ml-2 pl-2.5 border-l-2 border-slate-200 dark:border-slate-700"
+                      style={{
+                        marginTop: 10,
+                        marginLeft: 8,
+                        paddingLeft: 10,
+                        borderLeft: `2px solid ${T.border}`,
+                      }}
                     >
-                      <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: T.textSecondary,
+                          marginBottom: 6,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.04em",
+                        }}
+                      >
                         {child.label}
                       </div>
-                      <div className="flex flex-col gap-1.5">
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
                         {child.subperms &&
                           child.subperms.map((csp, cspIdx) => (
                             <div
                               key={`${csp.label}-${staggerGen}`}
-                              className="flex items-center justify-between gap-2"
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: 8,
+                              }}
                             >
                               <span
-                                className={`text-[11px] ${
-                                  csp.value
-                                    ? "text-slate-900 dark:text-slate-100 font-medium"
-                                    : "text-slate-400 dark:text-slate-500 font-normal"
-                                }`}
+                                style={{
+                                  fontSize: 11,
+                                  color: csp.value ? T.textPrimary : "#94A3B8",
+                                  fontWeight: csp.value ? 500 : 400,
+                                }}
                               >
                                 {csp.label}
                               </span>
@@ -123,7 +198,19 @@ export function RoleDrawerPermsList({
         ))}
       </div>
 
-      <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-2">
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: T.textSecondary,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          marginBottom: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
         <span>Пользователи роли</span>
         <span
           style={{
@@ -142,19 +229,42 @@ export function RoleDrawerPermsList({
       </div>
       <div>
         {userCount === 0 ? (
-          <div className="text-[13px] text-slate-500 dark:text-slate-400 py-1.5 pb-2.5 italic">
+          <div
+            style={{
+              fontSize: 13,
+              color: T.textSecondary,
+              padding: "6px 0 10px",
+              fontStyle: "italic",
+            }}
+          >
             Нет назначенных пользователей
           </div>
         ) : (
-          <div className="flex flex-wrap gap-1.5 mb-1.5">
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              marginBottom: 6,
+            }}
+          >
             {memberInitials.map((initials, idx) => (
               <div
                 key={`${initials}-${idx}`}
                 title={initials}
-                className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[9px] font-bold border border-white dark:border-slate-900 shrink-0"
                 style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
                   background: roleCfg.bg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 9,
+                  fontWeight: 700,
                   color: roleCfg.text,
+                  border: `1.5px solid ${T.surface}`,
+                  flexShrink: 0,
                 }}
               >
                 {initials}

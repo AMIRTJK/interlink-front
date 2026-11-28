@@ -55,7 +55,7 @@ export const ScreenActionsBar = ({
     <div className="flex items-center gap-3">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+        className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold text-slate-500 hover:text-th-accent-600 transition-colors group"
       >
         <ArrowLeft
           size={16}
@@ -100,7 +100,7 @@ export const ScreenActionsBar = ({
               !isOldVersionSelected &&
               !isSigned &&
               !isAlreadySent
-              ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+              ? "bg-white border-th-accent-200 text-th-accent-600 hover:bg-th-accent-50"
               : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
           )}
         >
@@ -152,7 +152,7 @@ export const ScreenActionsBar = ({
               allSignaturesSigned &&
               !isSending &&
               !isAlreadySent
-              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
+              ? "bg-th-accent-600 text-white hover:bg-th-accent-700 shadow-th-accent-100 active:scale-95"
               : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
           )}
         >

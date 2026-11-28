@@ -201,7 +201,7 @@ export const PreviewApproversQuickBar: React.FC<IProps> = ({
         onClick={onOpenFullPanel}
         style={{
           fontSize: 11,
-          color: "#6366f1",
+          color: "var(--th-accent-500)",
           border: "none",
           background: "transparent",
           cursor: "pointer",

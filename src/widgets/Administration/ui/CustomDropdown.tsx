@@ -58,7 +58,7 @@ export const CustomDropdown = ({
           color: value ? T.textPrimary : "#94A3B8",
           cursor: "pointer",
           transition: "border-color 0.15s, box-shadow 0.15s",
-          boxShadow: isOpen ? `0 0 0 2px ${T.accent}20` : "none",
+          boxShadow: isOpen ? `0 0 0 2px rgb(var(--th-accent-rgb)/0.125)` : "none",
         }}
         onMouseEnter={(e) => {
           if (!isOpen) e.currentTarget.style.borderColor = T.accent;
@@ -120,7 +120,7 @@ export const CustomDropdown = ({
                   borderRadius: 6,
                   fontSize: 13,
                   color: isSelected ? T.accent : T.textPrimary,
-                  background: isSelected ? `${T.accent}0D` : "transparent",
+                  background: isSelected ? `rgb(var(--th-accent-rgb)/0.05)` : "transparent",
                   fontWeight: isSelected ? 600 : 500,
                   cursor: "pointer",
                   transition: "background 0.12s, color 0.12s",

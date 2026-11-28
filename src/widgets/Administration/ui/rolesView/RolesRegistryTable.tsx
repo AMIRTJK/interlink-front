@@ -19,20 +19,41 @@ export function RolesRegistryTable({
   onCardClick,
   onDeleteRole,
 }: IProps) {
-  const thClass =
-    "px-3 h-11 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap text-left";
   return (
-    <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 overflow-x-auto shadow-xs">
-      <table className="w-full border-collapse">
+    <div
+      className="ui-glass ui-glass--forced"
+      style={{
+        background: T.surface,
+        borderRadius: 10,
+        border: `1px solid ${T.border}`,
+        overflow: "hidden",
+        boxShadow: T.shadow,
+      }}
+    >
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr className="bg-slate-50 dark:bg-slate-800/70">
-            <th className={`${thClass} w-8 pl-4 pr-2`} />
-            <th className={`${thClass} pl-2`}>Название роли</th>
-            <th className={thClass}>Описание</th>
-            <th className={thClass}>Пользователей</th>
-            <th className={thClass}>Разрешений</th>
-            <th className={thClass}>Дата создания</th>
-            <th className={`${thClass} text-center pr-4`}>Действия</th>
+          <tr style={{ background: T.bg }}>
+            <th style={{ ...thStyle, width: 32, padding: "0 8px 0 16px" }} />
+            <th style={{ ...thStyle, textAlign: "left", paddingLeft: 8 }}>
+              Название роли
+            </th>
+            <th style={{ ...thStyle, textAlign: "left" }}>Описание</th>
+            <th style={{ ...thStyle, textAlign: "left" }}>
+              Пользователей
+            </th>
+            <th style={{ ...thStyle, textAlign: "left" }}>Разрешений</th>
+            <th style={{ ...thStyle, textAlign: "left" }}>
+              Дата создания
+            </th>
+            <th
+              style={{
+                ...thStyle,
+                textAlign: "center",
+                paddingRight: 16,
+              }}
+            >
+              Действия
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -44,35 +65,82 @@ export function RolesRegistryTable({
               <tr
                 key={card.id}
                 onClick={() => onCardClick(card.id)}
-                className="h-12 border-b border-slate-100 dark:border-slate-800/80 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 style={{
-                  background: isSelected ? `${borderColor}14` : undefined,
+                  height: 48,
+                  borderBottom: `1px solid ${T.hoverBg}`,
+                  background: isSelected ? `${borderColor}08` : "transparent",
+                  cursor: "pointer",
+                  transition: "background 0.12s",
                   borderLeft: `4px solid ${borderColor}`,
                 }}
+                onMouseEnter={(e) => {
+                  if (!isSelected)
+                    (e.currentTarget as HTMLTableRowElement).style.background =
+                      T.bg;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLTableRowElement).style.background =
+                    isSelected ? `${borderColor}08` : "transparent";
+                }}
               >
-                <td className="pl-3 pr-2 align-middle w-8">
+                <td
+                  style={{
+                    padding: "0 8px 0 12px",
+                    verticalAlign: "middle",
+                    width: 32,
+                  }}
+                >
                   <span
-                    className="w-2 h-2 rounded-full inline-block"
-                    style={{ background: borderColor }}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: borderColor,
+                      display: "inline-block",
+                    }}
                   />
                 </td>
-                <td className="pl-2 pr-3 align-middle">
+                <td
+                  style={{
+                    padding: "0 12px 0 8px",
+                    verticalAlign: "middle",
+                  }}
+                >
                   <span
-                    className="text-sm font-semibold"
-                    style={{ color: borderColor }}
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: borderColor,
+                    }}
                   >
                     {card.name}
                   </span>
                 </td>
-                <td className="px-3 align-middle max-w-[220px]">
-                  <span className="text-[13px] text-slate-500 dark:text-slate-400 truncate block max-w-[200px]">
+                <td
+                  style={{
+                    padding: "0 12px",
+                    verticalAlign: "middle",
+                    maxWidth: 220,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: T.textSecondary,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                      maxWidth: 200,
+                    }}
+                  >
                     {card.description}
                   </span>
                 </td>
-                <td className="px-3 align-middle">
+                <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
                   <span
                     style={{
-                      background: `${borderColor}14`,
+                      background: `${borderColor}12`,
                       color: borderColor,
                       borderRadius: 20,
                       padding: "2px 10px",
@@ -84,32 +152,67 @@ export function RolesRegistryTable({
                     {card.userCount} чел.
                   </span>
                 </td>
-                <td className="px-3 align-middle">
-                  <span className="text-[13px] text-slate-500 dark:text-slate-400">
+                <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
+                  <span style={{ fontSize: 13, color: T.textSecondary }}>
                     {permCount} разрешений
                   </span>
                 </td>
-                <td className="px-3 align-middle">
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
+                  <span style={{ fontSize: 12, color: T.textSecondary }}>
                     {card.createdAt}
                   </span>
                 </td>
                 <td
-                  className="pl-3 pr-4 align-middle text-center"
+                  style={{
+                    padding: "0 16px 0 12px",
+                    verticalAlign: "middle",
+                    textAlign: "center",
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-center gap-1.5">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                    }}
+                  >
                     <button
                       onClick={() => onCardClick(card.id)}
                       title="Редактировать"
-                      className="w-7 h-7 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-center p-0"
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textSecondary,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
+                      }}
                     >
                       <Pencil size={13} />
                     </button>
                     <button
                       title="Удалить"
                       onClick={() => onDeleteRole(card.id)}
-                      className="w-7 h-7 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-center p-0"
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textSecondary,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
+                      }}
                     >
                       <Trash2 size={13} />
                     </button>

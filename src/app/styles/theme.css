@@ -240,3 +240,55 @@
   --th-glow-in: 0 0 20px rgb(var(--th-accent-rgb) / 0.35),
     0 0 48px rgb(var(--th-accent-2-rgb) / 0.22);
 }
+
+/* Тёмные поверхности: почти чёрная нейтраль с 8% акцента темы. Для синей темы
+   уровни совпадают со slate-950…600, на которых раньше был свёрстан профиль, —
+   теперь так выглядит каждый модуль, а оттенок следует выбранной теме.
+   В разметке они доступны как цвета Tailwind (`dark:bg-th-raised/90`, см. @theme
+   ниже) и используются только под `dark:`: светлый режим строится своими классами. */
+:root {
+  --th-dark-deep: color-mix(in srgb, rgb(var(--th-accent-rgb)) 8%, rgb(2 4 12));
+  --th-dark-base: color-mix(in srgb, rgb(var(--th-accent-rgb)) 8%, rgb(10 14 28));
+  --th-dark-raised: color-mix(in srgb, rgb(var(--th-accent-rgb)) 8%, rgb(24 30 46));
+  --th-dark-high: color-mix(in srgb, rgb(var(--th-accent-rgb)) 8%, rgb(44 52 70));
+  --th-dark-higher: color-mix(in srgb, rgb(var(--th-accent-rgb)) 8%, rgb(66 76 96));
+
+  /* Шкала акцента темы (600 — сам акцент): светлее — с белым, темнее — с
+     чёрным. Для инлайн-стилей, CSS и SVG: `var(--th-accent-500)`; в разметке —
+     цвета Tailwind `th-accent-N` (см. @theme ниже). */
+  --th-accent-50: color-mix(in srgb, rgb(var(--th-accent-rgb)) 7%, white);
+  --th-accent-100: color-mix(in srgb, rgb(var(--th-accent-rgb)) 14%, white);
+  --th-accent-200: color-mix(in srgb, rgb(var(--th-accent-rgb)) 28%, white);
+  --th-accent-300: color-mix(in srgb, rgb(var(--th-accent-rgb)) 46%, white);
+  --th-accent-400: color-mix(in srgb, rgb(var(--th-accent-rgb)) 66%, white);
+  --th-accent-500: color-mix(in srgb, rgb(var(--th-accent-rgb)) 85%, white);
+  --th-accent-600: rgb(var(--th-accent-rgb));
+  --th-accent-700: color-mix(in srgb, rgb(var(--th-accent-rgb)) 84%, black);
+  --th-accent-800: color-mix(in srgb, rgb(var(--th-accent-rgb)) 68%, black);
+  --th-accent-900: color-mix(in srgb, rgb(var(--th-accent-rgb)) 52%, black);
+  --th-accent-950: color-mix(in srgb, rgb(var(--th-accent-rgb)) 34%, black);
+}
+
+@theme inline {
+  --color-th-deep: var(--th-dark-deep);
+  --color-th-base: var(--th-dark-base);
+  --color-th-raised: var(--th-dark-raised);
+  --color-th-high: var(--th-dark-high);
+  --color-th-higher: var(--th-dark-higher);
+
+  /* Шкала акцента темы в привычной нумерации Tailwind: 600 — сам акцент
+     (у синей темы это blue-600), светлее — с белым, темнее — с чёрным.
+     Всё «акцентное» (кнопки, активные пункты, ссылки, фокус) пишется на ней:
+     `bg-th-accent-600 hover:bg-th-accent-700 focus:ring-th-accent-500/20`. */
+  --color-th-accent-50: var(--th-accent-50);
+  --color-th-accent-100: var(--th-accent-100);
+  --color-th-accent-200: var(--th-accent-200);
+  --color-th-accent-300: var(--th-accent-300);
+  --color-th-accent-400: var(--th-accent-400);
+  --color-th-accent-500: var(--th-accent-500);
+  --color-th-accent-600: var(--th-accent-600);
+  --color-th-accent-700: var(--th-accent-700);
+  --color-th-accent-800: var(--th-accent-800);
+  --color-th-accent-900: var(--th-accent-900);
+  --color-th-accent-950: var(--th-accent-950);
+}

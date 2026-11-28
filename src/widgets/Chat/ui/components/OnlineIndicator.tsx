@@ -17,7 +17,7 @@ export const OnlineIndicator: React.FC<IOnlineIndicatorProps> = ({
   return (
     <span className={`${className} flex ${sizeClass} select-none pointer-events-none`}>
       <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-      <span className="relative inline-flex h-full w-full rounded-full border-2 border-white dark:border-slate-800 bg-emerald-500 shadow-md animate-live-breathe" />
+      <span className="relative inline-flex h-full w-full rounded-full border-2 border-white dark:border-th-raised bg-emerald-500 shadow-md animate-live-breathe" />
     </span>
   );
 };

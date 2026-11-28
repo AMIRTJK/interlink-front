@@ -52,7 +52,7 @@ export const ToolbarPageGroup = ({
       className={cn(
         "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0",
         orientation === "landscape"
-          ? "bg-blue-50 border-blue-200 text-blue-700"
+          ? "bg-th-accent-50 border-th-accent-200 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
           : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100",
       )}
     >

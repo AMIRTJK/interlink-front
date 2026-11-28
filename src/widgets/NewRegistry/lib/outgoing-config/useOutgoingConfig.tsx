@@ -174,7 +174,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         items.push({
           key: "restore",
           label: "Восстановить",
-          icon: <Undo2 size={16} className="text-blue-600" />,
+          icon: <Undo2 size={16} className="text-th-accent-600" />,
           onClick: () => restoreCorrespondence({ id: record.id }),
         });
       } else {

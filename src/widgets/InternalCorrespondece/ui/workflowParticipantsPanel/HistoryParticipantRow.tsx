@@ -92,7 +92,7 @@ export const HistoryParticipantRow = ({
       <div
         className={`flex items-start justify-between p-3 rounded-lg border transition-all relative z-10 ${
           isDarkMode
-            ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800"
+            ? "bg-th-raised border-th-high hover:bg-th-raised"
             : "bg-gray-50 border-gray-100 hover:bg-white hover:shadow-sm"
         }`}
       >
@@ -113,7 +113,7 @@ export const HistoryParticipantRow = ({
                     className={`h-[20px]! w-[20px]! flex items-center justify-center rounded-full ${
                       isDarkMode
                         ? "text-green-400! bg-green-900/30!"
-                        : "text-green-600! bg-green-50!"
+                        : "text-green-600! bg-green-50! dark:bg-green-900/35! dark:text-green-400!"
                     }`}
                     onClick={(e) => onShowSignature(e, item)}
                     icon={
@@ -146,8 +146,8 @@ export const HistoryParticipantRow = ({
               <div
                 className={`mt-1 flex items-center gap-1 text-[11px] font-medium cursor-pointer select-none transition-colors ${
                   isDarkMode
-                    ? "text-blue-400 hover:text-blue-300"
-                    : "text-blue-500 hover:text-blue-600"
+                    ? "text-th-accent-400 hover:text-th-accent-300"
+                    : "text-th-accent-500 hover:text-th-accent-600"
                 }`}
                 onClick={() => toggleRow(item.id)}
               >
@@ -180,7 +180,7 @@ export const HistoryParticipantRow = ({
               disabled={item.status !== "pending"}
               type="primary"
               size="small"
-              className={`bg-blue-600! hover:bg-blue-500! ${
+              className={`bg-th-accent-600! hover:bg-th-accent-500! ${
                 item.status !== "pending" ? "text-white! opacity-50!" : ""
               }`}
             >
@@ -209,7 +209,7 @@ export const HistoryParticipantRow = ({
           className={`mt-1.5 mx-3 p-2 rounded-lg text-xs leading-relaxed border ${
             isDarkMode
               ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
-              : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+              : "bg-amber-50/80 border-amber-200/80 text-amber-900 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50"
           }`}
         >
           <span className="font-semibold block mb-0.5 text-[11px] opacity-80">
@@ -223,8 +223,8 @@ export const HistoryParticipantRow = ({
         <div
           className={`pl-[52px] pr-2 py-2 flex flex-col gap-2 border-l-2 ml-[22px] -mt-1 rounded-b-lg ${
             isDarkMode
-              ? "border-blue-900/50 bg-[#1f2937]/50"
-              : "border-blue-100 bg-white/50"
+              ? "border-th-accent-900/50 bg-th-raised/50"
+              : "border-th-accent-100 bg-white/50"
           }`}
         >
           {userVersions.map((v) => (
@@ -239,19 +239,19 @@ export const HistoryParticipantRow = ({
               className={`flex items-center justify-between p-2 rounded border cursor-pointer group transition-all ${
                 v.id === activeVersionId
                   ? isDarkMode
-                    ? "bg-gray-800 border-blue-500 shadow-sm shadow-blue-900/30"
-                    : "bg-blue-50/50 border-blue-500 shadow-sm shadow-blue-100"
+                    ? "bg-th-raised border-th-accent-500 shadow-sm shadow-th-accent-900/30"
+                    : "bg-th-accent-50/50 border-th-accent-500 shadow-sm shadow-th-accent-100 dark:bg-th-accent-900/35"
                   : isDarkMode
-                    ? "bg-gray-800 border-gray-700 hover:border-blue-500"
-                    : "bg-white border-gray-100 hover:border-blue-300 hover:shadow-sm"
+                    ? "bg-th-raised border-th-high hover:border-th-accent-500"
+                    : "bg-white border-gray-100 hover:border-th-accent-300 hover:shadow-sm"
               }`}
             >
               <div>
                 <div
                   className={`text-xs font-semibold transition-colors flex gap-1 ${
                     isDarkMode
-                      ? "text-gray-300 group-hover:text-blue-400"
-                      : "text-gray-700 group-hover:text-blue-600"
+                      ? "text-gray-300 group-hover:text-th-accent-400"
+                      : "text-gray-700 group-hover:text-th-accent-600"
                   }`}
                 >
                   <p>Версия {v.versionNumber}</p>
@@ -292,8 +292,8 @@ export const HistoryParticipantRow = ({
                 <div
                   className={`${
                     isDarkMode
-                      ? "text-gray-500 group-hover:text-blue-400"
-                      : "text-gray-300 group-hover:text-blue-500"
+                      ? "text-gray-500 group-hover:text-th-accent-400"
+                      : "text-gray-300 group-hover:text-th-accent-500"
                   }`}
                 >
                   <Tooltip title="Восстановить в редакторе">
@@ -303,7 +303,7 @@ export const HistoryParticipantRow = ({
                       size="small"
                       className={
                         isDarkMode
-                          ? "text-gray-400! hover:text-blue-400!"
+                          ? "text-gray-400! hover:text-th-accent-400!"
                           : ""
                       }
                     />

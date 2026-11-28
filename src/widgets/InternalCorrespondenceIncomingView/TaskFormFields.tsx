@@ -57,7 +57,7 @@ export const TaskFormFields: React.FC<IProps> = ({
           onChange={(e) => setTaskText(e.target.value)}
           placeholder="Опишите задачу..."
           rows={3}
-          className="w-full rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none resize-none transition-all"
+          className="w-full rounded-xl border border-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-100 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none resize-none transition-all"
         />
       </div>
 
@@ -74,7 +74,7 @@ export const TaskFormFields: React.FC<IProps> = ({
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 text-sm text-slate-800 outline-none transition-all"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-100 text-sm text-slate-800 outline-none transition-all"
           />
         </div>
       </div>
@@ -111,7 +111,7 @@ export const TaskFormFields: React.FC<IProps> = ({
           onChange={(e) => setNote(e.target.value)}
           placeholder="Дополнительные сведения..."
           rows={2}
-          className="w-full rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none resize-none transition-all"
+          className="w-full rounded-xl border border-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-100 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none resize-none transition-all"
         />
       </div>
     </div>

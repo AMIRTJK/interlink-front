@@ -58,9 +58,9 @@ export const SignerCard = ({
         className={cn(
           "rounded-xl border transition-all flex flex-col overflow-hidden",
           signer.dsDeclined
-            ? "border-red-200 bg-red-50/40"
+            ? "border-red-200 bg-red-50/40 dark:bg-red-900/35 dark:border-red-800/50"
             : signer.dsApplied
-              ? "border-emerald-100 bg-emerald-50/40"
+              ? "border-emerald-100 bg-emerald-50/40 dark:bg-emerald-900/35 dark:border-emerald-800/50"
               : "border-slate-100 bg-slate-50/40",
         )}
       >
@@ -79,7 +79,7 @@ export const SignerCard = ({
             </p>
             <p className="text-[10px] text-slate-500 mt-0.5">{signer.role}</p>
             <If is={!!signer.isInvited && signer.dsDeclined}>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 mt-1.5 bg-red-50 border border-red-100 rounded-full">
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 mt-1.5 bg-red-50 border border-red-100 rounded-full dark:bg-red-900/35 dark:border-red-800/50">
                 <X size={10} className="text-red-500 shrink-0" />
                 <span className="text-[10px] font-semibold text-red-600">
                   Отклонил право подписи
@@ -102,14 +102,14 @@ export const SignerCard = ({
                   })
                 }
                 disabled={isSignerInviting}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-th-accent-50 border-th-accent-200 text-th-accent-700 hover:bg-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
               >
                 <Send size={11} />
                 <span>{isSignerInviting ? "..." : "Пригласить"}</span>
               </button>
             </If>
             <If is={!!signer.isInvited && signer.dsApplied}>
-              <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+              <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full dark:bg-emerald-900/35 dark:border-emerald-800/50">
                 <Shield size={10} className="text-emerald-500" />
                 <span className="text-[10px] font-semibold text-emerald-600">
                   Подписано
@@ -151,7 +151,7 @@ export const SignerCard = ({
           className={cn(
             "px-3 py-2.5 border-t rounded-b-xl",
             signer.dsApplied
-              ? "border-emerald-100 bg-emerald-50/40"
+              ? "border-emerald-100 bg-emerald-50/40 dark:bg-emerald-900/35 dark:border-emerald-800/50"
               : "border-slate-100 bg-slate-50/40",
           )}
         >
@@ -179,7 +179,7 @@ export const SignerCard = ({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleInsertStamp}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-th-accent-50 hover:bg-th-accent-100 text-th-accent-700 text-[11px] font-semibold rounded-lg transition-colors border border-th-accent-200 shadow-sm cursor-pointer dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
               >
                 <Monitor size={12} />
                 <span>Указать место для ЭЦП</span>
@@ -214,7 +214,7 @@ export const SignerCard = ({
         confirmText="Подписать"
         icon={<PenLine size={26} strokeWidth={2.2} />}
         iconBg="bg-purple-50 dark:bg-purple-500/10 text-purple-600"
-        confirmBtnBg="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-purple-500/25"
+        confirmBtnBg="bg-gradient-to-r from-purple-500 to-th-accent-600 hover:from-purple-600 hover:to-th-accent-700 shadow-purple-500/25"
         onConfirm={async () => {
           applyFinalDS();
           setShowSignConfirm(false);

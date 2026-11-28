@@ -89,13 +89,15 @@ export const FilesHeader = ({
 					accent={accent}
 				/>
 
-				<div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+				<div className="h-[38px] flex items-center gap-0.5 ui-glass-soft bg-slate-100 dark:bg-th-raised p-1 rounded-full border border-slate-200/50 dark:border-th-high/50">
 					<button
 						onClick={() => onViewModeChange("grid")}
+						aria-label="Плитка"
+						aria-pressed={viewMode === "grid"}
 						style={viewMode === "grid" ? { color: accent } : undefined}
-						className={`p-1.5 rounded-full transition-all cursor-pointer ${
+						className={`h-full aspect-square flex items-center justify-center rounded-full transition-all cursor-pointer ${
 							viewMode === "grid"
-								? "bg-white dark:bg-slate-700 shadow-sm"
+								? "bg-white dark:bg-th-high shadow-sm"
 								: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 						}`}
 					>
@@ -103,10 +105,12 @@ export const FilesHeader = ({
 					</button>
 					<button
 						onClick={() => onViewModeChange("list")}
+						aria-label="Список"
+						aria-pressed={viewMode === "list"}
 						style={viewMode === "list" ? { color: accent } : undefined}
-						className={`p-1.5 rounded-full transition-all cursor-pointer ${
+						className={`h-full aspect-square flex items-center justify-center rounded-full transition-all cursor-pointer ${
 							viewMode === "list"
-								? "bg-white dark:bg-slate-700 shadow-sm"
+								? "bg-white dark:bg-th-high shadow-sm"
 								: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 						}`}
 					>
@@ -117,7 +121,7 @@ export const FilesHeader = ({
 				<If is={viewContext === "personal"}>
 					<button
 						onClick={onCreateFolderClick}
-						className="flex items-center gap-2 px-5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-full text-sm shadow-sm cursor-pointer transition-all"
+						className="flex items-center gap-2 px-5 py-2 ui-glass-soft bg-white dark:bg-th-raised hover:bg-slate-50 dark:hover:bg-th-high text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-th-high font-semibold rounded-full text-sm shadow-sm cursor-pointer transition-all"
 					>
 						<FolderPlus
 							size={16}

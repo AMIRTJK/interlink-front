@@ -1,7 +1,17 @@
 import { FC, ReactNode } from "react";
 import { Empty, Button } from "antd";
 import { motion } from "framer-motion";
+import { Inbox } from "lucide-react";
 import "./style.css";
+
+// Своя иконка вместо Empty.PRESENTED_IMAGE_SIMPLE: серый ящик antd рассчитан на
+// светлый фон и в тёмной теме выглядит мутным пятном. Круг в цвете темы читается
+// в обоих режимах.
+const DEFAULT_ICON = (
+  <span className="empty__icon" aria-hidden>
+    <Inbox size={28} strokeWidth={1.75} />
+  </span>
+);
 
 interface IProps {
   title?: string;
@@ -32,7 +42,7 @@ export const EmptyState: FC<IProps> = ({
       className={`empty ${className}`}
     >
       <Empty
-        image={icon || Empty.PRESENTED_IMAGE_SIMPLE}
+        image={icon || DEFAULT_ICON}
         description={
           <div className="empty__content">
             <h3 className="empty__title">{title}</h3>

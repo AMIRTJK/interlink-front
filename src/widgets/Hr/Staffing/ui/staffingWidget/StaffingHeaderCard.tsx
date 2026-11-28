@@ -50,7 +50,7 @@ export function StaffingHeaderCard({
       <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-th-accent-500 to-th-accent-700 flex items-center justify-center">
               <GitBranch size={15} className="text-white" />
             </div>
             <h2 className={`text-lg font-bold ${titleText}`}>
@@ -78,20 +78,20 @@ export function StaffingHeaderCard({
               <span className="opacity-60 text-[10px]">{pdfFile?.size}</span>
               <button
                 onClick={onOpenPdfViewer}
-                className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                className="p-0.5 rounded hover:bg-white/10 transition-colors dark:hover:bg-th-high/10"
               >
                 <Eye size={12} />
               </button>
               <a
                 href={pdfFile?.url}
                 download={pdfFile?.name}
-                className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                className="p-0.5 rounded hover:bg-white/10 transition-colors dark:hover:bg-th-high/10"
               >
                 <Download size={12} />
               </a>
               <button
                 onClick={onClearPdf}
-                className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                className="p-0.5 rounded hover:bg-white/10 transition-colors dark:hover:bg-th-high/10"
               >
                 <X size={12} />
               </button>

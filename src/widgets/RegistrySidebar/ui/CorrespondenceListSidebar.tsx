@@ -7,11 +7,11 @@ import { useMemo } from "react";
 
 const getStatusStyle = (status: string) => {
   const s = status?.toLowerCase() || "";
-  if (s === "draft") return "bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-slate-300";
-  if (s === "to_register") return "bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300";
+  if (s === "draft") return "bg-gray-200 text-gray-600 dark:bg-th-high dark:text-slate-300";
+  if (s === "to_register") return "bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-950/40 dark:text-th-accent-300";
   if (s === "to_execute") return "bg-[#FFA825] text-white";
   if (s === "registered") return "bg-[#7B54C4] text-white";
-  return "bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400";
+  return "bg-gray-100 text-gray-500 dark:bg-th-high dark:text-slate-400";
 };
 
 const getStatusName = (status: string) => {
@@ -57,7 +57,7 @@ export const CorrespondenceListSidebar = ({
 
   if (isLoading) {
     return (
-      <div className="w-full h-20 bg-white dark:bg-slate-800 rounded-2xl p-4 flex items-center justify-center border border-gray-200 dark:border-slate-700">
+      <div className="w-full h-20 bg-white dark:bg-th-raised rounded-2xl p-4 flex items-center justify-center border border-gray-200 dark:border-th-high">
         <Loader />
       </div>
     );
@@ -66,7 +66,7 @@ export const CorrespondenceListSidebar = ({
   return (
     <div
       className={cn(
-        "w-full bg-slate-100/80 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-300/80 dark:border-slate-700/80 shadow-md",
+        "w-full bg-slate-100/80 dark:bg-th-raised rounded-2xl overflow-hidden border border-gray-300/80 dark:border-th-high/80 shadow-md",
         variant === "horizontal" ? "flex flex-col" : "flex-1 flex flex-col h-full"
       )}
     >
@@ -96,8 +96,8 @@ export const CorrespondenceListSidebar = ({
                   "p-3 rounded-xl cursor-pointer border transition-all duration-200 shrink-0",
                   variant === "horizontal" ? "w-[280px]" : "w-full",
                   isActive
-                    ? "bg-[#F2F5FF] dark:bg-blue-950/40 border-[#0037AF] shadow-sm ring-1 ring-[#0037AF]/20"
-                    : "bg-white dark:bg-slate-800 border-transparent hover:border-blue-300 hover:shadow-md"
+                    ? "bg-[#F2F5FF] dark:bg-th-accent-950/40 border-[#0037AF] shadow-sm ring-1 ring-[#0037AF]/20"
+                    : "bg-white dark:bg-th-raised border-transparent hover:border-th-accent-300 hover:shadow-md"
                 )}
               >
                 <div className="flex flex-col h-full justify-between">
@@ -105,7 +105,7 @@ export const CorrespondenceListSidebar = ({
                     <div
                       className={cn(
                         "font-bold text-xs mb-1 line-clamp-1 leading-tight",
-                        isActive ? "text-[#0037AF] dark:text-blue-300" : "text-gray-900 dark:text-slate-100"
+                        isActive ? "text-[#0037AF] dark:text-th-accent-300" : "text-gray-900 dark:text-slate-100"
                       )}
                     >
                       {item.subject || "Без темы"}

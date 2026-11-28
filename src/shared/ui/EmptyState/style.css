@@ -13,6 +13,29 @@
   margin-top: 1rem;
 }
 
+/* Иконка по умолчанию: круг в цвете темы — читается и на светлом, и на тёмном фоне. */
+.empty .ant-empty-image {
+  height: auto !important;
+}
+
+.empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  color: var(--th-accent-600);
+  background: rgb(var(--th-accent-rgb) / 0.1);
+  border: 1px solid rgb(var(--th-accent-rgb) / 0.2);
+}
+
+.dark .empty__icon {
+  color: var(--th-accent-300);
+  background: rgb(var(--th-accent-rgb) / 0.16);
+  border-color: rgb(var(--th-accent-rgb) / 0.35);
+}
+
 .empty__title {
   color: #1e293b !important; /* slate-800 */
   font-size: 1.25rem !important;
@@ -28,20 +51,29 @@
   line-height: 1.5 !important;
 }
 
+/* Тёмная тема: светлый текст, иначе заголовок сливается с фоном. */
+.dark .empty__title {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.dark .empty__description {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
 .empty__action-btn {
   margin-top: 1.5rem !important;
   height: auto !important;
   padding: 10px 24px !important;
   border-radius: 12px !important;
   font-weight: 500 !important;
-  background: #0037af !important;
+  background: var(--th-accent-600) !important;
   border: none !important;
   transition: all 0.3s ease !important;
 }
 
 .empty__action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 55, 175, 0.2) !important;
+  box-shadow: 0 4px 12px rgb(var(--th-accent-rgb) / 0.25) !important;
   opacity: 0.9;
 }
 

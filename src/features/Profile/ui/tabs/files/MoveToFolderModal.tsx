@@ -53,10 +53,10 @@ export const MoveToFolderModal = ({
       onCancel={onClose}
       onOk={handleConfirm}
       okButtonProps={{
-        className: "bg-indigo-600! hover:bg-indigo-700! text-white! rounded-full px-5",
+        className: "bg-th-accent-600! hover:bg-th-accent-700! text-white! rounded-full px-5",
       }}
       cancelButtonProps={{
-        className: "rounded-full px-5 border-slate-200 dark:border-slate-800",
+        className: "rounded-full px-5 border-slate-200 dark:border-th-raised",
       }}
       destroyOnClose
     >
@@ -78,8 +78,8 @@ export const MoveToFolderModal = ({
             value={selectedFolderId}
             onChange={setSelectedFolderId}
             options={options}
-            className="w-full rounded-xl border-slate-200 dark:border-slate-850 h-10"
-            dropdownClassName="dark:bg-slate-800"
+            className="w-full rounded-xl border-slate-200 dark:border-th-raised h-10"
+            dropdownClassName="dark:bg-th-raised"
           />
         </div>
       </div>

@@ -23,7 +23,7 @@ export interface PeopleColumn {
   key: string;
   label: string;
   icon: React.ReactNode;
-  // Tailwind-класс фона аватара (bg-blue-600 и т.п.)
+  // Tailwind-класс фона аватара (bg-th-accent-600 и т.п.)
   avatarBg: string;
   getUsers: (data: any) => any[];
 }

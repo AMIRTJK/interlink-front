@@ -17,44 +17,70 @@ export function UserDrawerPermsList({
   togglePerm,
 }: IProps) {
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-4">
-      <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+    <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: T.textSecondary,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          marginBottom: 12,
+        }}
+      >
         Права пользователя
       </div>
       {isLoading || !perms ? (
-        <div className="text-[13px] text-slate-500 dark:text-slate-400 py-1.5">
+        <div style={{ fontSize: 13, color: T.textSecondary, padding: "6px 0" }}>
           Загрузка...
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {perms.map((mod, mIdx) => (
             <div
               key={`${mod.module}-${staggerGen}`}
-              className="bg-slate-50 dark:bg-slate-800/70 rounded-lg px-3.5 py-2.5 border border-slate-200 dark:border-slate-700/80"
               style={{
+                background: T.bg,
+                borderRadius: 8,
+                padding: "11px 14px",
+                border: `1px solid ${T.border}`,
                 animation: `permRowIn 200ms ease-out ${mIdx * 40}ms both`,
               }}
             >
-              <div className="text-[11px] font-bold text-slate-900 dark:text-slate-100 mb-2.5 uppercase tracking-wide">
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: T.textPrimary,
+                  marginBottom: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
+              >
                 {mod.module}
               </div>
               {mod.perms.map((perm, pIdx) => (
                 <div
                   key={`${perm.label}-${pIdx}-${staggerGen}`}
-                  className="flex flex-col gap-1.5"
+                  style={{ display: "flex", flexDirection: "column", gap: 7 }}
                 >
                   {perm.subperms &&
                     perm.subperms.map((sp, spIdx) => (
                       <div
                         key={`${sp.label}-${staggerGen}`}
-                        className="flex items-center justify-between gap-2"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 8,
+                        }}
                       >
                         <span
-                          className={`text-xs ${
-                            sp.value
-                              ? "text-slate-900 dark:text-slate-100 font-medium"
-                              : "text-slate-400 dark:text-slate-500 font-normal"
-                          }`}
+                          style={{
+                            fontSize: 12,
+                            color: sp.value ? T.textPrimary : "#94A3B8",
+                            fontWeight: sp.value ? 500 : 400,
+                          }}
                         >
                           {sp.label}
                         </span>

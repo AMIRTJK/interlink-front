@@ -6,7 +6,7 @@ import { useMutationQuery } from '@shared/lib';
 import { If } from '@shared/ui';
 
 const INPUT_CLS =
-  'w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white border-slate-200 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed';
+  'w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white border-slate-200 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed';
 
 const LABEL_CLS = 'block text-xs font-semibold text-gray-500 mb-1.5';
 
@@ -72,8 +72,8 @@ export const CreateOrganization = () => {
     <div className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm">
       <div className="px-6 pt-6 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50">
-            <Building2 className="w-5 h-5 text-indigo-600" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-th-accent-50 dark:bg-th-accent-900/35">
+            <Building2 className="w-5 h-5 text-th-accent-600" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900">Создать организацию</h2>
@@ -153,7 +153,7 @@ export const CreateOrganization = () => {
         <button
           type="submit"
           disabled={disabled || isPending}
-          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-900/30 disabled:opacity-50 cursor-pointer transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-th-accent-600 hover:bg-th-accent-700 text-white text-sm font-semibold shadow-md shadow-th-accent-900/30 disabled:opacity-50 cursor-pointer transition-colors flex items-center justify-center gap-2"
         >
           <If is={isPending}>
             <Loader2 className="w-4 h-4 animate-spin" />

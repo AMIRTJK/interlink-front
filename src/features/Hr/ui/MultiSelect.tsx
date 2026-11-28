@@ -18,9 +18,9 @@ interface IMultiSelectProps {
 
 const getInputClasses = (hasError?: boolean, disabled?: boolean) => {
   const inputShell = "w-full rounded-xl border text-sm outline-none transition-colors";
-  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-400 dark:text-slate-600 cursor-not-allowed`;
+  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-gray-400 dark:text-slate-600 cursor-not-allowed`;
   if (hasError) return `${inputShell} border-red-300 bg-red-50/30 dark:border-red-900/50 dark:bg-red-950/10 text-gray-800 dark:text-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/20`;
-  return `${inputShell} border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/50 text-gray-800 dark:text-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20`;
+  return `${inputShell} border-gray-200 bg-gray-50 dark:border-th-raised dark:bg-th-base/50 text-gray-800 dark:text-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-500/20`;
 };
 
 export const MultiSelect = ({ value, onChange, options, placeholder, disabled, hasError }: IMultiSelectProps) => {
@@ -56,7 +56,7 @@ export const MultiSelect = ({ value, onChange, options, placeholder, disabled, h
           chosen.map((o) => (
             <span
               key={o.value}
-              className="inline-flex items-center gap-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-lg px-2 py-0.5 text-xs"
+              className="inline-flex items-center gap-1 bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-700 dark:text-th-accent-300 rounded-lg px-2 py-0.5 text-xs"
             >
               {o.label}
               <span
@@ -64,7 +64,7 @@ export const MultiSelect = ({ value, onChange, options, placeholder, disabled, h
                   e.stopPropagation();
                   toggle(o.value);
                 }}
-                className="hover:text-indigo-900 dark:hover:text-indigo-100 flex"
+                className="hover:text-th-accent-900 dark:hover:text-th-accent-100 flex"
               >
                 <X size={11} />
               </span>
@@ -77,7 +77,7 @@ export const MultiSelect = ({ value, onChange, options, placeholder, disabled, h
         />
       </button>
       <If is={open}>
-        <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg py-1">
+        <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-th-raised bg-white dark:bg-th-base shadow-lg py-1">
           {options.length === 0 ? (
             <p className="px-3 py-2 text-xs text-gray-400 dark:text-slate-600">Нет данных</p>
           ) : (
@@ -88,11 +88,11 @@ export const MultiSelect = ({ value, onChange, options, placeholder, disabled, h
                   type="button"
                   key={o.value}
                   onClick={() => toggle(o.value)}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-th-raised/50 cursor-pointer"
                 >
                   <span
                     className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                      on ? "bg-indigo-600 border-indigo-600 text-white" : "border-gray-300 dark:border-slate-700"
+                      on ? "bg-th-accent-600 border-th-accent-600 text-white" : "border-gray-300 dark:border-th-high"
                     }`}
                   >
                     <If is={on}>

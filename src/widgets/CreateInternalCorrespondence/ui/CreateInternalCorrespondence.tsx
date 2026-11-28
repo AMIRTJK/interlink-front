@@ -1009,7 +1009,7 @@ export const CreateInternalCorrespondence = ({
           .split(" ")
           .map((n: string) => n[0])
           .join(""),
-        color: "bg-blue-100 text-blue-700",
+        color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
       };
     }) || [];
 
@@ -1159,7 +1159,7 @@ export const CreateInternalCorrespondence = ({
         .map((n: string) => n[0])
         .slice(0, 2)
         .join(""),
-      color: "bg-purple-100 text-purple-700",
+      color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
       dsApplied: false,
       dsLoading: false,
     });
@@ -2334,7 +2334,7 @@ export const CreateInternalCorrespondence = ({
           </p>
           <button
             onClick={onBack}
-            className="mt-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="mt-2 px-6 py-2.5 bg-th-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-th-accent-700 transition-colors"
           >
             Вернуться назад
           </button>
@@ -2374,7 +2374,7 @@ export const CreateInternalCorrespondence = ({
                   e.preventDefault();
                   onSelect(r);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-th-accent-50 transition-colors text-left"
               >
                 <div
                   className={cn(
@@ -2441,7 +2441,7 @@ export const CreateInternalCorrespondence = ({
             <h1 className="text-xl font-bold text-slate-900">
               Создание письма
             </h1>
-            <span className="px-2.5 py-0.5 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100">
+            <span className="px-2.5 py-0.5 bg-th-accent-50 text-th-accent-600 text-xs font-semibold rounded-full border border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
               Черновик
             </span>
           </div>
@@ -2587,7 +2587,7 @@ export const CreateInternalCorrespondence = ({
               >
                 <button
                   onClick={() => setShowCcField((v) => !v)}
-                  className="text-xs text-blue-600 cursor-pointer font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
+                  className="text-xs text-th-accent-600 cursor-pointer font-semibold hover:text-th-accent-800 transition-colors pt-2 flex-shrink-0"
                 >
                   {showCcField ? "- Скрыть копию" : "+ Копия"}
                 </button>
@@ -2791,8 +2791,8 @@ export const CreateInternalCorrespondence = ({
               >
                 {/* Подсказка при перетаскивании .docx в редактор */}
                 {isDraggingWord && !isReadOnly && (
-                  <div className="absolute inset-0 z-[60] m-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/80 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-                    <div className="flex flex-col items-center gap-2 text-blue-700">
+                  <div className="absolute inset-0 z-[60] m-3 rounded-2xl border-2 border-dashed border-th-accent-400 bg-th-accent-50/80 backdrop-blur-[1px] flex items-center justify-center pointer-events-none dark:bg-th-accent-900/35">
+                    <div className="flex flex-col items-center gap-2 text-th-accent-700">
                       <FileType size={32} />
                       <span className="text-sm font-semibold">
                         Отпустите, чтобы импортировать документ Word
@@ -3029,7 +3029,7 @@ export const CreateInternalCorrespondence = ({
                               name: r.name,
                               role: r.org,
                               initials: r.initials,
-                              color: "bg-purple-100 text-purple-700",
+                              color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
                               dsApplied: false,
                               dsLoading: false,
                               isInvited: false,
@@ -3124,8 +3124,8 @@ export const CreateInternalCorrespondence = ({
         message="Пожалуйста, перед отправкой внимательно проверьте тему письма, список получателей и прикрепленные файлы. Отменить отправку будет невозможно!"
         confirmText="Отправить"
         icon={<Send size={26} strokeWidth={2.2} />}
-        iconBg="bg-blue-50 dark:bg-blue-500/10 text-blue-500"
-        confirmBtnBg="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-blue-500/25"
+        iconBg="bg-th-accent-50 dark:bg-th-accent-500/10 text-th-accent-500"
+        confirmBtnBg="bg-gradient-to-r from-th-accent-500 to-th-accent-600 hover:from-th-accent-600 hover:to-th-accent-700 shadow-th-accent-500/25"
         onConfirm={async () => {
           sendCorrespondence({});
           setShowSendConfirm(false);

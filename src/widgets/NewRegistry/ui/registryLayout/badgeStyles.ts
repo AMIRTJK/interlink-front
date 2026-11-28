@@ -2,7 +2,7 @@
 export const getBadgeStyles = (color: string) => {
   switch (color) {
     case "blue":
-      return "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300";
+      return "bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-950/40 dark:text-th-accent-300";
     case "emerald":
       return "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300";
     case "purple":
@@ -12,7 +12,7 @@ export const getBadgeStyles = (color: string) => {
     case "rose":
       return "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300";
     default:
-      return "bg-gray-50 text-gray-600 dark:bg-slate-700/50 dark:text-slate-300";
+      return "bg-gray-50 text-gray-600 dark:bg-th-high/50 dark:text-slate-300";
   }
 };
 

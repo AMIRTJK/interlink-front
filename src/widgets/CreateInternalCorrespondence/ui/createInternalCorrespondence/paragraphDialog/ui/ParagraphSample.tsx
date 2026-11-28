@@ -31,7 +31,7 @@ export const ParagraphSample = ({ fmt }: IProps) => {
   return (
     <Group title="Образец">
       <div
-        className="mx-auto overflow-hidden rounded-lg border border-slate-100 bg-white dark:border-zinc-700 dark:bg-zinc-800"
+        className="mx-auto overflow-hidden rounded-lg border border-slate-100 bg-white dark:border-th-high dark:bg-th-raised"
         style={{ width: SHEET_WIDTH * SHEET_SCALE, height: VIEW_HEIGHT }}
       >
         <div

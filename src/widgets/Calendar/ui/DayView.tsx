@@ -64,7 +64,7 @@ export const DayView = memo(({
   return (
     <div className="w-full! flex! flex-col! gap-3!">
       {/* Top Focus Day Banner in Russian */}
-      <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-zinc-200! dark:border-slate-700/50! text-[#6b21a8]! dark:text-purple-200! font-semibold! text-xs! tracking-wider! uppercase! flex! items-center! justify-center! gap-2!">
+      <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-zinc-200! dark:border-th-high/50! text-[#6b21a8]! dark:text-purple-200! font-semibold! text-xs! tracking-wider! uppercase! flex! items-center! justify-center! gap-2!">
         <span>{currentDate.locale("ru").format("dddd, D MMMM").toUpperCase()} • ДЕНЬ В ФОКУСЕ</span>
         {dayWeather && <WeatherIcon type={dayWeather.weatherType} size={14} />}
       </div>
@@ -81,7 +81,7 @@ export const DayView = memo(({
       )}
 
       {/* Hourly Grid Container */}
-      <div className="flex! relative! w-full! border-t! border-slate-100/80! dark:border-slate-800/50! pt-2!">
+      <div className="flex! relative! w-full! border-t! border-slate-100/80! dark:border-th-raised/50! pt-2!">
         {/* Time Labels in 24h format */}
         <div className="w-14! flex-shrink-0! relative!">
           {HOURS.map((h) => (
@@ -97,7 +97,7 @@ export const DayView = memo(({
 
         {/* Day Column Grid */}
         <div
-          className="flex-1! relative! cursor-pointer! rounded-2xl! bg-white/70! dark:bg-slate-900/50! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! backdrop-blur-md!"
+          className="flex-1! relative! cursor-pointer! rounded-2xl! bg-white/70! dark:bg-th-base/50! ui-glass ui-glass--forced border! border-zinc-200! dark:border-th-high/50! backdrop-blur-md!"
           style={{ height: HOUR_HEIGHT * HOURS.length }}
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -110,7 +110,7 @@ export const DayView = memo(({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="w-full! border-b! border-slate-100/70! dark:border-slate-800/40! absolute! left-0! right-0!"
+              className="w-full! border-b! border-slate-100/70! dark:border-th-raised/40! absolute! left-0! right-0!"
               style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}
             />
           ))}

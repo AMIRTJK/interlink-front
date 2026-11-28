@@ -15,7 +15,7 @@ export function UserProfileTabNav({ tab, onTabChange }: IProps) {
   ];
 
   return (
-    <div className="px-6 pt-3 border-b border-slate-100">
+    <div className="px-6 pt-3 border-b border-slate-100 dark:border-th-high">
       <div className="flex items-center gap-6">
         {tabs.map(({ key, label }) => {
           const isActive = tab === key;
@@ -25,8 +25,8 @@ export function UserProfileTabNav({ tab, onTabChange }: IProps) {
               onClick={() => onTabChange(key)}
               className={`relative pb-3 text-sm font-semibold transition-colors cursor-pointer select-none outline-none! focus:outline-none! border border-transparent ${
                 isActive
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "text-th-accent-600 font-bold"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white"
               }`}
             >
               <span>{label}</span>
@@ -34,7 +34,7 @@ export function UserProfileTabNav({ tab, onTabChange }: IProps) {
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full origin-left"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-th-accent-600 rounded-full origin-left"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}

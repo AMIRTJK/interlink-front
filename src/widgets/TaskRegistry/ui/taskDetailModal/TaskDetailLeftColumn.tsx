@@ -35,7 +35,7 @@ export function TaskDetailLeftColumn({
           {task.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs rounded-full border border-slate-200 dark:border-white/10"
+              className="px-3 py-1 bg-slate-100 dark:bg-th-raised text-slate-600 dark:text-slate-300 text-xs rounded-full border border-slate-200 dark:border-white/10"
             >
               {tag}
             </span>
@@ -52,7 +52,7 @@ export function TaskDetailLeftColumn({
             {task.progress}%
           </span>
         </div>
-        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-2 w-full bg-slate-100 dark:bg-th-raised rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${task.progress}%` }}
@@ -72,7 +72,7 @@ export function TaskDetailLeftColumn({
             task.attachments.map((file) => (
               <div
                 key={file.id}
-                className="group flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
+                className="group flex items-center gap-3 p-3 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
               >
                 <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600">
                   <FileIcon size={20} />
@@ -91,7 +91,7 @@ export function TaskDetailLeftColumn({
                       }
                     }}
                     disabled={task.rawId == null || file.rawId == null}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-40"
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-th-high rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-40"
                     title="Скачать"
                   >
                     <Download size={16} />

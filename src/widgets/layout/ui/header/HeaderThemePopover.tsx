@@ -11,7 +11,7 @@ export const HeaderThemePopover = ({
   setCurrentTheme,
 }: IHeaderThemePopoverProps) => {
   return (
-    <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+    <div className="w-[260px] p-5 bg-white dark:bg-th-raised rounded-[2.5rem]">
       <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-4 px-1">
         Выберите тему
       </p>
@@ -24,9 +24,9 @@ export const HeaderThemePopover = ({
                 setCurrentTheme(key);
               }
             }}
-            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
+            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-th-high transition-all cursor-pointer ${
               currentTheme === key
-                ? "bg-zinc-100 dark:bg-zinc-700 ring-2 ring-indigo-400"
+                ? "bg-zinc-100 dark:bg-th-high ring-2 ring-th-accent-400"
                 : ""
             }`}
           >

@@ -10,7 +10,7 @@ interface IProps {
 
 export const OrderExecutorCard = ({ state, methods, users }: IProps) => (
   <div className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0">
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 dark:bg-th-raised dark:border-th-high">
       <SectionTitle num={3} title="ИСПОЛНИТЕЛЬ" />
       <div className="space-y-5">
         <div>
@@ -36,13 +36,13 @@ export const OrderExecutorCard = ({ state, methods, users }: IProps) => (
         </div>
       </div>
 
-      <div className="border-t border-slate-100 mt-6 pt-6">
+      <div className="border-t border-slate-100 mt-6 pt-6 dark:border-th-high">
         <SectionTitle num={4} title="ЗАГРУЗИТЬ ПРИЛОЖЕНИЕ" />
         <input type="file" multiple ref={state.attachInputRef} onChange={methods.handleAttachInputChange} className="hidden" />
-        <div onClick={() => state.attachInputRef.current?.click()} className="border-2 border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50 rounded-xl p-5 text-center cursor-pointer transition-colors group">
-          <UploadCloud size={28} className="text-blue-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-          <p className="text-blue-600 font-medium text-[13px] mb-1">Нажмите для выбора файла</p>
-          <p className="text-[10px] text-blue-400/80 uppercase">PDF, DOC, DOCX, JPG, PNG (макс. 10 МБ)</p>
+        <div onClick={() => state.attachInputRef.current?.click()} className="border-2 border-dashed border-th-accent-200 bg-th-accent-50/50 hover:bg-th-accent-50 rounded-xl p-5 text-center cursor-pointer transition-colors group dark:bg-th-accent-900/35 dark:border-th-accent-800/50">
+          <UploadCloud size={28} className="text-th-accent-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+          <p className="text-th-accent-600 font-medium text-[13px] mb-1">Нажмите для выбора файла</p>
+          <p className="text-[10px] text-th-accent-400/80 uppercase">PDF, DOC, DOCX, JPG, PNG (макс. 10 МБ)</p>
         </div>
 
         {state.attachments.length === 0 ? (
@@ -50,10 +50,10 @@ export const OrderExecutorCard = ({ state, methods, users }: IProps) => (
         ) : (
           <div className="space-y-2 mt-4">
             {state.attachments.map((file: any) => (
-              <div key={file.id} className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg">
+              <div key={file.id} className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg dark:bg-th-base dark:border-th-high">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <FileText size={14} className="text-slate-400 shrink-0" />
-                  <span className="text-[12px] text-slate-600 truncate">{file.name}</span>
+                  <span className="text-[12px] text-slate-600 truncate dark:text-slate-300">{file.name}</span>
                 </div>
                 <button onClick={() => methods.removeAttachment(file.id)} className="p-1 text-slate-400 hover:text-red-500 transition-colors">
                   <X size={14} />

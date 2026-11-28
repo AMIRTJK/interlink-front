@@ -42,18 +42,18 @@ const EmployeePickerRow = ({
       <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 animate-pulse">
         <div
           className={`w-9 h-9 aspect-square rounded-full shrink-0 ${
-            dark ? 'bg-gray-800' : 'bg-gray-200'
+            dark ? 'bg-th-raised' : 'bg-gray-200'
           }`}
         />
         <div className="flex-1 min-w-0 space-y-2">
           <div
             className={`h-3.5 rounded-md w-3/5 ${
-              dark ? 'bg-gray-800' : 'bg-gray-200'
+              dark ? 'bg-th-raised' : 'bg-gray-200'
             }`}
           />
           <div
             className={`h-2.5 rounded-md w-2/5 ${
-              dark ? 'bg-gray-800/60' : 'bg-gray-200/70'
+              dark ? 'bg-th-raised/60' : 'bg-gray-200/70'
             }`}
           />
         </div>
@@ -74,8 +74,8 @@ const EmployeePickerRow = ({
       className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-colors animate-in fade-in duration-150 ${
         isSelected
           ? dark
-            ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
-            : 'bg-indigo-50 ring-1 ring-indigo-200'
+            ? 'bg-th-accent-900/20 ring-1 ring-th-accent-600/50'
+            : 'bg-th-accent-50 ring-1 ring-th-accent-200'
           : rowHover
       }`}
     >
@@ -94,7 +94,7 @@ const EmployeePickerRow = ({
         </p>
       </div>
       <If is={isSelected}>
-        <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+        <div className="w-5 h-5 rounded-full bg-th-accent-600 flex items-center justify-center shrink-0">
           <Check size={11} className="text-white" />
         </div>
       </If>
@@ -192,12 +192,12 @@ export const EmployeePickerModal = ({
     }
   };
 
-  const cardBg = dark ? 'bg-gray-900' : 'bg-white';
-  const headerBorder = dark ? 'border-gray-700/60' : 'border-gray-100';
+  const cardBg = dark ? 'bg-th-base' : 'bg-white';
+  const headerBorder = dark ? 'border-th-high/60' : 'border-gray-100';
   const inputBg = dark
-    ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-600'
+    ? 'bg-th-raised border-th-high text-gray-100 placeholder:text-gray-600'
     : 'bg-gray-50 border-gray-200 text-gray-700 placeholder:text-gray-400';
-  const rowHover = dark ? 'hover:bg-gray-800' : 'hover:bg-gray-50';
+  const rowHover = dark ? 'hover:bg-th-raised' : 'hover:bg-gray-50';
   const nameText = dark ? 'text-gray-100' : 'text-gray-800';
   const subText = dark ? 'text-gray-400' : 'text-gray-500';
 
@@ -218,7 +218,7 @@ export const EmployeePickerModal = ({
             <button
               onClick={onClose}
               className={`p-1.5 rounded-xl transition-colors ${
-                dark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-400'
+                dark ? 'hover:bg-th-raised text-gray-400' : 'hover:bg-gray-100 text-gray-400'
               }`}
             >
               <X size={16} />
@@ -238,14 +238,14 @@ export const EmployeePickerModal = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleKeyDown}
-              className={`w-full pl-9 ${search ? 'pr-16' : 'pr-3'} py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
+              className={`w-full pl-9 ${search ? 'pr-16' : 'pr-3'} py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 transition-all ${inputBg}`}
             />
             <If is={!!search}>
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handleSearchSubmit}
-                  className="p-1 rounded-lg text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg text-th-accent-500 hover:bg-th-accent-50 dark:hover:bg-th-accent-950/30 transition-colors cursor-pointer"
                   title="Искать"
                   aria-label="Искать"
                 >
@@ -274,19 +274,19 @@ export const EmployeePickerModal = ({
                 >
                   <div
                     className={`w-9 h-9 aspect-square rounded-full shrink-0 ${
-                      dark ? 'bg-gray-800' : 'bg-gray-200'
+                      dark ? 'bg-th-raised' : 'bg-gray-200'
                     }`}
                   />
                   <div className="flex-1 min-w-0 space-y-2">
                     <div
                       className={`h-3.5 rounded-md ${
-                        dark ? 'bg-gray-800' : 'bg-gray-200'
+                        dark ? 'bg-th-raised' : 'bg-gray-200'
                       }`}
                       style={{ width: `${55 + (idx % 3) * 15}%` }}
                     />
                     <div
                       className={`h-2.5 rounded-md ${
-                        dark ? 'bg-gray-800/60' : 'bg-gray-200/70'
+                        dark ? 'bg-th-raised/60' : 'bg-gray-200/70'
                       }`}
                       style={{ width: `${35 + (idx % 2) * 20}%` }}
                     />
@@ -327,7 +327,7 @@ export const EmployeePickerModal = ({
                   type="button"
                   disabled={paginationMeta.currentPage <= 1 || isSearchLoading}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg border border-gray-200 dark:border-th-high disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-th-raised transition-colors cursor-pointer"
                   title="Предыдущая страница"
                   aria-label="Предыдущая страница"
                 >
@@ -340,7 +340,7 @@ export const EmployeePickerModal = ({
                   type="button"
                   disabled={paginationMeta.currentPage >= paginationMeta.lastPage || isSearchLoading}
                   onClick={() => setPage((p) => Math.min(paginationMeta.lastPage, p + 1))}
-                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg border border-gray-200 dark:border-th-high disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-th-raised transition-colors cursor-pointer"
                   title="Следующая страница"
                   aria-label="Следующая страница"
                 >
@@ -356,7 +356,7 @@ export const EmployeePickerModal = ({
             onClick={onClose}
             className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
               dark
-                ? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+                ? 'border-th-high text-gray-300 hover:bg-th-raised'
                 : 'border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >

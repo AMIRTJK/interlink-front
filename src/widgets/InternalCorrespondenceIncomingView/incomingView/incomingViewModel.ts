@@ -66,22 +66,22 @@ export interface InternalCorrespondenceIncomingViewProps {
 }
 
 export const inboxStatusStyle: Record<string, string> = {
-  "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-100",
-  "на исполнении": "bg-amber-50 text-amber-700 border-amber-100",
-  "на согласовании": "bg-blue-50 text-blue-700 border-blue-100",
-  "на подпись": "bg-purple-50 text-purple-700 border-purple-100",
+  "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  "на исполнении": "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  "на согласовании": "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  "на подпись": "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
   завершено: "bg-slate-100 text-slate-600 border-slate-200",
-  sent: "bg-blue-50 text-blue-700 border-blue-100",
+  sent: "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
   draft: "bg-slate-100 text-slate-600 border-slate-200",
-  to_register: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  to_execute: "bg-amber-50 text-amber-700 border-amber-100",
-  to_approve: "bg-blue-50 text-blue-700 border-blue-100",
-  to_sign: "bg-purple-50 text-purple-700 border-purple-100",
+  to_register: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+  to_execute: "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+  to_approve: "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  to_sign: "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
   done: "bg-slate-100 text-slate-600 border-slate-200",
-  cancelled: "bg-rose-50 text-rose-700 border-rose-100",
-  approved: "bg-blue-50 text-blue-700 border-blue-100",
-  signed: "bg-purple-50 text-purple-700 border-purple-100",
+  cancelled: "bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/35 dark:text-rose-400 dark:border-rose-800/50",
+  approved: "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+  signed: "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
 };
 
 export const statusTranslations: Record<string, string> = {
@@ -101,19 +101,19 @@ export const statusTranslations: Record<string, string> = {
 export const priorityConfig: Record<string, { label: string; className: string }> = {
   high: {
     label: "Высокая",
-    className: "bg-rose-50! text-rose-700! border-rose-100!",
+    className: "bg-rose-50! text-rose-700! border-rose-100! dark:bg-rose-900/35! dark:text-rose-400! dark:border-rose-800/50!",
   },
   middle: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   medium: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   normal: {
     label: "Средняя",
-    className: "bg-amber-50! text-amber-700! border-amber-100!",
+    className: "bg-amber-50! text-amber-700! border-amber-100! dark:bg-amber-900/35! dark:text-amber-400! dark:border-amber-800/50!",
   },
   low: {
     label: "Низкая важность",

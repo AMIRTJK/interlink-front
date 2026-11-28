@@ -28,7 +28,7 @@ export const HeaderDesignGroup = ({
   const isResponsive = variant === "responsive";
 
   const compactContent = (
-    <div className="max-w-[300px] p-4 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+    <div className="max-w-[300px] p-4 bg-white dark:bg-th-raised rounded-[2.5rem]">
       <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-3 px-1">
         {label}
       </p>

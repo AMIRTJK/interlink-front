@@ -75,17 +75,17 @@ export const OrderForm = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col overflow-auto bg-gradient-to-br from-slate-100 to-indigo-50">
+    <div className="fixed inset-0 z-[200] flex flex-col overflow-auto bg-gradient-to-br from-slate-100 to-th-accent-50">
       {/* Sticky Header */}
-      <div className="flex items-center justify-between px-6 py-3 bg-white shadow-sm sticky top-0 z-10 shrink-0 animate-in slide-in-from-top-4 duration-300">
+      <div className="flex items-center justify-between px-6 py-3 bg-white shadow-sm sticky top-0 z-10 shrink-0 animate-in slide-in-from-top-4 duration-300 dark:bg-th-raised">
         <button
           onClick={onClose}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:bg-th-high dark:hover:text-white"
         >
           <ArrowLeft size={16} />
           <span>Назад</span>
         </button>
-        <h1 className="text-base font-semibold text-gray-900">
+        <h1 className="text-base font-semibold text-gray-900 dark:text-slate-100">
           {title ?? 'Новый приказ'}
         </h1>
         <div className="flex items-center gap-2">

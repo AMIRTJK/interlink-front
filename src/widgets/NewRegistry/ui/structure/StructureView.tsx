@@ -14,7 +14,7 @@ const AnimatedStructureDivider: React.FC = () => {
   const themeColor = isDark ? (theme.dark || "#0A84FF") : (theme.light || "#007AFF");
 
   return (
-    <div className="flex-1 h-[2px] bg-slate-200/50 dark:bg-slate-700/50 relative overflow-hidden rounded-full my-auto">
+    <div className="flex-1 h-[2px] bg-slate-200/50 dark:bg-th-high/50 relative overflow-hidden rounded-full my-auto">
       <motion.div
         initial={{ x: "-100%" }}
         animate={{ x: "200%" }}

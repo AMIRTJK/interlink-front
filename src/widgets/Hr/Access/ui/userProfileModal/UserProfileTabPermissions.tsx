@@ -39,7 +39,7 @@ export function UserProfileTabPermissions({
         </p>
         <button
           onClick={onResetToStandard}
-          className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+          className="shrink-0 text-xs font-semibold text-th-accent-600 hover:text-th-accent-700 transition-colors cursor-pointer"
         >
           Сбросить к стандартным
         </button>
@@ -50,7 +50,7 @@ export function UserProfileTabPermissions({
             <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
               {MODULE_TRANSLATIONS[moduleName] || moduleName}
             </h4>
-            <div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-col! gap-2.5!">
+            <div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-col! gap-2.5! dark:bg-th-base/40! dark:border-th-high!">
               {actions.map((act) => {
                 const inRole = roleGrantedPermissions.includes(act.name);
                 const isDenied = deniedPermissionsState.includes(act.name);
@@ -62,22 +62,22 @@ export function UserProfileTabPermissions({
                     className="flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium text-slate-600 truncate">
+                      <span className="text-sm font-medium text-slate-600 truncate dark:text-slate-300">
                         {act.label}
                       </span>
                       {inRole && (
                         <span
                           className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide select-none ${
                             isDenied
-                              ? "bg-rose-50 text-rose-500"
-                              : "bg-blue-50 text-blue-500"
+                              ? "bg-rose-50 text-rose-500 dark:bg-rose-900/35"
+                              : "bg-th-accent-50 text-th-accent-500 dark:bg-th-accent-900/35"
                           }`}
                         >
                           Роль
                         </span>
                       )}
                       {!inRole && isDirect && (
-                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 text-[9px] font-bold uppercase tracking-wide select-none">
+                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 text-[9px] font-bold uppercase tracking-wide select-none dark:bg-violet-900/35">
                           Выдано лично
                         </span>
                       )}
@@ -86,8 +86,8 @@ export function UserProfileTabPermissions({
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-bold select-none ${
                           isEffective
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-slate-100 text-slate-400"
+                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/35 dark:text-emerald-400"
+                            : "bg-slate-100 text-slate-400 dark:bg-th-high"
                         }`}
                       >
                         {isEffective ? "Да" : "Нет"}
@@ -112,7 +112,7 @@ export function UserProfileTabPermissions({
         ))}
       </div>
       {totalModules > PAGE_SIZE && (
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2 dark:border-th-high">
           <span className="text-xs text-slate-400 font-medium mr-auto">
             {(permissionsPage - 1) * PAGE_SIZE + 1}–
             {Math.min(permissionsPage * PAGE_SIZE, totalModules)} из{" "}
@@ -121,7 +121,7 @@ export function UserProfileTabPermissions({
           <button
             onClick={() => onPermissionsPageChange((p) => Math.max(1, p - 1))}
             disabled={permissionsPage === 1}
-            className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer dark:border-th-high"
           >
             <svg
               width="14"
@@ -136,7 +136,7 @@ export function UserProfileTabPermissions({
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+          <span className="text-xs font-bold text-slate-600 min-w-[32px] text-center dark:text-slate-300">
             {permissionsPage} / {Math.ceil(totalModules / PAGE_SIZE)}
           </span>
           <button
@@ -146,7 +146,7 @@ export function UserProfileTabPermissions({
               )
             }
             disabled={permissionsPage >= Math.ceil(totalModules / PAGE_SIZE)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer dark:border-th-high"
           >
             <svg
               width="14"

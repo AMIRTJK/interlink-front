@@ -117,7 +117,7 @@ export const VersionsPanel = ({
                     className={cn(
                       "rounded-xl p-3 flex flex-col gap-1.5 border transition-all cursor-pointer",
                       isActive
-                        ? "bg-blue-50/50 border-blue-200 shadow-sm"
+                        ? "bg-th-accent-50/50 border-th-accent-200 shadow-sm dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
                         : "bg-slate-50 border-slate-100 hover:bg-slate-100/75 hover:border-slate-200",
                     )}
                   >
@@ -125,14 +125,14 @@ export const VersionsPanel = ({
                       <span
                         className={cn(
                           "text-xs font-bold",
-                          isActive ? "text-blue-700" : "text-slate-700",
+                          isActive ? "text-th-accent-700" : "text-slate-700",
                         )}
                       >
                         Версия {v.versionNumber || v.version || idx + 1}
                       </span>
                       {isActive && (
-                        <span className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Check size={9} className="text-blue-600" />
+                        <span className="w-4 h-4 rounded-full bg-th-accent-100 flex items-center justify-center dark:bg-th-accent-900/35">
+                          <Check size={9} className="text-th-accent-600" />
                         </span>
                       )}
                     </div>
@@ -144,7 +144,7 @@ export const VersionsPanel = ({
                     <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
                       <span>{dateStr}</span>
                       {v.is_selected && (
-                        <span className="text-green-600 font-semibold uppercase tracking-wider text-[8px] bg-green-50 px-1.5 py-0.5 rounded border border-green-100">
+                        <span className="text-green-600 font-semibold uppercase tracking-wider text-[8px] bg-green-50 px-1.5 py-0.5 rounded border border-green-100 dark:bg-green-900/35 dark:text-green-400 dark:border-green-800/50">
                           Для подписи
                         </span>
                       )}

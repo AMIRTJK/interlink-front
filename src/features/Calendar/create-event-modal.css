@@ -112,17 +112,17 @@
    только здесь. Поля ввода красятся dark:-классами в EventFormFields: важные
    правила Tailwind лежат в слое и перебивают незаслоенный !important этого файла. */
 .dark .create-event-modal .ant-modal-container {
-  background: #0f172a !important;
+  background: var(--th-dark-base) !important;
   border: 1px solid rgb(51 65 85 / 0.5) !important;
 }
 
 .dark .create-event-modal .ant-select-selector {
-  background: #1e293b !important;
+  background: var(--th-dark-raised) !important;
   color: #e2e8f0 !important;
 }
 
 .dark .create-event-modal .ant-select:hover .ant-select-selector {
-  background: #334155 !important;
+  background: var(--th-dark-high) !important;
 }
 
 .dark .create-event-modal .ant-picker input {

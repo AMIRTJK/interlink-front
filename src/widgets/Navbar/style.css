@@ -509,7 +509,7 @@ body.no-animations
   width: 4px;
   height: 4px;
   margin: 0 auto;
-  background: #1677ff;
+  background: var(--th-accent-600);
   border-radius: 20px;
   z-index: -1;
   box-shadow: 0 0 6px rgba(22, 119, 255, 0.4);

@@ -19,14 +19,14 @@ export function UsersTabRoleChips({
         onClick={() => onQuickRoleChange("all")}
         className={`relative px-3 py-1.5 border rounded-xl text-xs font-semibold transition-colors duration-200 cursor-pointer select-none outline-none! ${
           selectedQuickRole === "all"
-            ? "border-blue-600 text-blue-600"
-            : "border-slate-200 text-slate-500 hover:bg-slate-50"
+            ? "border-th-accent-600 text-th-accent-600"
+            : "border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-th-high dark:text-slate-400 dark:hover:bg-th-high"
         }`}
       >
         {selectedQuickRole === "all" && (
           <motion.div
             layoutId="activeQuickRolePill"
-            className="absolute inset-0 bg-blue-50/50 -z-10 rounded-xl"
+            className="absolute inset-0 bg-th-accent-50/50 -z-10 rounded-xl dark:bg-th-accent-900/35"
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
           />
         )}
@@ -36,7 +36,7 @@ export function UsersTabRoleChips({
         const isSelected = selectedQuickRole === role;
         const activeStyle = ROLE_CHIP_STYLE_MAP[role] || {
           border: "border-blue-400!",
-          bg: "bg-blue-50/50!",
+          bg: "bg-blue-50/50! dark:bg-blue-900/35!",
           text: "text-blue-600!",
           dot: "bg-blue-500!",
         };
@@ -48,7 +48,7 @@ export function UsersTabRoleChips({
             className={`relative px-3 py-1.5 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors duration-200 cursor-pointer select-none outline-none! ${
               isSelected
                 ? `${activeStyle.border} ${activeStyle.text}`
-                : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                : "border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-th-high dark:text-slate-400 dark:hover:bg-th-high"
             }`}
           >
             {isSelected && (

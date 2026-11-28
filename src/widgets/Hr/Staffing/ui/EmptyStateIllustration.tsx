@@ -22,7 +22,7 @@ export const EmptyStateIllustration = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className={`rounded-2xl border shadow-sm py-16 flex flex-col items-center justify-center gap-6 ${
-        dark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-100'
+        dark ? 'bg-th-raised/80 border-th-high/60' : 'bg-white border-gray-100'
       }`}
     >
       <div className="relative">
@@ -54,7 +54,7 @@ export const EmptyStateIllustration = ({
       <If is={!hasSearch}>
         <button
           onClick={onAddOrg}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/25"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-th-accent-600 text-white text-sm font-semibold hover:bg-th-accent-700 transition-colors shadow-lg shadow-th-accent-900/25"
         >
           <Plus size={16} />
           <span>Добавить организацию</span>

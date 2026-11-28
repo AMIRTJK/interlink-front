@@ -10,7 +10,7 @@ import type { IHeaderOption } from "./HeaderOptionGrid";
 
 const SWATCH_CLASS = "block w-9 h-9 rounded-full bg-gradient-to-br shadow-md";
 const LAYOUT_PREVIEW_CLASS =
-  "flex items-center justify-center w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300";
+  "flex items-center justify-center w-9 h-9 rounded-full bg-zinc-100 dark:bg-th-high text-zinc-600 dark:text-zinc-300";
 const LAYOUT_ICON_PROPS = { size: 18, strokeWidth: 2.2 } as const;
 
 export const THEME_OPTIONS: IHeaderOption[] = Object.entries(THEMES).map(
@@ -27,7 +27,7 @@ const toBgOptions = (isDarkMode: boolean): IHeaderOption[] =>
     label: bg.name,
     preview: (
       <span
-        className={`${SWATCH_CLASS} border border-zinc-200 dark:border-zinc-600 ${
+        className={`${SWATCH_CLASS} border border-zinc-200 dark:border-th-higher ${
           isDarkMode ? bg.dark : bg.light
         }`}
       />

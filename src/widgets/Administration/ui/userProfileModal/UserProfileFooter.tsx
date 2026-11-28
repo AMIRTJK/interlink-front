@@ -62,7 +62,7 @@ export function UserProfileFooter({
           style={{
             ...primaryBtnStyle,
             background: T.accent,
-            boxShadow: `0 2px 8px ${T.accent}35`,
+            boxShadow: `0 2px 8px rgb(var(--th-accent-rgb)/0.21)`,
             opacity: setUserRolesPending ? 0.7 : 1,
           }}
         >
@@ -82,7 +82,7 @@ export function UserProfileFooter({
           style={{
             ...primaryBtnStyle,
             background: T.accent,
-            boxShadow: `0 2px 8px ${T.accent}35`,
+            boxShadow: `0 2px 8px rgb(var(--th-accent-rgb)/0.21)`,
             opacity:
               !permsInitialized ||
               isUserPermsLoading ||

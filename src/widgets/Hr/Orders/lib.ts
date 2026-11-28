@@ -10,30 +10,30 @@ export const ORDER_STATUS_CONFIG: Record<
   { bg: string; text: string; dot: string }
 > = {
   draft: {
-    bg: "bg-slate-100",
-    text: "text-slate-500",
+    bg: "bg-slate-100 dark:bg-th-high",
+    text: "text-slate-500 dark:text-slate-400",
     dot: "bg-slate-400",
   },
   pending: {
-    bg: "bg-amber-100",
+    bg: "bg-amber-100 dark:bg-amber-900/35",
     text: "text-amber-700",
     dot: "bg-amber-500",
   },
   signed: {
-    bg: "bg-emerald-100",
+    bg: "bg-emerald-100 dark:bg-emerald-900/35",
     text: "text-emerald-700",
     dot: "bg-emerald-500",
   },
   approved: {
-    bg: "bg-blue-100",
+    bg: "bg-blue-100 dark:bg-blue-900/35",
     text: "text-blue-700",
     dot: "bg-blue-500",
   },
 };
 
 export const ORDER_STATUS_FALLBACK = {
-  bg: "bg-slate-100",
-  text: "text-slate-500",
+  bg: "bg-slate-100 dark:bg-th-high",
+  text: "text-slate-500 dark:text-slate-400",
   dot: "bg-slate-400",
 };
 

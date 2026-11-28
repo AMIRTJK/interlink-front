@@ -1,13 +1,14 @@
 import * as React from "react";
-import { Search, Plus, Calendar, LayoutGrid, List as ListIcon, X } from "lucide-react";
-import { Select, DatePicker, ConfigProvider, theme } from "antd";
+import { Search, Plus, LayoutGrid, List as ListIcon, X } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import { cn, useDebouncedCallback, useIsDarkMode } from "@shared/lib";
-import { If, Tooltip } from "@shared/ui";
-import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
-import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
+import { cn, useDebouncedCallback } from "@shared/lib";
+import { Tooltip } from "@shared/ui";
+import type { Colleague, TaskStatsFull } from "../model/types";
 import type { TaskDisplayMode, TaskFilters } from "../model/filters";
+import { TaskStatusTabs } from "./taskFilters/TaskStatusTabs";
+import { TaskFilterSelects } from "./taskFilters/TaskFilterSelects";
+import { FIELD, SEGMENT_ACTIVE, SEGMENT_IDLE, SEGMENT_ITEM, SEGMENT_TRACK } from "./taskFilters/model";
 
 dayjs.locale("ru");
 
@@ -22,28 +23,17 @@ interface IProps {
   count: number;
 }
 
-const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskStatsFull | "total" }[] = [
-  { value: "", label: "Все", statKey: "total" },
-  { value: "new", label: "Новая", statKey: "new" },
-  { value: "in_progress", label: "В работе", statKey: "in_progress" },
-  { value: "review", label: "На проверке", statKey: "review" },
-  { value: "completed", label: "Завершена", statKey: "completed" },
-  { value: "overdue", label: "Просрочена", statKey: "overdue" },
+const DISPLAY_MODES: { value: TaskDisplayMode; label: string; icon: typeof ListIcon }[] = [
+  { value: "table", label: "Список", icon: ListIcon },
+  { value: "board", label: "Доска", icon: LayoutGrid },
 ];
 
-const getAntdTheme = (isDark: boolean) => ({
-  algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
-  token: {
-    borderRadius: 16,
-    controlHeight: 36,
-    fontSize: 12,
-    colorPrimary: "#6366f1",
-    colorTextPlaceholder: isDark ? "rgba(255, 255, 255, 0.45)" : "#94a3b8",
-    colorText: isDark ? "#f1f5f9" : "#334155",
-    colorBgContainer: isDark ? "rgba(30, 41, 59, 0.8)" : "rgba(255, 255, 255, 0.8)",
-  },
-});
-
+/**
+ * Панель реестра задач: одна стеклянная панель из двух строк.
+ * Сверху — что показывать (статус, вид) и главное действие, снизу — уточнение
+ * выборки (поиск и фильтры). Статус выбирается только вкладками: отдельный
+ * выпадающий «Статус» дублировал их.
+ */
 export const TasksFilterBar = React.memo(({
   filters,
   onFilterChange,
@@ -53,8 +43,6 @@ export const TasksFilterBar = React.memo(({
   onDisplayModeChange,
   onCreate,
 }: IProps) => {
-  const isDark = useIsDarkMode();
-  const antdTheme = React.useMemo(() => getAntdTheme(isDark), [isDark]);
   const [searchLocal, setSearchLocal] = React.useState(filters.search);
 
   React.useEffect(() => {
@@ -71,176 +59,77 @@ export const TasksFilterBar = React.memo(({
     debouncedSearch(val);
   };
 
+  const handleSearchClear = () => {
+    setSearchLocal("");
+    onFilterChange({ search: "" });
+  };
+
   return (
-    <div className="flex flex-col gap-4">
-      <ConfigProvider theme={antdTheme}>
-        {/* Row 1: Filter Dropdowns Bar */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Priority filter pill */}
-          <Tooltip title={PRIORITY_OPTIONS.find((o) => o.value === filters.priority)?.label}>
-            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
-              <Select
-                variant="borderless"
-                value={filters.priority || undefined}
-                placeholder="Все приоритеты"
-                onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
-                allowClear
-                options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                className="w-[130px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
-              />
-            </div>
-          </Tooltip>
+    <div className="ui-glass flex flex-col gap-3 rounded-3xl border border-zinc-200 dark:border-th-high/50 bg-white/70 dark:bg-th-raised/90 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TaskStatusTabs
+          value={filters.status}
+          stats={stats}
+          onChange={(status) => onFilterChange({ status })}
+        />
 
-          {/* Assignee filter pill */}
-          <Tooltip title={colleagues.find((c) => String(c.id) === String(filters.assigneeId))?.name}>
-            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
-              <Select
-                variant="borderless"
-                value={filters.assigneeId ? String(filters.assigneeId) : undefined}
-                placeholder="Все исполнители"
-                onChange={(val) => onFilterChange({ assigneeId: val || "" })}
-                allowClear
-                showSearch
-                filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
-                options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
-                className="w-[155px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
-              />
-            </div>
-          </Tooltip>
-
-          {/* Status filter pill */}
-          <Tooltip title={STATUS_OPTIONS.find((o) => o.value === filters.status)?.label}>
-            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
-              <Select
-                variant="borderless"
-                value={filters.status || undefined}
-                placeholder="Все статусы"
-                onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
-                allowClear
-                options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                className="w-[125px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
-              />
-            </div>
-          </Tooltip>
-
-          {/* Deadline DatePicker pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <Calendar size={14} className="text-slate-400 mr-1.5 shrink-0" />
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Дедлайн:</span>
-            <DatePicker
-              variant="borderless"
-              value={filters.date ? dayjs(filters.date) : null}
-              onChange={(d) => onFilterChange({ date: d ? d.format("YYYY-MM-DD") : "" })}
-              format="DD.MM.YYYY"
-              placeholder="ДД.ММ.ГГГГ"
-              allowClear
-              className="w-[115px] font-bold text-slate-700 dark:text-slate-100 [&_input::placeholder]:text-slate-400! dark:[&_input::placeholder]:text-slate-400!"
-            />
+        <div className="flex items-center gap-3">
+          <div role="tablist" aria-label="Вид списка" className={SEGMENT_TRACK}>
+            {DISPLAY_MODES.map(({ value, label, icon: Icon }) => {
+              const isActive = displayMode === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => onDisplayModeChange(value)}
+                  className={cn(SEGMENT_ITEM, isActive ? SEGMENT_ACTIVE : SEGMENT_IDLE)}
+                >
+                  <Icon size={14} />
+                  {label}
+                </button>
+              );
+            })}
           </div>
-        </div>
-      </ConfigProvider>
 
-      {/* Row 2: Controls Bar (View switcher, Search input, Create button) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 py-1">
-        {/* View Switcher */}
-        <div className="flex items-center gap-1 bg-slate-100/70 dark:bg-slate-800/70 p-1 rounded-2xl border border-slate-200/50 dark:border-white/10">
           <button
-            onClick={() => onDisplayModeChange("table")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-              displayMode === "table"
-                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
-            )}
+            type="button"
+            onClick={onCreate}
+            className="h-9 flex items-center gap-1.5 px-4 rounded-full border-0 bg-th-accent-600 hover:bg-th-accent-700 text-white text-xs font-bold shadow-sm shadow-th-accent-600/25 cursor-pointer transition-colors active:scale-95"
           >
-            <ListIcon size={14} /> Список
-          </button>
-          <button
-            onClick={() => onDisplayModeChange("board")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-              displayMode === "board"
-                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
-            )}
-          >
-            <LayoutGrid size={14} /> Доска
+            <Plus size={15} strokeWidth={2.5} />
+            Создать задачу
           </button>
         </div>
+      </div>
 
-        {/* Central Oval Search Bar */}
-        <div className="relative flex-1 max-w-md mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={cn(FIELD, "relative w-full sm:w-72")}>
+          <Search size={15} className="absolute left-3.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Поиск"
+            placeholder="Поиск по задачам"
+            aria-label="Поиск по задачам"
             value={searchLocal}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-10 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
+            className="h-full w-full bg-transparent pl-10 pr-9 rounded-full outline-none focus:ring-2 focus:ring-th-accent-500/25 text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400"
           />
           {searchLocal ? (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchLocal("");
-                onFilterChange({ search: "" });
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
-              title="Очистить"
-            >
-              <X size={14} />
-            </button>
+            <Tooltip title="Очистить">
+              <button
+                type="button"
+                onClick={handleSearchClear}
+                aria-label="Очистить поиск"
+                className="absolute right-3 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </Tooltip>
           ) : null}
         </div>
 
-        {/* Create Button */}
-        <button
-          onClick={onCreate}
-          className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-b from-white to-slate-50/90 dark:from-slate-800 dark:to-slate-800/90 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-95"
-        >
-          <div className="w-5 h-5 rounded-md bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <Plus size={13} strokeWidth={3} />
-          </div>
-          <span className="text-xs font-extrabold text-blue-500 dark:text-blue-400">Создать</span>
-        </button>
-      </div>
-
-      {/* Row 3: Centered Quick Status Tabs */}
-      <div className="flex items-center justify-center">
-        <nav className="flex items-center gap-2">
-          {STATUS_TABS.map((tab) => {
-            const active = filters.status === tab.value;
-            const countVal = stats
-              ? (stats[tab.statKey] as number) ?? 0
-              : 0;
-
-            return (
-              <button
-                key={tab.value || "all"}
-                onClick={() => onFilterChange({ status: tab.value })}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border",
-                  active
-                    ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-200 dark:shadow-none"
-                    : "bg-white/80 dark:bg-slate-800/80 text-slate-500 border-slate-200/60 dark:border-white/10 hover:border-purple-300",
-                )}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={cn(
-                    "text-[10px] font-extrabold min-w-4 h-4 px-1 rounded-full flex items-center justify-center shrink-0",
-                    active ? "bg-purple-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
-                  )}
-                >
-                  {countVal}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
+        <TaskFilterSelects filters={filters} colleagues={colleagues} onFilterChange={onFilterChange} />
       </div>
     </div>
   );

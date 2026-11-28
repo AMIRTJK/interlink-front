@@ -222,10 +222,10 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 size={34}
                 src={UserAvatar}
                 alt="Аватар пользователя"
-                className={`border shadow-sm ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+                className={`border shadow-sm ${isDarkMode ? "border-th-high" : "border-gray-200"}`}
               />
               <span
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 rounded-full ${isDarkMode ? "border-gray-800" : "border-white"}`}
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 rounded-full ${isDarkMode ? "border-th-raised" : "border-white"}`}
               ></span>
             </div>
           </div>

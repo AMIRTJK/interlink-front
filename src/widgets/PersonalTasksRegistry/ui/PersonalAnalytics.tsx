@@ -1,5 +1,4 @@
 import React, { memo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Clock, X, CheckCircle2, TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -37,8 +36,8 @@ const ChartSwitcher = memo(({ current, onChange }: { current: ChartType; onChang
         onClick={() => onChange(type)}
         className={`rounded-lg! p-1.5! transition-all! duration-200! border-0! cursor-pointer! flex! items-center! justify-center! ${
           current === type
-            ? "bg-white! dark:bg-zinc-700! shadow-sm! text-indigo-600! dark:text-indigo-400!"
-            : "bg-transparent! text-zinc-400! hover:text-zinc-600! dark:hover:text-zinc-200!"
+            ? "bg-th-accent-600! text-white! shadow-sm!"
+            : "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-100! hover:bg-zinc-200/50! dark:hover:bg-th-high/50!"
         }`}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +48,7 @@ const ChartSwitcher = memo(({ current, onChange }: { current: ChartType; onChang
   );
 
   return (
-    <div className="rounded-xl! bg-zinc-100! dark:bg-zinc-800! p-0.5! flex! gap-0.5!">
+    <div className="ui-glass-soft rounded-xl! bg-zinc-100! dark:bg-th-raised/90! border! border-zinc-200! dark:border-th-high/50! p-0.5! flex! gap-0.5!">
       {btn("bar", <><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></>, "Столбцы")}
       {btn("line", <><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="m19 9-5 5-4-4-3 3"></path></>, "Линия")}
       {btn("area", <><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></>, "Область")}
@@ -151,59 +150,59 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Выполнено</span>
-            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600"><CheckCircle2 size={18} /></span>
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/35 dark:text-emerald-400"><CheckCircle2 size={18} /></span>
           </div>
           <div className="text-3xl font-black leading-none text-emerald-700 dark:text-emerald-400">{stats.completionPct}%</div>
           <div className="text-xs text-zinc-400 mt-1">{stats.completed} из {stats.total}</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Средний прогресс</span>
-            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-100 text-blue-600"><TrendingUp size={18} /></span>
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400"><TrendingUp size={18} /></span>
           </div>
-          <div className="text-3xl font-black leading-none text-blue-700 dark:text-blue-400">{stats.avgProgress}%</div>
+          <div className="text-3xl font-black leading-none text-th-accent-700 dark:text-th-accent-400">{stats.avgProgress}%</div>
           <div className="text-xs text-zinc-400 mt-1">по всем задачам</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Просрочено</span>
-            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-100 text-red-600"><X size={18} /></span>
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-100 text-red-600 dark:bg-red-900/35 dark:text-red-400"><X size={18} /></span>
           </div>
           <div className="text-3xl font-black leading-none text-red-700 dark:text-red-400">{stats.overdue}</div>
           <div className="text-xs text-zinc-400 mt-1">задач</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">В работе</span>
-            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-indigo-100 text-indigo-600"><Clock size={18} /></span>
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400"><Clock size={18} /></span>
           </div>
-          <div className="text-3xl font-black leading-none text-indigo-700 dark:text-indigo-400">{stats.inProgress}</div>
+          <div className="text-3xl font-black leading-none text-th-accent-700 dark:text-th-accent-400">{stats.inProgress}</div>
           <div className="text-xs text-zinc-400 mt-1">активных</div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
+        <div className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Статус задач</h3>
             <ChartSwitcher current={statusChart} onChange={setStatusChart} />
           </div>
           <div className="h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              {renderChart(statusChart, statusData, "#6366f1", "statusGrad", "value")}
+              {renderChart(statusChart, statusData, "var(--th-accent-500)", "statusGrad", "value")}
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
+        <div className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Приоритет задач</h3>
             <ChartSwitcher current={priorityChart} onChange={setPriorityChart} />
@@ -215,18 +214,18 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           </div>
         </div>
 
-        <div className="col-span-2 rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
+        <div className="col-span-2 rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Прогресс выполнения</h3>
             <ChartSwitcher current={progressChart} onChange={setProgressChart} />
           </div>
           <div className="h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              {renderChart(progressChart, progressData, "#6366f1", "progressGrad", "progress")}
+              {renderChart(progressChart, progressData, "var(--th-accent-500)", "progressGrad", "progress")}
             </ResponsiveContainer>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });

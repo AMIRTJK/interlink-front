@@ -426,7 +426,7 @@ export const NavigationPane: React.FC<IProps> = ({
               stepHit(e.shiftKey ? -1 : 1);
             }}
             placeholder="Поиск в документе"
-            className="w-full pl-8 pr-16 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-blue-400 focus:outline-none transition-colors"
+            className="w-full pl-8 pr-16 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-th-accent-400 focus:outline-none transition-colors"
           />
           <div className="absolute right-1 flex items-center gap-0.5">
             {query.trim() !== "" && (
@@ -477,7 +477,7 @@ export const NavigationPane: React.FC<IProps> = ({
             className={cn(
               "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
               tab === t.key
-                ? "bg-slate-800 text-white"
+                ? "bg-th-raised text-white"
                 : "text-slate-500 hover:bg-slate-100",
             )}
           >
@@ -516,7 +516,7 @@ export const NavigationPane: React.FC<IProps> = ({
                     className={cn(
                       "group flex items-start gap-0.5 rounded-lg transition-colors",
                       activeHeading === i
-                        ? "bg-blue-50"
+                        ? "bg-th-accent-50 dark:bg-th-accent-900/35"
                         : "hover:bg-slate-100/80",
                     )}
                     style={{ paddingLeft: (h.level - 1) * 12 }}
@@ -540,7 +540,7 @@ export const NavigationPane: React.FC<IProps> = ({
                       className={cn(
                         "flex-1 text-left py-1 pr-2 text-xs leading-snug cursor-pointer truncate",
                         activeHeading === i
-                          ? "text-blue-700 font-semibold"
+                          ? "text-th-accent-700 font-semibold"
                           : "text-slate-600",
                         h.level === 1 && "font-semibold",
                       )}
@@ -567,7 +567,7 @@ export const NavigationPane: React.FC<IProps> = ({
                   className={cn(
                     "relative overflow-hidden bg-white border rounded-md transition-all",
                     currentPage === i
-                      ? "border-blue-500 ring-2 ring-blue-200"
+                      ? "border-th-accent-500 ring-2 ring-th-accent-200"
                       : "border-slate-200 group-hover:border-slate-400",
                   )}
                   style={{
@@ -597,7 +597,7 @@ export const NavigationPane: React.FC<IProps> = ({
                 <span
                   className={cn(
                     "text-[10px] font-semibold tabular-nums",
-                    currentPage === i ? "text-blue-600" : "text-slate-400",
+                    currentPage === i ? "text-th-accent-600" : "text-slate-400",
                   )}
                 >
                   {i + 1}
@@ -626,7 +626,7 @@ export const NavigationPane: React.FC<IProps> = ({
                   className={cn(
                     "w-full text-left px-2.5 py-2 rounded-lg text-[11px] leading-snug transition-colors cursor-pointer",
                     activeHit === i
-                      ? "bg-blue-50 text-slate-700"
+                      ? "bg-th-accent-50 text-slate-700 dark:bg-th-accent-900/35"
                       : "text-slate-500 hover:bg-slate-100/80",
                   )}
                 >

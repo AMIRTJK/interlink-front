@@ -58,7 +58,7 @@ export const CalendarHeader = memo(({
 
         {/* Show weather badge in header only in Day mode where it represents a specific single day */}
         {viewMode === "day" && dayWeather && (
-          <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-zinc-200! dark:border-slate-700/50! backdrop-blur-md!">
+          <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-th-raised/90! border! border-zinc-200! dark:border-th-high/50! backdrop-blur-md! ui-glass ui-glass--forced">
             <WeatherIcon type={dayWeather.weatherType} size={15} />
             <span className="text-xs! font-semibold! text-slate-800! dark:text-slate-100!">
               {dayWeather.temp}
@@ -71,7 +71,7 @@ export const CalendarHeader = memo(({
       </div>
 
       {/* Right Mode Switcher Segmented Control */}
-      <div className="bg-slate-100/90! dark:bg-slate-800/90! backdrop-blur-md! p-1! rounded-full! border! border-zinc-200! dark:border-slate-700/50! flex! items-center! gap-1!">
+      <div className="bg-slate-100/90! dark:bg-th-raised/90! backdrop-blur-md! ui-glass ui-glass--forced p-1! rounded-full! border! border-zinc-200! dark:border-th-high/50! flex! items-center! gap-1!">
         {VIEW_MODES.map(({ key, label }) => {
           const isActive = viewMode === key;
           return (
@@ -81,7 +81,7 @@ export const CalendarHeader = memo(({
               onClick={() => setViewMode(key)}
               className={`px-5! py-1.5! rounded-full! text-sm! font-semibold! transition-all! cursor-pointer! border-0! ${
                 isActive
-                  ? "bg-white! dark:bg-slate-900! text-slate-800! dark:text-slate-100! ring-1! ring-zinc-200! dark:ring-slate-700/50!"
+                  ? "bg-white! dark:bg-th-base! text-slate-800! dark:text-slate-100! ring-1! ring-zinc-200! dark:ring-th-high/50!"
                   : "text-slate-500! hover:text-slate-800! dark:text-slate-400! dark:hover:text-slate-200! bg-transparent!"
               }`}
             >

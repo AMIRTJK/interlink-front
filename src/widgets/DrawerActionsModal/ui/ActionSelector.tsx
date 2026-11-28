@@ -19,7 +19,7 @@ export const ActionSelector: React.FC<IActionSelectorProps> = ({
   isDarkMode,
 }) => {
   const containerClasses = isDarkMode
-    ? "border-gray-700 bg-gray-800 hover:border-[#8b5cf6] hover:bg-gray-700 hover:shadow-lg hover:shadow-purple-900/20"
+    ? "border-th-high bg-th-raised hover:border-[#8b5cf6] hover:bg-th-high hover:shadow-lg hover:shadow-purple-900/20"
     : "border-[#a78bfa] bg-white hover:border-[#8b5cf6] hover:bg-[#f5f3ff] hover:shadow-lg hover:shadow-purple-100";
   return (
     <div

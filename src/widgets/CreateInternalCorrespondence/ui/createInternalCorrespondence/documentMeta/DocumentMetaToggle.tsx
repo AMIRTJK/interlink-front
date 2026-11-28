@@ -29,7 +29,7 @@ export const DocumentMetaToggle = ({
       {!formExpanded && (
         <div className="flex items-center gap-1.5 ml-2">
           {letterType && (
-            <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded border border-indigo-100">
+            <span className="bg-th-accent-50 text-th-accent-700 text-[10px] font-bold px-2 py-0.5 rounded border border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
               {letterTypeOptions.find((o) => o.value === letterType)?.label ?? letterType}
             </span>
           )}

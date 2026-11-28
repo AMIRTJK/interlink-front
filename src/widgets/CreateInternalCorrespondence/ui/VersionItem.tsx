@@ -56,11 +56,11 @@ export const VersionItem = ({
         "flex flex-col p-3 rounded-xl border transition-all group text-xs gap-2",
         isViewSelectDisabled ? "cursor-default" : "cursor-pointer",
         isSignedVersion
-          ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
+          ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/35"
           : isRevoked
-            ? "bg-rose-50/40 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
+            ? "bg-rose-50/40 border-rose-200 hover:bg-rose-50 hover:border-rose-300 dark:bg-rose-900/35 dark:border-rose-800/50"
             : isCurrentActive
-              ? "bg-blue-50/50 border-blue-500 shadow-sm"
+              ? "bg-th-accent-50/50 border-th-accent-500 shadow-sm dark:bg-th-accent-900/35"
               : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
       )}
     >
@@ -71,7 +71,7 @@ export const VersionItem = ({
             isSignedVersion
               ? "bg-emerald-500 text-white"
               : isRevoked
-                ? "bg-rose-100 text-rose-600 border-rose-200"
+                ? "bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/35 dark:text-rose-400 dark:border-rose-800/50"
                 : "bg-slate-200 text-slate-600",
           )}
         >
@@ -96,14 +96,14 @@ export const VersionItem = ({
                   : isRevoked
                     ? "text-rose-700"
                     : isCurrentActive
-                      ? "text-blue-600"
+                      ? "text-th-accent-600"
                       : "text-slate-700",
               )}
             >
               Версия {version.versionNumber}
             </span>
             <If is={isLatestVersion && !isDocumentSigned}>
-              <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 font-medium rounded text-[9px] border border-blue-100 whitespace-nowrap shrink-0">
+              <span className="px-1.5 py-0.5 bg-th-accent-50 text-th-accent-600 font-medium rounded text-[9px] border border-th-accent-100 whitespace-nowrap shrink-0 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
                 Актуальная
               </span>
             </If>
@@ -114,13 +114,13 @@ export const VersionItem = ({
               </span>
             </If>
             <If is={isRevoked}>
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-50 text-rose-600 font-semibold rounded text-[9px] border border-rose-200 whitespace-nowrap shrink-0">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-50 text-rose-600 font-semibold rounded text-[9px] border border-rose-200 whitespace-nowrap shrink-0 dark:bg-rose-900/35 dark:text-rose-400 dark:border-rose-800/50">
                 <Undo size={9} />
                 Подпись отменена
               </span>
             </If>
             <If is={!isSignedVersion && !isRevoked && version.is_selected && !isDocumentSigned}>
-              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0">
+              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50">
                 Для подписи
               </span>
             </If>
@@ -142,7 +142,7 @@ export const VersionItem = ({
             <input
               type="checkbox"
               id={`version-sign-${version.id}`}
-              className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+              className="w-3.5 h-3.5 text-th-accent-600 border-slate-300 rounded focus:ring-th-accent-500 cursor-pointer"
               checked={version.is_selected}
               disabled={isSelectingVersion || isSigned}
               onChange={() => onSetVersionForSign(version.id)}

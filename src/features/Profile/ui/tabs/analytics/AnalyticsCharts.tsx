@@ -99,7 +99,7 @@ export const ProgressChart = memo(({ type, data }: IProgressChartProps) => {
 				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
 				<YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
 				<Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
-				<Line type="monotone" dataKey="progress" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+				<Line type="monotone" dataKey="progress" stroke="var(--th-accent-500)" strokeWidth={2} dot={{ r: 4, fill: "var(--th-accent-500)", strokeWidth: 2, stroke: "#fff" }} />
 			</LineChart>
 		);
 	}
@@ -109,7 +109,7 @@ export const ProgressChart = memo(({ type, data }: IProgressChartProps) => {
 				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
 				<YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
 				<Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
-				<Bar dataKey="progress" fill="#6366f1" radius={[6, 6, 0, 0]} />
+				<Bar dataKey="progress" fill="var(--th-accent-500)" radius={[6, 6, 0, 0]} />
 			</BarChart>
 		);
 	}
@@ -130,14 +130,14 @@ export const ProgressChart = memo(({ type, data }: IProgressChartProps) => {
 		<AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
 			<defs>
 				<linearGradient id="mainProgressGrad" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+					<stop offset="5%" stopColor="var(--th-accent-500)" stopOpacity={0.3} />
 					<stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
 				</linearGradient>
 			</defs>
 			<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
 			<YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
 			<Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
-			<Area type="monotone" dataKey="progress" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#mainProgressGrad)" dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "#6366f1" }} />
+			<Area type="monotone" dataKey="progress" stroke="var(--th-accent-500)" strokeWidth={2} fillOpacity={1} fill="url(#mainProgressGrad)" dot={{ r: 4, fill: "var(--th-accent-500)", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "var(--th-accent-500)" }} />
 		</AreaChart>
 	);
 });

@@ -4,7 +4,7 @@ import { Filter, ChevronDown, User, Mail, Search, Calendar } from "lucide-react"
 import { DatePicker, Input, Select } from "antd";
 
 const getIcon = (name: string) => {
-  const iconClass = "w-4 h-4 text-blue-200/60 mr-1";
+  const iconClass = "w-4 h-4 text-th-accent-200/60 mr-1";
   if (name.toLowerCase().includes("incoming"))
     return <Mail className={iconClass} />;
   if (name.toLowerCase().includes("outgoing"))
@@ -80,7 +80,7 @@ export const FilterField = ({
           onChange={
             (date, dateString) => onChange(item.name, dateString) // dateString будет пустой строкой при очистке
           }
-          suffixIcon={<Calendar className="w-4 h-4 text-blue-200/60" />}
+          suffixIcon={<Calendar className="w-4 h-4 text-th-accent-200/60" />}
         />
       )}
 
@@ -117,7 +117,7 @@ export const FilterField = ({
               });
             }
           }}
-          suffixIcon={<Calendar className="w-4 h-4 text-blue-200/60" />}
+          suffixIcon={<Calendar className="w-4 h-4 text-th-accent-200/60" />}
           separator={<span className="text-white/40">→</span>}
           allowClear
         />

@@ -81,7 +81,7 @@ export const MiniAvatar = ({
       >
         {!loaded && (
           <div
-            className={`absolute inset-0 rounded-full animate-pulse bg-gray-200 dark:bg-gray-800 flex items-center justify-center font-bold text-gray-400 dark:text-gray-500`}
+            className={`absolute inset-0 rounded-full animate-pulse bg-gray-200 dark:bg-th-raised flex items-center justify-center font-bold text-gray-400 dark:text-gray-500`}
           >
             {initials}
           </div>

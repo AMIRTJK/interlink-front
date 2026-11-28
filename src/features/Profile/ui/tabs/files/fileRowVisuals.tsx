@@ -39,7 +39,7 @@ export const getSmallIcon = (file: IApiFile) => {
 		case "document":
 		default: {
 			const isMarkdown = file.original_name.endsWith(".md");
-			const bg = isMarkdown ? "bg-slate-500!" : "bg-blue-500!";
+			const bg = isMarkdown ? "bg-slate-500!" : "bg-th-accent-500!";
 			return (
 				<div className={`${baseClass} ${bg}`}>
 					<FileText size={13} />
@@ -80,7 +80,7 @@ export const getTypeBadge = (file: IApiFile) => {
 		case "document":
 		default:
 			return (
-				<div className="inline-flex items-center text-blue-600 dark:text-blue-400">
+				<div className="inline-flex items-center text-th-accent-600 dark:text-th-accent-400">
 					<FileText size={14} className="shrink-0" />
 				</div>
 			);

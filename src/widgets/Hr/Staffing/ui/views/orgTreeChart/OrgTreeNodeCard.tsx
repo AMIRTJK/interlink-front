@@ -72,7 +72,7 @@ export function OrgTreeNodeCard({
           onSelectNode({ type: 'org', id: org.id });
         }}
         className={`relative cursor-pointer rounded-2xl border-2 shadow-lg transition-all select-none ${cardBg} ${
-          isSelOrg ? 'ring-2 ring-indigo-500 ring-offset-2' : ''
+          isSelOrg ? 'ring-2 ring-th-accent-500 ring-offset-2' : ''
         }`}
         style={{ borderColor: isMain ? '#f59e0b' : org.color, width: 148 }}
       >
@@ -146,8 +146,8 @@ export function OrgTreeNodeCard({
           }}
           className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm transition-colors z-10 ${
             dark
-              ? 'bg-gray-800 border-gray-600 text-gray-400 hover:border-indigo-500'
-              : 'bg-white border-gray-200 text-gray-400 hover:border-indigo-400'
+              ? 'bg-th-raised border-th-higher text-gray-400 hover:border-th-accent-500'
+              : 'bg-white border-gray-200 text-gray-400 hover:border-th-accent-400'
           }`}
         >
           <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2 }}>
@@ -210,8 +210,8 @@ export function OrgTreeNodeCard({
               onClick={() => onAddDept(org.id)}
               className={`mt-5 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed text-xs font-medium transition-all ${
                 dark
-                  ? 'border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
-                  : 'border-indigo-200 text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50/50'
+                  ? 'border-th-accent-700/50 text-th-accent-400 hover:border-th-accent-500 hover:bg-th-accent-900/20'
+                  : 'border-th-accent-200 text-th-accent-500 hover:border-th-accent-400 hover:bg-th-accent-50/50'
               }`}
             >
               <Plus size={12} />
@@ -230,8 +230,8 @@ export function OrgTreeNodeCard({
               onClick={() => onAddDept(org.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed text-xs font-medium transition-all ${
                 dark
-                  ? 'border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
-                  : 'border-indigo-200 text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50/50'
+                  ? 'border-th-accent-700/50 text-th-accent-400 hover:border-th-accent-500 hover:bg-th-accent-900/20'
+                  : 'border-th-accent-200 text-th-accent-500 hover:border-th-accent-400 hover:bg-th-accent-50/50'
               }`}
             >
               <Plus size={12} />

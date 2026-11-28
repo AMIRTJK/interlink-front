@@ -26,9 +26,9 @@ interface IProps {
 type TTab = "info" | "activity" | "docs";
 
 const STATUS_STYLE: Record<string, { chip: string; dot: string }> = {
-  active: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
-  vacation: { chip: "bg-red-100 text-red-700", dot: "bg-red-500" },
-  business_trip: { chip: "bg-amber-100 text-amber-700", dot: "bg-amber-500" },
+  active: { chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400", dot: "bg-emerald-500" },
+  vacation: { chip: "bg-red-100 text-red-700 dark:bg-red-900/35 dark:text-red-400", dot: "bg-red-500" },
+  business_trip: { chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/35 dark:text-amber-400", dot: "bg-amber-500" },
 };
 
 const TABS: { key: TTab; label: string; icon: React.ReactNode }[] = [
@@ -57,7 +57,7 @@ export const EmployeeProfileModal = ({
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const r = e.raw;
   const st = STATUS_STYLE[e.status] || {
-    chip: "bg-gray-100 text-gray-500",
+    chip: "bg-gray-100 text-gray-500 dark:bg-th-high dark:text-slate-400",
     dot: "bg-gray-400",
   };
 
@@ -73,7 +73,7 @@ export const EmployeeProfileModal = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[9998] bg-slate-900/40 backdrop-blur-sm flex items-end justify-center ${
+      className={`fixed inset-0 z-[9998] bg-th-base/40 backdrop-blur-sm flex items-end justify-center ${
         showPhotoModal ? "pointer-events-none" : ""
       }`}
       onClick={() => !showPhotoModal && onClose()}
@@ -84,7 +84,7 @@ export const EmployeeProfileModal = ({
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 360, damping: 36 }}
         onClick={(ev) => ev.stopPropagation()}
-        className="relative w-full max-w-6xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl h-[90vh]"
+        className="relative w-full max-w-6xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl h-[90vh] dark:bg-th-raised dark:border-th-high"
       >
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-gray-300" />
@@ -93,7 +93,7 @@ export const EmployeeProfileModal = ({
           className="h-[3px] w-full mt-2 shrink-0"
           style={{
             background:
-              "linear-gradient(90deg, rgb(99, 102, 241), rgba(99, 102, 241, 0.533), transparent)",
+              "linear-gradient(90deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-rgb)/0.533), transparent)",
           }}
         />
 
@@ -105,16 +105,16 @@ export const EmployeeProfileModal = ({
             onOpenPhotoModal={() => e.photo && setShowPhotoModal(true)}
           />
 
-          <div className="px-6 pt-4 pb-2 border-b border-gray-100">
-            <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-fit">
+          <div className="px-6 pt-4 pb-2 border-b border-gray-100 dark:border-th-high">
+            <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-fit dark:bg-th-high">
               {TABS.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     tab === t.key
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
+                      ? "bg-white text-gray-900 shadow-sm dark:bg-th-raised dark:text-slate-100"
+                      : "text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-white"
                   }`}
                 >
                   {t.icon}
@@ -147,11 +147,11 @@ export const EmployeeProfileModal = ({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 shrink-0">
+        <div className="px-6 py-4 border-t border-gray-100 shrink-0 dark:border-th-high">
           <div className="flex gap-2">
             <button
               onClick={() => onEdit(e)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-lg shadow-indigo-900/30 hover:bg-indigo-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-th-accent-600 text-white text-sm font-semibold shadow-lg shadow-th-accent-900/30 hover:bg-th-accent-700 transition-colors"
             >
               <Pencil size={15} />
               <span>Редактировать</span>
@@ -164,7 +164,7 @@ export const EmployeeProfileModal = ({
             </button>
             <button
               onClick={() => onDuplicate(e)}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-semibold transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-semibold transition-colors dark:border-th-high dark:text-slate-400 dark:hover:bg-th-high"
               title="Дублировать"
             >
               <Copy size={15} />
@@ -179,7 +179,7 @@ export const EmployeeProfileModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center pointer-events-auto"
+          className="fixed inset-0 z-[9999] bg-th-base/60 backdrop-blur-sm flex items-center justify-center pointer-events-auto"
           onClick={() => setShowPhotoModal(false)}
         >
           <motion.div
@@ -191,7 +191,7 @@ export const EmployeeProfileModal = ({
           >
             <button
               onClick={() => setShowPhotoModal(false)}
-              className="absolute -top-12 right-0 p-2 rounded-full text-white hover:bg-white/20 transition-colors"
+              className="absolute -top-12 right-0 p-2 rounded-full text-white hover:bg-white/20 transition-colors dark:hover:bg-th-high/20"
             >
               <X size={24} />
             </button>

@@ -29,9 +29,9 @@ export const SectionTitle = ({ icon, children }: { icon: React.ReactNode; childr
 const inputShell = "w-full rounded-xl border text-sm outline-none transition-colors";
 
 const getInputClasses = (hasError?: boolean, disabled?: boolean) => {
-  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-400 dark:text-slate-600 cursor-not-allowed`;
+  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-gray-400 dark:text-slate-600 cursor-not-allowed`;
   if (hasError) return `${inputShell} border-red-300 bg-red-50/30 dark:border-red-900/50 dark:bg-red-950/10 text-gray-800 dark:text-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/20`;
-  return `${inputShell} border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/50 text-gray-800 dark:text-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20`;
+  return `${inputShell} border-gray-200 bg-gray-50 dark:border-th-raised dark:bg-th-base/50 text-gray-800 dark:text-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-500/20`;
 };
 
 interface IIconInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> {
@@ -73,7 +73,7 @@ export const PhoneInput = ({ value, onChange, placeholder, id, hasError, disable
   const onlyDigits9 = (v: string) => (v || "").replace(/\D/g, "").slice(0, 9);
   return (
     <div className="flex items-stretch">
-      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-sm text-gray-500 dark:text-slate-500 select-none">
+      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-sm text-gray-500 dark:text-slate-500 select-none">
         +992
       </span>
       <input
@@ -87,12 +87,12 @@ export const PhoneInput = ({ value, onChange, placeholder, id, hasError, disable
         onChange={(e) => onChange?.(onlyDigits9(e.target.value))}
         className={`flex-1 min-w-0 h-11 px-3 rounded-r-xl border text-sm outline-none transition-colors ${
           disabled
-            ? "border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-400 dark:text-slate-600 cursor-not-allowed"
+            ? "border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-gray-400 dark:text-slate-600 cursor-not-allowed"
             : readOnly
-              ? "border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-500 dark:text-slate-400 cursor-default"
+              ? "border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-gray-500 dark:text-slate-400 cursor-default"
             : hasError
               ? "border-red-300 bg-red-50/30 dark:border-red-900/50 dark:bg-red-950/10 text-gray-800 dark:text-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
-              : "border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/50 text-gray-800 dark:text-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+              : "border-gray-200 bg-gray-50 dark:border-th-raised dark:bg-th-base/50 text-gray-800 dark:text-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-500/20"
         }`}
       />
     </div>
@@ -125,7 +125,7 @@ export const SegmentControl = ({ value, onChange, options }: ISegmentControlProp
             className={`flex-1 flex items-center justify-center gap-1.5 px-2 h-11 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
               active
                 ? o.activeClass
-                : "bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-slate-500 border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800"
+                : "bg-gray-50 dark:bg-th-base/50 text-gray-500 dark:text-slate-500 border-gray-200 dark:border-th-raised hover:bg-gray-100 dark:hover:bg-th-raised"
             }`}
           >
             <If is={active && o.showCheck}>

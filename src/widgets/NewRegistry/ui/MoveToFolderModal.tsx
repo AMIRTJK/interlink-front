@@ -79,7 +79,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
     return (
       <Icon
         size={16}
-        className={`${isSelected ? "text-blue-500" : "text-gray-400 dark:text-slate-500"} transition-colors duration-200`}
+        className={`${isSelected ? "text-th-accent-500" : "text-gray-400 dark:text-slate-500"} transition-colors duration-200`}
       />
     );
   };
@@ -87,7 +87,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   // --- Вспомогательные рендеры (правило 37) ---
   const renderHeader = () => (
     <div className="flex items-center gap-2 pb-2">
-      <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg text-blue-600 dark:text-blue-300">
+      <div className="p-2 bg-th-accent-50 dark:bg-th-accent-950/40 rounded-lg text-th-accent-600 dark:text-th-accent-300">
         <Folder size={20} />
       </div>
       <div>
@@ -145,19 +145,19 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
           <div className="space-y-3">
             <div className="relative group">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 group-focus-within:text-blue-500 transition-colors"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 group-focus-within:text-th-accent-500 transition-colors"
                 size={16}
               />
               <Input
                 placeholder="Поиск целевой папки..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 bg-gray-50/50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-600 hover:border-blue-200 focus:border-blue-500 transition-all rounded-xl"
+                className="pl-10 h-10 bg-gray-50/50 dark:bg-th-raised/50 border-gray-100 dark:border-th-higher hover:border-th-accent-200 focus:border-th-accent-500 transition-all rounded-xl"
                 allowClear
               />
             </div>
 
-            <div className="max-h-[450px] overflow-y-auto pr-1 custom-scrollbar min-h-[150px] bg-gray-50/40 dark:bg-slate-900/30 rounded-2xl p-3 border border-dashed border-gray-200/60 dark:border-slate-700 transition-all">
+            <div className="max-h-[450px] overflow-y-auto pr-1 custom-scrollbar min-h-[150px] bg-gray-50/40 dark:bg-th-base/30 rounded-2xl p-3 border border-dashed border-gray-200/60 dark:border-th-high transition-all">
               {treeData.length > 0 ? (
                 <Tree
                   showIcon

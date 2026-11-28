@@ -18,7 +18,7 @@ export const FileListHeader = ({
 }: IProps) => {
 	return (
 		<thead>
-			<tr className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 tracking-wider uppercase border-b border-slate-100 dark:border-slate-800">
+			<tr className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 tracking-wider uppercase border-b border-slate-100 dark:border-th-raised">
 				<If is={!!showSharedWith}>
 					<th className="py-4 px-4 w-12 text-center">
 						<input
@@ -32,7 +32,7 @@ export const FileListHeader = ({
 									onDeselectAll?.(fileIds);
 								}
 							}}
-							className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+							className="rounded border-slate-200 dark:border-th-raised text-th-accent-600 focus:ring-th-accent-500/20 w-4 h-4 cursor-pointer"
 						/>
 					</th>
 				</If>

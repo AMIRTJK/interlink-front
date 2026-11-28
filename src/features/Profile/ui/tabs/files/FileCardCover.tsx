@@ -40,7 +40,7 @@ const getCoverContent = (file: IApiFile) => {
 	const fileType = getFileType(file.extension);
 	const isMarkdown = file.original_name.endsWith(".md");
 	const docBg = isMarkdown
-		? "from-slate-600 to-slate-500!"
+		? "from-th-higher to-slate-500!"
 		: "from-blue-600 to-indigo-500!";
 	const config = COVER_STYLES[fileType] || { bg: docBg, icon: FileText };
 	const Icon = config.icon;
@@ -69,7 +69,7 @@ export const FileCardCover = ({
 }: IProps) => (
 	<div
 		onClick={() => onView(file)}
-		className="h-44 relative overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer group/cover"
+		className="h-44 relative overflow-hidden bg-slate-100 dark:bg-th-base cursor-pointer group/cover"
 	>
 		{getCoverContent(file)}
 

@@ -5,6 +5,27 @@ import { Avatar } from "@shared/ui";
 import { T, getRoleColor, EXT_STATUS_CFG } from "../theme/tokens";
 import type { ExtUser } from "../model";
 
+const actionMenuItemStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  borderRadius: 6,
+  padding: "6px 8px",
+  fontSize: 12,
+  fontWeight: 500,
+  color: T.textPrimary,
+  textAlign: "left",
+  cursor: "pointer",
+  fontFamily: T.font,
+  transition: "background 0.12s",
+};
+
+const actionMenuHover = (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.currentTarget.style.background = T.hoverBg;
+};
+const actionMenuLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.currentTarget.style.background = "transparent";
+};
+
 export const getUsersColumns = (
   setProfileUser: (u: ExtUser) => void,
   activeActionsUserId: string | null,
@@ -16,7 +37,7 @@ export const getUsersColumns = (
     key: "user",
     width: 240,
     render: (_, user) => (
-      <div className="flex items-center gap-2.5">
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <Avatar
           colleague={{
             id: user.id,
@@ -24,15 +45,15 @@ export const getUsersColumns = (
             initials: user.avatarInitials,
             photo: user.photoUrl,
           }}
-          className="w-8 h-8 rounded-full shrink-0"
+          className="w-8 h-8 rounded-full"
           allowPreview={true}
         />
-        <div className="min-w-0">
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+        <div style={{ minWidth: 0 }}>
+          <div className="truncate" style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
             {user.fio}
           </div>
           {user.position && user.position !== "—" && (
-            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+            <div className="truncate" style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
               {user.position}
             </div>
           )}
@@ -47,21 +68,19 @@ export const getUsersColumns = (
     render: (_, user) => {
       const primary = user.corporateEmail || user.email;
       const secondary =
-        user.personalEmail && user.personalEmail !== primary
-          ? user.personalEmail
-          : "";
+        user.personalEmail && user.personalEmail !== primary ? user.personalEmail : "";
       if (!primary && !secondary) {
-        return <span className="text-xs text-slate-400">—</span>;
+        return <span style={{ fontSize: 12, color: T.textFaint }}>—</span>;
       }
       return (
-        <div className="min-w-0">
+        <div style={{ minWidth: 0 }}>
           {primary && (
-            <div className="text-xs text-slate-700 dark:text-slate-200 truncate">
+            <div className="truncate" style={{ fontSize: 12, color: T.textPrimary }}>
               {primary}
             </div>
           )}
           {secondary && (
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+            <div className="truncate" style={{ fontSize: 11, color: T.textSecondary, marginTop: 2 }}>
               {secondary}
             </div>
           )}
@@ -74,18 +93,14 @@ export const getUsersColumns = (
     dataIndex: "department",
     key: "department",
     width: 170,
-    render: (text) => (
-      <span className="text-[13px] text-slate-900 dark:text-slate-100">
-        {text}
-      </span>
-    ),
+    render: (text) => <span style={{ fontSize: 13, color: T.textPrimary }}>{text}</span>,
   },
   {
     title: "Роли",
     key: "roles",
     width: 180,
     render: (_, user) => (
-      <div className="flex flex-wrap gap-1">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {user.roles.slice(0, 2).map((role) => {
           const cfg = getRoleColor(role);
           return (
@@ -106,7 +121,16 @@ export const getUsersColumns = (
           );
         })}
         {user.roles.length > 2 && (
-          <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md px-2 py-0.5 text-[11px] font-semibold">
+          <span
+            style={{
+              background: T.hoverBg,
+              color: T.textSecondary,
+              borderRadius: 6,
+              padding: "2px 8px",
+              fontSize: 11,
+              fontWeight: 600,
+            }}
+          >
             +{user.roles.length - 2}
           </span>
         )}
@@ -120,12 +144,18 @@ export const getUsersColumns = (
     render: (_, user) => {
       const statusCfg = EXT_STATUS_CFG[user.status] ?? EXT_STATUS_CFG["Активен"];
       return (
-        <div className="flex items-center gap-1.5">
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span
-            className="w-[7px] h-[7px] rounded-full inline-block shrink-0"
-            style={{ background: statusCfg.dot }}
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              background: statusCfg.dot,
+              display: "inline-block",
+              flexShrink: 0,
+            }}
           />
-          <span className="text-[13px] text-slate-900 dark:text-slate-100 font-medium">
+          <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: 500 }}>
             {statusCfg.label}
           </span>
         </div>
@@ -137,25 +167,21 @@ export const getUsersColumns = (
     dataIndex: "lastActivity",
     key: "lastActivity",
     width: 130,
-    render: (text) => (
-      <span className="text-xs text-slate-500 dark:text-slate-400">{text}</span>
-    ),
+    render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
   },
   {
     title: "В системе с",
     dataIndex: "joinedDate",
     key: "joinedDate",
     width: 130,
-    render: (text) => (
-      <span className="text-xs text-slate-500 dark:text-slate-400">{text}</span>
-    ),
+    render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
   },
   {
     key: "actions",
     width: 60,
     fixed: "right",
     render: (_, user, idx) => (
-      <div className="relative" onClick={(e) => e.stopPropagation()}>
+      <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
         <button
           className={
             activeActionsUserId === user.id
@@ -173,9 +199,20 @@ export const getUsersColumns = (
 
         {activeActionsUserId === user.id && (
           <div
-            className="absolute right-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-[950] min-w-[130px] p-1 flex flex-col gap-0.5"
             style={{
+              position: "absolute",
               ...(idx >= 5 ? { bottom: 40 } : { top: 40 }),
+              right: 12,
+              background: T.surface,
+              border: `1px solid ${T.border}`,
+              borderRadius: 8,
+              boxShadow: T.shadowMd,
+              zIndex: 950,
+              minWidth: 130,
+              padding: 4,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
               animation: "fieldsSlideDown 120ms ease-out forwards",
             }}
           >
@@ -184,8 +221,9 @@ export const getUsersColumns = (
                 setProfileUser(user);
                 setActiveActionsUserId(null);
               }}
-              className="bg-transparent border-0 rounded-md px-2 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/70 text-left cursor-pointer transition-colors"
-              style={{ fontFamily: T.font }}
+              style={actionMenuItemStyle}
+              onMouseEnter={actionMenuHover}
+              onMouseLeave={actionMenuLeave}
             >
               Профиль
             </button>
@@ -194,8 +232,9 @@ export const getUsersColumns = (
                 addToast("Редактирование сотрудника временно недоступно");
                 setActiveActionsUserId(null);
               }}
-              className="bg-transparent border-0 rounded-md px-2 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/70 text-left cursor-pointer transition-colors"
-              style={{ fontFamily: T.font }}
+              style={actionMenuItemStyle}
+              onMouseEnter={actionMenuHover}
+              onMouseLeave={actionMenuLeave}
             >
               Редактировать
             </button>
@@ -204,8 +243,13 @@ export const getUsersColumns = (
                 addToast("Удаление сотрудника временно недоступно");
                 setActiveActionsUserId(null);
               }}
-              className="bg-transparent border-0 rounded-md px-2 py-1.5 text-xs font-medium text-red-500 hover:bg-red-500/10 text-left cursor-pointer transition-colors"
-              style={{ fontFamily: T.font }}
+              style={{ ...actionMenuItemStyle, color: T.danger }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `${T.danger}0D`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
             >
               Удалить
             </button>

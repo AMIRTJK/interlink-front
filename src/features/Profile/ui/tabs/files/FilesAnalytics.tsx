@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Select } from "antd";
 import { Loader, EmptyState } from "@shared/ui";
 import { useFilesAnalytics } from "./useFilesAnalytics";
 import { FilesKpiCards } from "./FilesKpiCards";
@@ -11,6 +10,21 @@ import { FilesRecentList } from "./FilesRecentList";
 import { FilesLargestList } from "./FilesLargestList";
 import { IFilesAnalyticsStorage } from "./analyticsModel";
 import { formatBytes } from "./lib";
+import { AnalyticsSegment, type ISegmentOption } from "./AnalyticsSegment";
+
+const PERIOD_OPTIONS: ISegmentOption[] = [
+	{ value: 3, label: "3 мес" },
+	{ value: 6, label: "6 мес" },
+	{ value: 12, label: "12 мес" },
+	{ value: 24, label: "24 мес" },
+];
+
+const LIMIT_OPTIONS: ISegmentOption[] = [
+	{ value: 5, label: "5" },
+	{ value: 10, label: "10" },
+	{ value: 15, label: "15" },
+	{ value: 20, label: "20" },
+];
 
 const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 	const pct = storage.used_pct;
@@ -19,7 +33,7 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 	const free = storage.free_bytes_human || formatBytes(storage.free_bytes);
 
 	return (
-		<div className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col justify-between min-h-[320px]">
+		<div className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col justify-between min-h-[320px]">
 			<div>
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-2">
 					Использование диска
@@ -37,7 +51,7 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 							d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
 						/>
 						<path
-							className="text-indigo-600 dark:text-indigo-400"
+							className="text-th-accent-600 dark:text-th-accent-400"
 							strokeWidth="3.2"
 							strokeDasharray={`${pct}, 100`}
 							strokeLinecap="round"
@@ -54,7 +68,7 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 					</div>
 				</div>
 			</div>
-			<div className="space-y-2 border-t border-slate-100/60 dark:border-slate-850/60 pt-4">
+			<div className="space-y-2 border-t border-slate-100/60 dark:border-th-raised/60 pt-4">
 				<div className="flex justify-between text-xs">
 					<span className="text-slate-500 dark:text-zinc-400 font-semibold">Занято</span>
 					<span className="text-slate-700 dark:text-zinc-200 font-bold">{used}</span>
@@ -100,41 +114,14 @@ export const FilesAnalytics = () => {
 
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			className="flex flex-col gap-5 pb-6 animate-in fade-in duration-200"
+			initial={{ y: 8 }}
+			animate={{ y: 0 }}
+			transition={{ duration: 0.25, ease: "easeOut" }}
+			className="flex flex-col gap-5 pb-6"
 		>
-			<div className="flex flex-wrap items-center justify-end gap-3 bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl ui-glass border border-zinc-200 dark:border-slate-700/30">
-				<div className="flex items-center gap-2">
-					<span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Период:</span>
-					<Select
-						value={months}
-						onChange={setMonths}
-						size="small"
-						className="w-28"
-						options={[
-							{ value: 3, label: "3 месяца" },
-							{ value: 6, label: "6 месяцев" },
-							{ value: 12, label: "12 месяцев" },
-							{ value: 24, label: "24 месяца" },
-						]}
-					/>
-				</div>
-				<div className="flex items-center gap-2">
-					<span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Лимит файлов:</span>
-					<Select
-						value={limit}
-						onChange={setLimit}
-						size="small"
-						className="w-24"
-						options={[
-							{ value: 5, label: "5 файлов" },
-							{ value: 10, label: "10 файлов" },
-							{ value: 15, label: "15 файлов" },
-							{ value: 20, label: "20 файлов" },
-						]}
-					/>
-				</div>
+			<div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 bg-white/40 dark:bg-th-raised/90 p-2.5 rounded-2xl ui-glass border border-zinc-200 dark:border-th-high/50">
+				<AnalyticsSegment label="Период" value={months} options={PERIOD_OPTIONS} onChange={setMonths} />
+				<AnalyticsSegment label="Лимит файлов" value={limit} options={LIMIT_OPTIONS} onChange={setLimit} />
 			</div>
 
 			<FilesKpiCards summary={data.summary} />

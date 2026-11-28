@@ -41,7 +41,7 @@ export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0, onSelect }) 
       >
         {isCreatePlaceholder ? (
             <div className="flex flex-col items-center justify-center py-2">
-                <div className="w-8 h-8 flex items-center justify-center text-yellow-600 bg-yellow-100 rounded-full mb-1">
+                <div className="w-8 h-8 flex items-center justify-center text-yellow-600 bg-yellow-100 rounded-full mb-1 dark:bg-yellow-900/35 dark:text-yellow-400">
                      <PlusOutlined />
                 </div>
                 <span className="text-xs font-medium text-yellow-700">

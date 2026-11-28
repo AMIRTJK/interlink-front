@@ -67,7 +67,7 @@ export const PreviewFullApproversDrawer: React.FC<IProps> = ({
             gap: 8,
           }}
         >
-          <Users size={16} style={{ color: "#6366f1" }} />
+          <Users size={16} style={{ color: "var(--th-accent-500)" }} />
           Этапы обработки документа
         </span>
         <button
