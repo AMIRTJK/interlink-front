@@ -68,7 +68,7 @@ export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset
           onChange={(e) => setDraft({ ...draft, salaryMin: e.target.value })}
           type="number"
           placeholder="От"
-          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:border-th-accent-400 dark:border-th-high"
+          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-th-accent-400 dark:border-th-high dark:bg-th-base dark:text-slate-100 dark:[color-scheme:dark]"
         />
         <span className="text-slate-400">—</span>
         <input
@@ -76,7 +76,7 @@ export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset
           onChange={(e) => setDraft({ ...draft, salaryMax: e.target.value })}
           type="number"
           placeholder="До"
-          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:border-th-accent-400 dark:border-th-high"
+          className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-th-accent-400 dark:border-th-high dark:bg-th-base dark:text-slate-100 dark:[color-scheme:dark]"
         />
       </div>
 

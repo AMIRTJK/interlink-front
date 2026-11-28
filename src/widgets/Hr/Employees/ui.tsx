@@ -103,7 +103,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all dark:border-th-high dark:bg-th-raised dark:text-slate-400 dark:hover:bg-th-high"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -114,7 +114,7 @@ export const EmployeesWidget: React.FC = () => {
                   className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
                     safePage === i + 1
                       ? "bg-th-accent-600 text-white shadow-md shadow-th-accent-900/30"
-                      : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                      : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-th-high dark:bg-th-raised dark:text-slate-400 dark:hover:bg-th-high"
                   }`}
                 >
                   {i + 1}
@@ -123,7 +123,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all dark:border-th-high dark:bg-th-raised dark:text-slate-400 dark:hover:bg-th-high"
               >
                 <ChevronRight size={16} />
               </button>

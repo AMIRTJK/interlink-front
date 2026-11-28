@@ -60,10 +60,10 @@ export const Field = ({
     className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
       accent
         ? "border bg-th-accent-50 border-th-accent-100 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
-        : "bg-gray-50 hover:bg-th-accent-50/60"
+        : "bg-gray-50 hover:bg-th-accent-50/60 dark:bg-th-base"
     }`}
   >
-    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0 dark:bg-th-raised">
       <span className={accent ? "text-th-accent-500" : "text-th-accent-400"}>
         {icon}
       </span>
@@ -108,7 +108,7 @@ export const ActivityTab = () => (
         <div className="absolute left-[9px] top-0 bottom-0 w-0.5 bg-gray-200" />
         <div className="space-y-5">
           <div className="flex items-start gap-4">
-            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
+            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10 dark:bg-th-high">
               <span className="w-2.5 h-2.5 rounded-full bg-th-accent-500" />
             </div>
             <div className="flex-1 min-w-0">
@@ -117,7 +117,7 @@ export const ActivityTab = () => (
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
+            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10 dark:bg-th-high">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div className="flex-1 min-w-0">
@@ -126,7 +126,7 @@ export const ActivityTab = () => (
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
+            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10 dark:bg-th-high">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
             </div>
             <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export const ActivityTab = () => (
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
+            <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10 dark:bg-th-high">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
             </div>
             <div className="flex-1 min-w-0">

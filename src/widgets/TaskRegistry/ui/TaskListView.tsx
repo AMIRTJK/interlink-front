@@ -9,6 +9,10 @@ import { Avatar } from "./Avatar";
 import { LiveCountdown } from "./Countdown";
 import { TaskCreatorCell } from "./TaskCreatorCell";
 
+// Обычный размер (32px, отступ 8px): в size="small" кнопки 24px и стоят вплотную.
+// Цвета — из глобальной темы antd, здесь только форма.
+const PAGINATION_THEME = { token: { borderRadius: 10, fontSize: 12 } };
+
 interface TaskListViewProps {
 	tasks: Task[];
 	pagination: Pagination;
@@ -331,12 +335,7 @@ export const TaskListView = ({
 				</p>
 				<If is={pagination.total > 0}>
 					<ConfigProvider
-						theme={{
-							token: {
-								borderRadius: 8,
-								fontSize: 12,
-							},
-						}}
+						theme={PAGINATION_THEME}
 					>
 						<AntPagination
 							current={safePage}
@@ -344,7 +343,7 @@ export const TaskListView = ({
 							pageSize={pagination.perPage}
 							onChange={onPageChange}
 							showSizeChanger={false}
-							size="small"
+							hideOnSinglePage
 						/>
 					</ConfigProvider>
 				</If>
