@@ -6,16 +6,12 @@ const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**
  * Стрелки крутятся прямой записью transform в DOM, без React-состояния:
- * раз в секунду перерисовываются только несколько элементов, а не дерево экрана.
- * `counterRef` (30-минутный счётчик) и `dayRef` (24-часовой индикатор) нужны
- * только хронографу — у остальных часов эти ref'ы просто не привязаны.
+ * раз в секунду перерисовываются только три элемента, а не дерево экрана.
  */
 export const useClockHands = () => {
   const hourRef = useRef<SVGGElement>(null);
   const minuteRef = useRef<SVGGElement>(null);
   const secondRef = useRef<SVGGElement>(null);
-  const counterRef = useRef<SVGGElement>(null);
-  const dayRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -37,8 +33,6 @@ export const useClockHands = () => {
 
       if (hourRef.current) hourRef.current.style.transform = `rotate(${(h24 % 12) * 30}deg)`;
       if (minuteRef.current) minuteRef.current.style.transform = `rotate(${m * 6}deg)`;
-      if (counterRef.current) counterRef.current.style.transform = `rotate(${(m % 30) * 12}deg)`;
-      if (dayRef.current) dayRef.current.style.transform = `rotate(${h24 * 15}deg)`;
       const sec = secondRef.current;
       if (sec) {
         sec.style.transition = isSingleTick && !reducedMotion.matches ? TICK_TRANSITION : "none";
@@ -58,5 +52,5 @@ export const useClockHands = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  return { hourRef, minuteRef, secondRef, counterRef, dayRef };
+  return { hourRef, minuteRef, secondRef };
 };

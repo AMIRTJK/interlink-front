@@ -12,30 +12,29 @@ import { ClockBg } from "./ClockBg";
 
 interface IProps {
   scene: TDesktopScene;
-  isDark: boolean;
   spaceVariant: TSpaceVariant;
 }
 
-export const SceneBackground = ({ scene, isDark, spaceVariant }: IProps) => {
+export const SceneBackground = ({ scene, spaceVariant }: IProps) => {
   switch (scene) {
     case "space":
       return <SpacePlateBg variant={spaceVariant} />;
     case "aurora":
-      return <AuroraBg isDark={isDark} />;
+      return <AuroraBg />;
     case "rain":
-      return <RainBg isDark={isDark} />;
+      return <RainBg />;
     case "campfire":
       return <CampfireBg />;
     case "newyear":
       return <NewYearBg />;
     case "particles":
-      return <ParticlesBg isDark={isDark} />;
+      return <ParticlesBg />;
     case "ocean":
-      return <OceanBg isDark={isDark} />;
+      return <OceanBg />;
     case "mountains":
-      return <MountainsBg isDark={isDark} />;
+      return <MountainsBg />;
     case "clock":
-      return <ClockBg isDark={isDark} />;
+      return <ClockBg />;
     default:
       return null;
   }

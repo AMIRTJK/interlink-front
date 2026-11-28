@@ -13,9 +13,6 @@ import { HideFormButton } from "./ui/HideFormButton";
 import { useFormReveal } from "./lib/useFormReveal";
 import { usePointerActivity } from "./lib/usePointerActivity";
 import { SceneSwitcher } from "./ui/SceneSwitcher";
-import { Watch } from "./watch/ui/Watch";
-import { WatchVariantSwitcher } from "./watch/ui/WatchVariantSwitcher";
-import { useWatchVariant } from "./watch/lib/useWatchVariant";
 import { useSpaceVariant } from "./space/lib/useSpaceVariant";
 import { SpaceVariantSwitcher } from "./space/ui/SpaceVariantSwitcher";
 
@@ -47,7 +44,8 @@ const LAYOUT_CLASSES = {
   },
   split: {
     main: "relative z-10 flex-1 min-h-0 overflow-y-auto my-4 md:my-6",
-    row: "min-h-full flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10 lg:gap-24 text-center py-2",
+    // Левую часть экрана занимают 4K-часы на фоне; время и карточка встают по центру свободной правой области.
+    row: "min-h-full flex items-center justify-center md:pl-[38%] text-center py-2",
     column: "flex flex-col items-center w-full max-w-sm shrink-0",
     time: "text-4xl md:text-5xl font-extralight tracking-widest leading-none",
     date: "text-xs font-semibold tracking-widest uppercase mt-2.5",
@@ -65,7 +63,6 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
     const saved = localStorage.getItem(STORAGE_SCENE_KEY) as TDesktopScene;
     return SCENES.some((s) => s.key === saved) ? saved : DEFAULT_SCENE;
   });
-  const { variant: watchVariant, selectVariant: selectWatchVariant } = useWatchVariant();
   const { variant: spaceVariant, selectVariant: selectSpaceVariant } = useSpaceVariant();
 
   const lang = localStorage.getItem("lang") || "ru";
@@ -80,7 +77,6 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
   const layout = sceneOption?.layout ?? "centered";
   const classes = LAYOUT_CLASSES[layout];
   const isSplit = layout === "split";
-  const isClockScene = activeScene === "clock";
   const isSceneDark = isDark || Boolean(sceneOption?.isAlwaysNight);
   const isFormOnDemand = Boolean(sceneOption?.isFormOnDemand);
   const { isRevealed, reveal, conceal } = useFormReveal(isFormOnDemand);
@@ -109,7 +105,7 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
       data-session-lock=""
     >
       <div className="absolute inset-0 z-0">
-        <SceneBackground scene={activeScene} isDark={isDark} spaceVariant={spaceVariant} />
+        <SceneBackground scene={activeScene} spaceVariant={spaceVariant} />
       </div>
 
       <header className="relative z-10 flex items-center justify-between w-full">
@@ -126,14 +122,6 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
       {/* Дерево одно для всех раскладок: при смене сцены форма пароля не перемонтируется. */}
       <main className={classes.main} onClick={handleStageClick}>
         <div className={isSplit ? LAYOUT_CLASSES.split.row : "contents"}>
-          {isClockScene && (
-            <Watch
-              key={watchVariant}
-              variant={watchVariant}
-              isDark={isSceneDark}
-              className="shrink-0 aspect-[8/15] h-[min(42vh,340px)] md:h-[min(calc(100vh-20rem),460px)] lg:h-[min(calc(100vh-20rem),620px)]"
-            />
-          )}
           <div className={isSplit ? LAYOUT_CLASSES.split.column : "contents"}>
             <h1
               className={`${classes.time} ${textTone}`}
@@ -192,14 +180,6 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
         onFocus={handleControlFocus}
         onBlur={handleControlBlur}
       >
-        {isClockScene && (
-          <WatchVariantSwitcher
-            value={watchVariant}
-            isDark={isSceneDark}
-            isVisible={isControlsVisible}
-            onChange={selectWatchVariant}
-          />
-        )}
         {activeScene === "space" && (
           <SpaceVariantSwitcher
             value={spaceVariant}

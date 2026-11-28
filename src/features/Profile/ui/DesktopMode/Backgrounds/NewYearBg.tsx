@@ -5,15 +5,13 @@ import { renderNewYearBackdrop } from "../lib/newYearBackdrop";
 import { getTreePlace, renderTreeLayer, type ITreeBounds, type ITreeLayer, type ITreePlace } from "../lib/newYearTree";
 import {
   createGlowSprites,
-  createSnow,
   createTwinkles,
-  drawSnow,
   drawTreeLayer,
   drawTreeLights,
   drawTwinkles,
   drawWarmGlow,
-  stepSnow,
 } from "../lib/newYearLive";
+import { createSnow, drawSnow, stepSnow } from "../lib/snowfall";
 import plateSrc from "../assets/newyear-plate.webp";
 
 // Готовый 4K-фон с ёлкой. Если убрать картинку (null), задник и ёлка рисуются кодом.
