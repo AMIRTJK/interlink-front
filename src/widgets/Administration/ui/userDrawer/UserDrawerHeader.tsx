@@ -12,17 +12,8 @@ interface IProps {
 
 export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
   return (
-    <div
-      style={{
-        padding: "16px 20px",
-        borderBottom: `1px solid ${T.border}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexShrink: 0,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+    <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+      <div className="flex items-center gap-2.5 min-w-0">
         <Avatar
           colleague={{
             id: user.id,
@@ -30,40 +21,21 @@ export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
             initials: user.avatarInitials,
             photo: user.photoUrl,
           }}
-          className="w-8 h-8 rounded-full"
+          className="w-8 h-8 rounded-full shrink-0"
           allowPreview={true}
         />
-        <div style={{ minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: T.textPrimary,
-              letterSpacing: "-0.01em",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
+        <div className="min-w-0">
+          <div className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
             {user.fio}
           </div>
-          <div style={{ fontSize: 11, color: T.textSecondary, marginTop: 1 }}>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
             {resolvedRoles.join(", ") || "Без роли"}
           </div>
         </div>
       </div>
       <button
         onClick={onClose}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: T.textSecondary,
-          padding: 4,
-          borderRadius: 6,
-          display: "flex",
-          flexShrink: 0,
-        }}
+        className="bg-transparent border-0 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 p-1 rounded-md flex shrink-0"
       >
         <X size={15} />
       </button>

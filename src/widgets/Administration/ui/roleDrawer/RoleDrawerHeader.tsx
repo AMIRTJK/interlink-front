@@ -13,18 +13,9 @@ export function RoleDrawerHeader({ role, onClose }: IProps) {
   const roleCfg = getRoleColor(roleName);
 
   return (
-    <div
-      style={{
-        padding: "16px 20px",
-        borderBottom: `1px solid ${T.border}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexShrink: 0,
-      }}
-    >
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2.5">
           <div
             style={{
               width: 32,
@@ -43,24 +34,11 @@ export function RoleDrawerHeader({ role, onClose }: IProps) {
           >
             {roleName.slice(0, 2).toUpperCase()}
           </div>
-          <div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: T.textPrimary,
-                letterSpacing: "-0.01em",
-              }}
-            >
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
               {roleName}
             </div>
-            <div
-              style={{
-                fontSize: 11,
-                color: T.textSecondary,
-                marginTop: 1,
-              }}
-            >
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
               {role.description}
             </div>
           </div>
@@ -68,15 +46,7 @@ export function RoleDrawerHeader({ role, onClose }: IProps) {
       </div>
       <button
         onClick={onClose}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: T.textSecondary,
-          padding: 4,
-          borderRadius: 6,
-          display: "flex",
-        }}
+        className="bg-transparent border-0 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 p-1 rounded-md flex shrink-0"
       >
         <X size={15} />
       </button>
