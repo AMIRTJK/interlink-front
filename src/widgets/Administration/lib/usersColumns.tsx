@@ -36,43 +36,57 @@ export const getUsersColumns = (
     title: "Сотрудник",
     key: "user",
     width: 240,
-    render: (_, user) => {
-      const primaryRole = user.roles[0];
-      const roleCfg = getRoleColor(primaryRole);
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Avatar
-            colleague={{
-              id: user.id,
-              name: user.fio,
-              initials: user.avatarInitials,
-              photo: user.photoUrl,
-            }}
-            className="w-8 h-8 rounded-full"
-            allowPreview={true}
-          />
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
-              {user.fio}
-            </div>
-            {user.email && (
-              <div style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
-                {user.email}
-              </div>
-            )}
+    render: (_, user) => (
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Avatar
+          colleague={{
+            id: user.id,
+            name: user.fio,
+            initials: user.avatarInitials,
+            photo: user.photoUrl,
+          }}
+          className="w-8 h-8 rounded-full"
+          allowPreview={true}
+        />
+        <div style={{ minWidth: 0 }}>
+          <div className="truncate" style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
+            {user.fio}
           </div>
+          {user.position && user.position !== "—" && (
+            <div className="truncate" style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
+              {user.position}
+            </div>
+          )}
         </div>
-      );
-    },
+      </div>
+    ),
   },
   {
     title: "Email",
-    dataIndex: "email",
     key: "email",
-    width: 200,
-    render: (text) => (
-      <span style={{ fontSize: 12, color: T.textSecondary }}>{text || ""}</span>
-    ),
+    width: 210,
+    render: (_, user) => {
+      const primary = user.corporateEmail || user.email;
+      const secondary =
+        user.personalEmail && user.personalEmail !== primary ? user.personalEmail : "";
+      if (!primary && !secondary) {
+        return <span style={{ fontSize: 12, color: T.textFaint }}>—</span>;
+      }
+      return (
+        <div style={{ minWidth: 0 }}>
+          {primary && (
+            <div className="truncate" style={{ fontSize: 12, color: T.textPrimary }}>
+              {primary}
+            </div>
+          )}
+          {secondary && (
+            <div className="truncate" style={{ fontSize: 11, color: T.textSecondary, marginTop: 2 }}>
+              {secondary}
+            </div>
+          )}
+        </div>
+      );
+    },
   },
   {
     title: "Отдел",
